@@ -15,9 +15,14 @@ the plotting task, resulting in one or more graphics output files.
 
 ## BEFORE YOU BEGIN: 
 Make sure to set up verif_plotting if you haven't already.  To set up,
-clone the Github repository (/MarcelCaron-NOAA/verif_plotting) or else choose
-any directory that will house verif_plotting.  As an example, we'll
-call that directory `PY_PLOT_DIR`.  Then on the command line:
+clone the Github repository:
+
+```
+git clone https://github.com/MarcelCaron-NOAA/verif_plotting
+```
+
+or else choose any directory that will house verif_plotting.  As an example, 
+we'll call that directory `PY_PLOT_DIR`.  Then on the command line:
 
 ```
 PY_PLOT_DIR="/gpfs/path/to/my/directory"
