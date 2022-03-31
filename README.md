@@ -6,7 +6,7 @@
 Marcel Caron, marcel.caron@noaa.gov, NOAA/NWS/NCEP/EMC-VPPPGB
 
 ## PURPOSE:          
-Create plots from METPlus output statistics
+Create plots from METplus output statistics
 
 ## DESCRIPTION:      
 The py_plotting.config configuration file defines environment variables that are meant to be
