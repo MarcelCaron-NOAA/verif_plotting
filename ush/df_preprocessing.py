@@ -25,6 +25,11 @@ import plot_util
 # =================== FUNCTIONS =========================
 
 def get_valid_range(logger, date_type, date_range, date_hours, fleads):
+    if None in date_hours:
+        e = (f"One or more FCST_{date_type}_HOURS is Nonetype. This may be"
+             + f" because the input string is empty.")
+        logger.error(e)
+        raise ValueError(e)
     if date_type == 'INIT':
         init_beg, init_end = date_range
         valid_beg = (
