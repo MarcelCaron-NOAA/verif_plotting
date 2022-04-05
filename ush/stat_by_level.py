@@ -328,8 +328,33 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     else:
         handles = []
         labels = []
-    y_vals = pivot_metric1.index
-    plev_incr = np.abs(np.diff(y_vals))
+    if confidence_intervals:
+        indices_in_common1 = list(set.intersection(*map(
+            set, 
+            [
+                pivot_metric1.index, 
+                pivot_ci_lower1.index, 
+                pivot_ci_upper1.index
+            ]
+        )))
+        pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
+        pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
+        pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
+        if metric2_name is not None:
+            indices_in_common2 = list(set.intersection(*map(
+                set, 
+                [
+                    pivot_metric2.index, 
+                    pivot_ci_lower2.index, 
+                    pivot_ci_upper2.index
+                ]
+            )))
+            pivot_metric2 = pivot_metric2[pivot_metric2.index.isin(indices_in_common2)]
+            pivot_ci_lower2 = pivot_ci_lower2[pivot_ci_lower2.index.isin(indices_in_common2)]
+            pivot_ci_upper2 = pivot_ci_upper2[pivot_ci_upper2.index.isin(indices_in_common2)]
+    y_vals1 = pivot_metric1.index
+    y_vals2 = pivot_metric2.index
+    plev_incr = np.abs(np.diff(y_vals1))
     min_incr = np.min(plev_incr) 
     x_min = x_min_limit
     x_max = x_max_limit
@@ -387,7 +412,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         else:
             metric1_mean_fmt_string = f'{x_vals_metric1_mean:.2E}'
         plt.plot(
-            x_vals_metric1, y_vals.tolist(), 
+            x_vals_metric1, y_vals1.tolist(), 
             marker=mod_setting_dicts[m]['marker'], 
             c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
             figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
@@ -399,7 +424,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             else:
                 metric2_mean_fmt_string = f'{x_vals_metric2_mean:.2E}'
             plt.plot(
-                x_vals_metric2, y_vals.tolist(), 
+                x_vals_metric2, y_vals2.tolist(), 
                 marker=mod_setting_dicts[m]['marker'], 
                 c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
                 figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed', 
@@ -407,7 +432,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             )
         if confidence_intervals:
             plt.errorbar(
-                x_vals_metric1, y_vals.tolist(),
+                x_vals_metric1, y_vals1.tolist(),
                 xerr=[np.abs(x_vals_ci_lower1), x_vals_ci_upper1],
                 fmt='none', ecolor=mod_setting_dicts[m]['color'],
                 elinewidth=mod_setting_dicts[m]['linewidth']/1.5,
@@ -416,7 +441,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             )
             if metric2_name is not None:
                 plt.errorbar(
-                    x_vals_metric2, y_vals.tolist(),
+                    x_vals_metric2, y_vals2.tolist(),
                     xerr=[np.abs(x_vals_ci_lower2), x_vals_ci_upper2],
                     fmt='none', ecolor=mod_setting_dicts[m]['color'],
                     elinewidth=mod_setting_dicts[m]['linewidth']/1.5,
@@ -447,10 +472,14 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     plt.axvline(x=0, color='black', linestyle='--', linewidth=1, zorder=0) 
 
     # Configure axis ticks
-    yticks = [1000, 925, 850, 700, 500, 300, 250, 200, 100, 50]
+    yticks = [1000, 925, 850, 700, 500, 300, 250, 200, 100, 50, 10, 1]
     yticks = np.array([
         ytick 
-        for ytick in yticks if (ytick>=min(y_vals) and ytick<=max(y_vals))
+        for ytick in yticks 
+        if (
+            ytick>=min([min(y_vals1),min(y_vals2)]) 
+            and ytick<=max([max(y_vals1),max(y_vals2)])
+        )
     ])
     ytick_labels = yticks.astype(str)
     # x ticks and axis limits adjust based on the size of the x_range 
@@ -516,7 +545,10 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     if y_lim_lock:
         y_min, y_max = [y_min_limit, y_max_limit]
     else:
-        y_min, y_max = [min(y_vals), max(y_vals)]
+        y_min, y_max = [
+            min([min(y_vals1),min(y_vals2)]), 
+            max([max(y_vals1),max(y_vals2)])
+        ]
         if y_min < y_min_limit:
             y_min = y_min_limit
         if y_max > y_max_limit:

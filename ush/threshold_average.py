@@ -332,6 +332,18 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     # Plot data
     logger.info("Begin plotting ...")
 
+    if confidence_intervals:
+        indices_in_common = list(set.intersection(*map(
+            set, 
+            [
+                pivot_metric.index, 
+                pivot_ci_lower.index, 
+                pivot_ci_upper.index
+            ]
+        )))
+        pivot_metric = pivot_metric[pivot_metric.index.isin(indices_in_common)]
+        pivot_ci_lower = pivot_ci_lower[pivot_ci_lower.index.isin(indices_in_common)]
+        pivot_ci_upper = pivot_ci_upper[pivot_ci_upper.index.isin(indices_in_common)]
     x_vals = pivot_metric.index.astype(float).tolist()
     x_vals_argsort = np.argsort(x_vals)
     x_vals = np.sort(x_vals)

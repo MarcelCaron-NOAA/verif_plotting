@@ -206,7 +206,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated.index.get_level_values('LEAD_HOURS')
         .isin(df_reduced.index)
     ]
-
     if df_aggregated.empty:
         logger.warning(f"Empty Dataframe. Continuing onto next plot...")
         plt.close(num)
@@ -281,7 +280,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                 df_aggregated, values=str(metric2_name).upper()+'_BUERR',
                 columns='MODEL', index='LEAD_HOURS'
             )
-            
     # Reindex pivot table with full list of lead hours, introducing NaNs 
     x_vals_pre = pivot_metric1.index.tolist()
     lead_time_incr = np.diff(x_vals_pre)
@@ -365,7 +363,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     mod_setting_dicts = [
         model_colors.get_color_dict(name) for name in models_renamed
     ]
-
     # Plot data
     logger.info("Begin plotting ...")
     f = lambda m,c,ls,lw,ms,mec: plt.plot(
@@ -383,7 +380,32 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     else:
         handles = []
         labels = []
-    x_vals = pivot_metric1.index
+    if confidence_intervals:
+        indices_in_common1 = list(set.intersection(*map(
+            set, 
+            [
+                pivot_metric1.index, 
+                pivot_ci_lower1.index, 
+                pivot_ci_upper1.index
+            ]
+        )))
+        pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
+        pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
+        pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
+        if metric2_name is not None:
+            indices_in_common2 = list(set.intersection(*map(
+                set, 
+                [
+                    pivot_metric2.index, 
+                    pivot_ci_lower2.index, 
+                    pivot_ci_upper2.index
+                ]
+            )))
+            pivot_metric2 = pivot_metric2[pivot_metric2.index.isin(indices_in_common2)]
+            pivot_ci_lower2 = pivot_ci_lower2[pivot_ci_lower2.index.isin(indices_in_common2)]
+            pivot_ci_upper2 = pivot_ci_upper2[pivot_ci_upper2.index.isin(indices_in_common2)]
+    x_vals1 = pivot_metric1.index
+    x_vals2 = pivot_metric2.index
     y_min = y_min_limit
     y_max = y_max_limit
     if thresh and '' not in thresh:
@@ -424,8 +446,8 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                 ].values
         if not y_lim_lock:
             if metric2_name is not None:
-                y_vals_metric_min = np.nanmin([y_vals_metric1, y_vals_metric2])
-                y_vals_metric_max = np.nanmax([y_vals_metric1, y_vals_metric2])
+                y_vals_metric_min = np.nanmin(np.concatenate((y_vals_metric1, y_vals_metric2)))
+                y_vals_metric_max = np.nanmax(np.concatenate((y_vals_metric1, y_vals_metric2)))
             else:
                 y_vals_metric_min = np.nanmin(y_vals_metric1)
                 y_vals_metric_max = np.nanmax(y_vals_metric1)
@@ -446,7 +468,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         else:
             metric1_mean_fmt_string = f' {y_vals_metric1_mean:.2E}'
         plt.plot(
-            x_vals.tolist(), y_vals_metric1, 
+            x_vals1.tolist(), y_vals_metric1, 
             marker=mod_setting_dicts[m]['marker'], 
             c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
             figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
@@ -458,7 +480,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             else:
                 metric2_mean_fmt_string = f' {y_vals_metric2_mean:.2E}'
             plt.plot(
-                x_vals.tolist(), y_vals_metric2, 
+                x_vals2.tolist(), y_vals_metric2, 
                 marker=mod_setting_dicts[m]['marker'], 
                 c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
                 figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed',
@@ -466,7 +488,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             )
         if confidence_intervals:
             plt.errorbar(
-                x_vals.tolist(), y_vals_metric1, 
+                x_vals1.tolist(), y_vals_metric1, 
                 yerr=[np.abs(y_vals_ci_lower1), y_vals_ci_upper1], 
                 fmt='none', ecolor=mod_setting_dicts[m]['color'], 
                 elinewidth=mod_setting_dicts[m]['linewidth'],
@@ -475,7 +497,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             )
             if metric2_name is not None:
                 plt.errorbar(
-                    x_vals.tolist(), y_vals_metric2, 
+                    x_vals2.tolist(), y_vals_metric2, 
                     yerr=[np.abs(y_vals_ci_lower2), y_vals_ci_upper2], 
                     fmt='none', ecolor=mod_setting_dicts[m]['color'], 
                     elinewidth=mod_setting_dicts[m]['linewidth'],
@@ -513,8 +535,8 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
 
     # Configure axis ticks
     if not x_lim_lock:
-        xticks_min = x_vals.tolist()[0]
-        xticks_max = x_vals.tolist()[-1]
+        xticks_min = np.min([x_vals1.tolist()[0], x_vals2.tolist()[0]])
+        xticks_max = np.max([x_vals1.tolist()[-1], x_vals2.tolist()[-1]])
     else:
         xticks_min = x_min_limit
         xticks_max = x_max_limit

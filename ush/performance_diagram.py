@@ -399,7 +399,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                     np.array(temp_colors)==c
                 ]
                 if np.flatnonzero(np.core.defchararray.find(
-                        models_sharing_colors, 'model')!=-1):
+                        models_sharing_colors, 'model'
+                    )!=-1):
                     need_to_rename = models_sharing_colors[np.flatnonzero(
                         np.core.defchararray.find(
                             models_sharing_colors, 'model'

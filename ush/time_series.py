@@ -430,7 +430,32 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
     else:
         handles = []
         labels = []
-    x_vals = pivot_metric1.index
+    if confidence_intervals:
+        indices_in_common1 = list(set.intersection(*map(
+            set, 
+            [
+                pivot_metric1.index, 
+                pivot_ci_lower1.index, 
+                pivot_ci_upper1.index
+            ]
+        )))
+        pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
+        pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
+        pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
+        if metric2_name is not None:
+            indices_in_common2 = list(set.intersection(*map(
+                set, 
+                [
+                    pivot_metric2.index, 
+                    pivot_ci_lower2.index, 
+                    pivot_ci_upper2.index
+                ]
+            )))
+            pivot_metric2 = pivot_metric2[pivot_metric2.index.isin(indices_in_common2)]
+            pivot_ci_lower2 = pivot_ci_lower2[pivot_ci_lower2.index.isin(indices_in_common2)]
+            pivot_ci_upper2 = pivot_ci_upper2[pivot_ci_upper2.index.isin(indices_in_common2)]
+    x_vals1 = pivot_metric1.index
+    x_vals2 = pivot_metric2.index
     y_min = y_min_limit
     y_max = y_max_limit
     if thresh and '' not in thresh:
@@ -497,7 +522,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         else:
             metric1_mean_fmt_string = f'{y_vals_metric1_mean:.2E}'
         plt.plot(
-            x_vals.tolist(), y_vals_metric1, 
+            x_vals1.tolist(), y_vals_metric1, 
             marker=mod_setting_dicts[m]['marker'], 
             c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
             figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
@@ -509,7 +534,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
             else:
                 metric2_mean_fmt_string = f'{y_vals_metric2_mean:.2E}'
             plt.plot(
-                x_vals.tolist(), y_vals_metric2, 
+                x_vals2.tolist(), y_vals_metric2, 
                 marker=mod_setting_dicts[m]['marker'], 
                 c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
                 figure=fig, ms=mod_setting_dicts[m]['markersize'], 
@@ -517,7 +542,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
             )
         if confidence_intervals:
             plt.errorbar(
-                x_vals.tolist(), y_vals_metric1,
+                x_vals1.tolist(), y_vals_metric1,
                 yerr=[np.abs(y_vals_ci_lower1), y_vals_ci_upper1],
                 fmt='none', ecolor=mod_setting_dicts[m]['color'],
                 elinewidth=mod_setting_dicts[m]['linewidth'],
@@ -526,7 +551,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
             )
             if metric2_name is not None:
                 plt.errorbar(
-                    x_vals.tolist(), y_vals_metric2,
+                    x_vals2.tolist(), y_vals_metric2,
                     yerr=[np.abs(y_vals_ci_lower2), y_vals_ci_upper2],
                     fmt='none', ecolor=mod_setting_dicts[m]['color'],
                     elinewidth=mod_setting_dicts[m]['linewidth'],
@@ -558,7 +583,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
 
     # Configure axis ticks
     xticks = [
-        x_val for x_val in daterange(x_vals[0], x_vals[-1], td(hours=incr))
+        x_val for x_val in daterange(x_vals1[0], x_vals1[-1], td(hours=incr))
     ] 
     xtick_labels = [xtick.strftime('%HZ %m/%d') for xtick in xticks]
     number_of_ticks_dig = [10,20,30,40,50,60]
