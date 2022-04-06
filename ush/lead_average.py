@@ -3,7 +3,7 @@
 # Name:          lead_average.py
 # Contact(s):    Marcel Caron
 # Developed:     Nov. 18, 2021 by Marcel Caron 
-# Last Modified: Jan. 26, 2022 by Marcel Caron             
+# Last Modified: Apr. 06, 2022 by Marcel Caron             
 # Title:         Line plot of verification metric as a function of 
 #                lead time
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -405,7 +405,8 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             pivot_ci_lower2 = pivot_ci_lower2[pivot_ci_lower2.index.isin(indices_in_common2)]
             pivot_ci_upper2 = pivot_ci_upper2[pivot_ci_upper2.index.isin(indices_in_common2)]
     x_vals1 = pivot_metric1.index
-    x_vals2 = pivot_metric2.index
+    if metric2_name is not None:
+        x_vals2 = pivot_metric2.index
     y_min = y_min_limit
     y_max = y_max_limit
     if thresh and '' not in thresh:
@@ -535,8 +536,12 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
 
     # Configure axis ticks
     if not x_lim_lock:
-        xticks_min = np.min([x_vals1.tolist()[0], x_vals2.tolist()[0]])
-        xticks_max = np.max([x_vals1.tolist()[-1], x_vals2.tolist()[-1]])
+        if metric2_name is not None:
+            xticks_min = np.min([x_vals1.tolist()[0], x_vals2.tolist()[0]])
+            xticks_max = np.max([x_vals1.tolist()[-1], x_vals2.tolist()[-1]])
+        else:
+            xticks_min = x_vals1.tolist()[0]
+            xticks_max = x_vals1.tolist()[-1]
     else:
         xticks_min = x_min_limit
         xticks_max = x_max_limit

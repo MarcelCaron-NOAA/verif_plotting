@@ -3,7 +3,7 @@
 # Name:          stat_by_level.py
 # Contact(s):    Marcel Caron
 # Developed:     Oct. 14, 2021 by Marcel Caron 
-# Last Modified: Dec. 3, 2021 by Marcel Caron             
+# Last Modified: Apr. 06, 2022 by Marcel Caron             
 # Title:         Line plot of pressure level as a function of 
 #                verification metric
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -353,7 +353,8 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             pivot_ci_lower2 = pivot_ci_lower2[pivot_ci_lower2.index.isin(indices_in_common2)]
             pivot_ci_upper2 = pivot_ci_upper2[pivot_ci_upper2.index.isin(indices_in_common2)]
     y_vals1 = pivot_metric1.index
-    y_vals2 = pivot_metric2.index
+    if metric2_name is not None:
+        y_vals2 = pivot_metric2.index
     plev_incr = np.abs(np.diff(y_vals1))
     min_incr = np.min(plev_incr) 
     x_min = x_min_limit
@@ -473,14 +474,24 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
 
     # Configure axis ticks
     yticks = [1000, 925, 850, 700, 500, 300, 250, 200, 100, 50, 10, 1]
-    yticks = np.array([
-        ytick 
-        for ytick in yticks 
-        if (
-            ytick>=min([min(y_vals1),min(y_vals2)]) 
-            and ytick<=max([max(y_vals1),max(y_vals2)])
-        )
-    ])
+    if metric2_name is not None:
+        yticks = np.array([
+            ytick 
+            for ytick in yticks 
+            if (
+                ytick>=min([min(y_vals1),min(y_vals2)]) 
+                and ytick<=max([max(y_vals1),max(y_vals2)])
+            )
+        ])
+    else:
+        yticks = np.array([
+            ytick 
+            for ytick in yticks 
+            if (
+                ytick>=min(y_vals1) 
+                and ytick<=max(y_vals1)
+            )
+        ])
     ytick_labels = yticks.astype(str)
     # x ticks and axis limits adjust based on the size of the x_range 
     x_range_categories = np.array([
@@ -545,10 +556,16 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     if y_lim_lock:
         y_min, y_max = [y_min_limit, y_max_limit]
     else:
-        y_min, y_max = [
-            min([min(y_vals1),min(y_vals2)]), 
-            max([max(y_vals1),max(y_vals2)])
-        ]
+        if metric2_name is not None:
+            y_min, y_max = [
+                min([min(y_vals1),min(y_vals2)]), 
+                max([max(y_vals1),max(y_vals2)])
+            ]
+        else:
+            y_min, y_max = [
+                min(y_vals1), 
+                max(y_vals1)
+            ]
         if y_min < y_min_limit:
             y_min = y_min_limit
         if y_max > y_max_limit:
