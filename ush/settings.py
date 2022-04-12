@@ -265,6 +265,10 @@ class ModelSpecs():
             'RAPNA': {
                 'settings_key':'RAP', 
                 'plot_name':'RAP'
+            },
+            'RRFS_A': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A'
             }
         }
         self.model_settings = {
@@ -343,6 +347,9 @@ class ModelSpecs():
             'NAM_NEST': {'color': '#1e3cff',
                      'marker': 'o', 'markersize': 12,
                      'linestyle': 'solid', 'linewidth': 3.},
+            'RRFS_A': {'color': '#00dc00',
+                      'marker': 'o', 'markersize': 12,
+                      'linestyle': 'solid', 'linewidth': 3.},
             'GFS': {'color': '#000000',
                     'marker': 'o', 'markersize': 12,
                     'linestyle': 'solid', 'linewidth': 5.},
