@@ -1343,7 +1343,7 @@ class Reference():
                                  'obs_var_levels': ['L0'],
                                  'obs_var_thresholds': '',
                                  'obs_var_options': '',
-                                 'plot_group':'sfc_upper'}
+                                 'plot_group':'sfc_upper'},
                         'UGRD10m': {'fcst_var_name': 'UGRD',
                                     'fcst_var_levels': ['Z10'],
                                     'fcst_var_thresholds': '',
