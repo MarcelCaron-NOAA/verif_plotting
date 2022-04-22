@@ -3,7 +3,7 @@
 # Name:          df_preprocessing.py
 # Contact(s):    Marcel Caron
 # Developed:     Dec. 2, 2021 by Marcel Caron
-# Last Modified: Dec. 2, 2021 by Marcel Caron
+# Last Modified: Apr. 22, 2022 by Marcel Caron
 # Abstract:      Collection of functions that initialize and filter dataframes
 #
 ###############################################################################
@@ -53,7 +53,7 @@ def get_valid_range(logger, date_type, date_range, date_hours, fleads):
 def run_prune_data(logger, stats_dir, prune_dir, verif_case, verif_type, 
                    line_type, valid_range, eval_period, var_name, 
                    fcst_var_name, model_list, domain):
-    model_list = [str(model).upper() for model in model_list]
+    model_list = [str(model) for model in model_list]
     tmp_dir = 'tmp'+str(uuid.uuid4().hex)
     pruned_data_dir = os.path.join(
         prune_dir,
@@ -98,20 +98,20 @@ def check_empty(df, logger, called_from):
 
 def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range, 
               model_list, met_version):
-    model_list = [str(model).upper() for model in model_list]
+    model_list = [str(model) for model in model_list]
     # Create df combining pruned stats for all models in model_list
     start_string = date_range[0].strftime('%HZ %d %B %Y')
     end_string = date_range[1].strftime('%HZ %d %B %Y')
     for model in model_list:
-        fpath = os.path.join(pruned_data_dir,f'{str(model).upper()}.stat')
+        fpath = os.path.join(pruned_data_dir,f'{str(model)}.stat')
         if not os.path.isfile(fpath):
             logger.warning(
-                f"The stat file for {str(model).upper()} does not exist in"
+                f"The stat file for {str(model)} does not exist in"
                 + f" {pruned_data_dir}."
             )
             logger.warning(
                 f"You might check whether the stats_dir ({stats_dir}) includes"
-                + f" {str(model).upper()} data given domain, variable, etc..."
+                + f" {str(model)} data given domain, variable, etc..."
             )
             logger.warning("Continuing ...")
             continue

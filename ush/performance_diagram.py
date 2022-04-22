@@ -192,17 +192,17 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
 
     # Remove from model_list the models that don't exist in the dataframe
     cols_to_keep = [
-        str(model).upper() 
+        str(model)
         in df['MODEL'].tolist() 
         for model in model_list
     ]
     models_removed = [
-        str(m).upper() 
+        str(m)
         for (m, keep) in zip(model_list, cols_to_keep) if not keep
     ]
     models_removed_string = ', '.join(models_removed)
     model_list = [
-        str(m).upper() 
+        str(m)
         for (m, keep) in zip(model_list, cols_to_keep) if keep
     ]
     if not all(cols_to_keep):
@@ -216,7 +216,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
     # Effective "event equalization", i.e. removing datapoints that aren't 
     # shared among all models. Otherwise plot_util.calculate_stat will throw 
     # an error
-    df_split = [df_aggregated.xs(str(model).upper()) for model in model_list]
+    df_split = [df_aggregated.xs(str(model)) for model in model_list]
     df_reduced = reduce(
         lambda x,y: pd.merge(
             x, y, on='FCST_THRESH_VALUE', how='inner'
@@ -239,7 +239,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         stat_output = plot_util.calculate_stat(
             logger, df_aggregated, str(metric_name).lower()
         )
-        df_aggregated[str(metric_name).upper()] = stat_output[0]
+        df_aggregated[str(metric_name)] = stat_output[0]
         metric_long_names.append(stat_output[2])
         if confidence_intervals:
             ci_output = df_groups.apply(
@@ -254,10 +254,10 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                 .reindex(df_aggregated.index)
                 .reindex(ci_output.index)
             )
-            df_aggregated[str(metric_name).upper()+'_BLERR'] = ci_output[
+            df_aggregated[str(metric_name)+'_BLERR'] = ci_output[
                 'CI_LOWER'
             ].values
-            df_aggregated[str(metric_name).upper()+'_BUERR'] = ci_output[
+            df_aggregated[str(metric_name)+'_BUERR'] = ci_output[
                 'CI_UPPER'
             ].values
 
@@ -510,29 +510,29 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         else:
             model_plot_name = model_list[m]
         x_vals = [
-            pivot_metric1[str(model_list[m]).upper()].values[i] 
+            pivot_metric1[str(model_list[m])].values[i] 
             for i in thresh_argsort
         ]
         y_vals = [
-            pivot_metric2[str(model_list[m]).upper()].values[i] 
+            pivot_metric2[str(model_list[m])].values[i] 
             for i in thresh_argsort
         ]
-        mosaic_vals = pivot_metric3[str(model_list[m]).upper()].values
+        mosaic_vals = pivot_metric3[str(model_list[m])].values
         x_mean = np.nanmean(x_vals)
         y_mean = np.nanmean(y_vals)
         mosaic_mean = np.nanmean(mosaic_vals)
         if confidence_intervals:
             x_vals_ci_lower = pivot_ci_lower1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             x_vals_ci_upper = pivot_ci_upper1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             y_vals_ci_lower = pivot_ci_lower2[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             y_vals_ci_upper = pivot_ci_upper2[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
         if display_averages:
             metric_mean_fmt_string = (f'{model_plot_name} ({x_mean:.2f},'
@@ -700,7 +700,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
     logger.info("... Plotting complete.")
 
     # Saving
-    models_savename = '_'.join([str(model).upper() for model in model_list])
+    models_savename = '_'.join([str(model) for model in model_list])
     date_hours_savename = '_'.join([
         f'{date_hour:02d}Z' for date_hour in date_hours
     ])

@@ -123,17 +123,17 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
 
     # Remove from model_list the models that don't exist in the dataframe
     cols_to_keep = [
-        str(model).upper() 
+        str(model) 
         in df['MODEL'].tolist() 
         for model in model_list
     ]
     models_removed = [
-        str(m).upper() 
+        str(m) 
         for (m, keep) in zip(model_list, cols_to_keep) if not keep
     ]
     models_removed_string = ', '.join(models_removed)
     model_list = [
-        str(m).upper() 
+        str(m) 
         for (m, keep) in zip(model_list, cols_to_keep) if keep
     ]
     if not all(cols_to_keep):
@@ -151,7 +151,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     # Effective "event equalization", i.e. removing datapoints that aren't 
     # shared among all models. Otherwise plot_util.calculate_stat will throw 
     # an error
-    df_split = [df_aggregated.xs(str(model).upper()) for model in model_list]
+    df_split = [df_aggregated.xs(str(model)) for model in model_list]
     df_reduced = reduce(
         lambda x,y: pd.merge(
             x, y, on='PLEV', how='inner'
@@ -366,24 +366,24 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             )
         else:
             model_plot_name = model_list[m]
-        x_vals_metric1 = pivot_metric1[str(model_list[m]).upper()].values
+        x_vals_metric1 = pivot_metric1[str(model_list[m])].values
         x_vals_metric1_mean = np.nanmean(x_vals_metric1)
         if metric2_name is not None:
-            x_vals_metric2 = pivot_metric2[str(model_list[m]).upper()].values
+            x_vals_metric2 = pivot_metric2[str(model_list[m])].values
             x_vals_metric2_mean = np.nanmean(x_vals_metric2)
         if confidence_intervals:
             x_vals_ci_lower1 = pivot_ci_lower1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             x_vals_ci_upper1 = pivot_ci_upper1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             if metric2_name is not None:
                 x_vals_ci_lower2 = pivot_ci_lower2[
-                    str(model_list[m]).upper()
+                    str(model_list[m])
                 ].values
                 x_vals_ci_upper2 = pivot_ci_upper2[
-                    str(model_list[m]).upper()
+                    str(model_list[m])
                 ].values
         if not x_lim_lock:
             if metric2_name is not None:
@@ -628,7 +628,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     logger.info("... Plotting complete.")
 
     # Saving 
-    models_savename = '_'.join([str(model).upper() for model in model_list])
+    models_savename = '_'.join([str(model) for model in model_list])
     date_hours_savename = '_'.join([
         f'{date_hour:02d}Z' for date_hour in date_hours
     ])

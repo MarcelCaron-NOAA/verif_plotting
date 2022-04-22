@@ -29,7 +29,7 @@ def expand_met_stat_files(met_stat_files, data_dir, RUN_case, RUN_type,
         met_stat_files, 
         glob.glob(os.path.join(
             # edit below to define stats archive path. Use '*' as wildcard.
-            data_dir, str(RUN_case).lower(), str(model).upper(), 
+            data_dir, str(RUN_case).lower(), str(model), 
             valid_string[:-2], model+'_'+valid_string+'*'
         ))
     ))

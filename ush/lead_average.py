@@ -195,7 +195,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     # Effective "event equalization", i.e. removing datapoints that aren't 
     # shared among all models. Otherwise plot_util.calculate_stat will throw 
     # an error
-    df_split = [df_aggregated.xs(str(model).upper()) for model in model_list]
+    df_split = [df_aggregated.xs(str(model)) for model in model_list]
     df_reduced = reduce(
         lambda x,y: pd.merge(
             x, y, on='LEAD_HOURS', how='inner'
@@ -426,24 +426,24 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             )
         else:
             model_plot_name = model_list[m]
-        y_vals_metric1 = pivot_metric1[str(model_list[m]).upper()].values
+        y_vals_metric1 = pivot_metric1[str(model_list[m])].values
         y_vals_metric1_mean = np.nanmean(y_vals_metric1)
         if metric2_name is not None:
-            y_vals_metric2 = pivot_metric2[str(model_list[m]).upper()].values
+            y_vals_metric2 = pivot_metric2[str(model_list[m])].values
             y_vals_metric2_mean = np.nanmean(y_vals_metric2)
         if confidence_intervals:
             y_vals_ci_lower1 = pivot_ci_lower1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             y_vals_ci_upper1 = pivot_ci_upper1[
-                str(model_list[m]).upper()
+                str(model_list[m])
             ].values
             if metric2_name is not None:
                 y_vals_ci_lower2 = pivot_ci_lower2[
-                    str(model_list[m]).upper()
+                    str(model_list[m])
                 ].values
                 y_vals_ci_upper2 = pivot_ci_upper2[
-                    str(model_list[m]).upper()
+                    str(model_list[m])
                 ].values
         if not y_lim_lock:
             if metric2_name is not None:
@@ -686,7 +686,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     logger.info("... Plotting complete.")
 
     # Saving
-    models_savename = '_'.join([str(model).upper() for model in model_list])
+    models_savename = '_'.join([str(model) for model in model_list])
     date_hours_savename = '_'.join([
         f'{date_hour:02d}Z' for date_hour in date_hours
     ])
