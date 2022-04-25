@@ -60,9 +60,9 @@ def prune_data(data_dir, prune_dir, tmp_dir, valid_range, eval_period,
          met_header_cols = msf.readline()
       all_grep_output = ''
       if RUN_type == 'anom' and 'HGT' in var_name:
-         print("Pruning "+data_dir+" files for vx_mask "+vx_mask+", variable "
-               +fcst_var_name+", line_type "+line_type+", interp "
-               +os.environ['interp'])
+         print("Pruning "+data_dir+" files for model "+model+", vx_mask "
+               +vx_mask+", variable "+fcst_var_name+", line_type "+line_type
+               +", interp "+os.environ['interp'])
          filter_cmd = (
             ' | grep "'+vx_mask
             +'" | grep "'+fcst_var_name
@@ -70,8 +70,8 @@ def prune_data(data_dir, prune_dir, tmp_dir, valid_range, eval_period,
             +'" | grep "'+os.environ['interp']+'"'
          )
       else:
-         print("Pruning "+data_dir+" files for vx_mask "+vx_mask+", variable "
-               +fcst_var_name+", line_type "+line_type)
+         print("Pruning "+data_dir+" files for model "+model+", vx_mask "
+               +vx_mask+", variable "+fcst_var_name+", line_type "+line_type)
          filter_cmd = (
             ' | grep "'+vx_mask
             +'" | grep "'+fcst_var_name

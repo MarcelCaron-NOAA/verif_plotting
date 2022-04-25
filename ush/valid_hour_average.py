@@ -176,8 +176,8 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 np.isin(requested_thresh_symbol, df['FCST_THRESH_SYMBOL'])
             ]
         )
-        if thresholds_removed:
-            threshold_removed_string = ', '.join(thresholds_removed)
+        if thresholds_removed.size > 0:
+            thresholds_removed_string = ', '.join(thresholds_removed)
             if len(thresholds_removed) > 1:
                 warning_string = (f"{thresholds_removed_string} thresholds"
                                   + f" were not found and will not be"
@@ -208,6 +208,11 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             f"{models_removed_string} data were not found and will not be"
             + f" plotted."
         )
+    if df.empty:
+        logger.warning(f"Empty Dataframe. Continuing onto next plot...")
+        plt.close(num)
+        logger.info("========================================")
+        return None
     df_groups = df.groupby(['MODEL','ANTI_DATE_HOURS'])
     # Aggregate unit statistics before calculating metrics
     if str(line_type).upper() == 'CTC':
