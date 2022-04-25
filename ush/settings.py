@@ -29,6 +29,12 @@ class Presets():
                 'init_beg': (datetime.now()-td(days=7)).strftime('%Y%m%d'),
                 'init_end': (datetime.now()-td(days=1)).strftime('%Y%m%d')
             },
+            'PAST3DAYS': {
+                'valid_beg': (datetime.now()-td(days=3)).strftime('%Y%m%d'),
+                'valid_end': (datetime.now()-td(days=1)).strftime('%Y%m%d'),
+                'init_beg': (datetime.now()-td(days=3)).strftime('%Y%m%d'),
+                'init_end': (datetime.now()-td(days=1)).strftime('%Y%m%d')
+            },
             '2020': {
                 'valid_beg': '20200101',
                 'valid_end': '20201231',
@@ -130,6 +136,22 @@ class ModelSpecs():
                 'settings_key':'HREF_MEAN', 
                 'plot_name':'HREF Mean'
             },
+            'HREF_AVRG':{
+                'settings_key':'HREF_AVRG', 
+                'plot_name':'HREF Average of MEAN and PMMN'
+            },
+            'HREF_LPMM':{
+                'settings_key':'HREF_LPMM', 
+                'plot_name':'HREF Local Probability-Matched Mean'
+            },
+            'HREF_PMMN':{
+                'settings_key':'HREF_PMMN', 
+                'plot_name':'HREF Probability-Matched Mean'
+            },
+            'HREF_PROB':{
+                'settings_key':'HREF_PROB', 
+                'plot_name':'HREF Probability'
+            },
             'HREFX_MEAN':{
                 'settings_key':'HREFX_MEAN', 
                 'plot_name':'HREF-X Mean'
@@ -138,9 +160,101 @@ class ModelSpecs():
                 'settings_key':'HREF_MEAN', 
                 'plot_name':'HREF Mean'
             },
+            'CONUSHREF_AVRG':{
+                'settings_key':'HREF_AVRG', 
+                'plot_name':'HREF Average of MEAN and PMMN'
+            },
+            'CONUSHREF_LPMM':{
+                'settings_key':'HREF_LPMM', 
+                'plot_name':'HREF Local Probability-Matched Mean'
+            },
+            'CONUSHREF_PMMN':{
+                'settings_key':'HREF_PMMN', 
+                'plot_name':'HREF Probability-Matched Mean'
+            },
+            'CONUSHREF_PROB':{
+                'settings_key':'HREF_PROB', 
+                'plot_name':'HREF Probability'
+            },
             'CONUSHREFX_MEAN':{
                 'settings_key':'HREFX_MEAN', 
                 'plot_name':'HREF-X Mean'
+            },
+            'AKHREF_MEAN':{
+                'settings_key':'HREF_MEAN', 
+                'plot_name':'HREF Mean'
+            },
+            'AKHREF_AVRG':{
+                'settings_key':'HREF_AVRG', 
+                'plot_name':'HREF Average of MEAN and PMMN'
+            },
+            'AKHREF_LPMM':{
+                'settings_key':'HREF_LPMM', 
+                'plot_name':'HREF Local Probability-Matched Mean'
+            },
+            'AKHREF_PMMN':{
+                'settings_key':'HREF_PMMN', 
+                'plot_name':'HREF Probability-Matched Mean'
+            },
+            'AKHREF_PROB':{
+                'settings_key':'HREF_PROB', 
+                'plot_name':'HREF Probability'
+            },
+            'AKHREFX_MEAN':{
+                'settings_key':'HREFX_MEAN', 
+                'plot_name':'HREF-X Mean'
+            },
+            'PRHREF_MEAN':{
+                'settings_key':'HREF_MEAN', 
+                'plot_name':'HREF Mean'
+            },
+            'PRHREF_AVRG':{
+                'settings_key':'HREF_AVRG', 
+                'plot_name':'HREF Average of MEAN and PMMN'
+            },
+            'PRHREF_LPMM':{
+                'settings_key':'HREF_LPMM', 
+                'plot_name':'HREF Local Probability-Matched Mean'
+            },
+            'PRHREF_PMMN':{
+                'settings_key':'HREF_PMMN', 
+                'plot_name':'HREF Probability-Matched Mean'
+            },
+            'PRHREF_PROB':{
+                'settings_key':'HREF_PROB', 
+                'plot_name':'HREF Probability'
+            },
+            'PRHREFX_MEAN':{
+                'settings_key':'HREFX_MEAN', 
+                'plot_name':'HREF-X Mean'
+            },
+            'HIHREF_MEAN':{
+                'settings_key':'HREF_MEAN', 
+                'plot_name':'HREF Mean'
+            },
+            'HIHREF_AVRG':{
+                'settings_key':'HREF_AVRG', 
+                'plot_name':'HREF Average of MEAN and PMMN'
+            },
+            'HIHREF_LPMM':{
+                'settings_key':'HREF_LPMM', 
+                'plot_name':'HREF Local Probability-Matched Mean'
+            },
+            'HIHREF_PMMN':{
+                'settings_key':'HREF_PMMN', 
+                'plot_name':'HREF Probability-Matched Mean'
+            },
+            'HIHREF_PROB':{
+                'settings_key':'HREF_PROB', 
+                'plot_name':'HREF Probability'
+            },
+            'HIHREFX_MEAN':{
+                'settings_key':'HREFX_MEAN', 
+                'plot_name':'HREF-X Mean'
+            },
+            'NARRE_MEAN':{
+                'settings_key':'NARRE_MEAN', 
+                'plot_name':'NARRE Mean'
             },
             'HIARW': {
                 'settings_key':'HRW_ARW', 
@@ -335,6 +449,15 @@ class ModelSpecs():
             'HREF_MEAN': {'color': '#000000',
                      'marker': 'o', 'markersize': 12,
                      'linestyle': 'solid', 'linewidth': 3.},
+            'HREF_AVRG': {'color': '#696969',
+                     'marker': 'o', 'markersize': 12,
+                     'linestyle': 'solid', 'linewidth': 3.},
+            'HREF_PMMN': {'color': '#8400c8',
+                     'marker': 'o', 'markersize': 12,
+                     'linestyle': 'solid', 'linewidth': 3.},
+            'HREF_LPMM': {'color': '#d269c1',
+                     'marker': 'o', 'markersize': 12,
+                     'linestyle': 'solid', 'linewidth': 3.},
             'HREFX_MEAN': {'color': '#000000',
                      'marker': 'P', 'markersize': 14,
                      'linestyle': 'dashed', 'linewidth': 3.},
@@ -357,6 +480,9 @@ class ModelSpecs():
                            'marker': 'o', 'markersize': 12,
                            'linestyle': 'dashed', 'linewidth': 5.},
             'GEFS': {'color': '#000000',
+                     'marker': 'o', 'markersize': 12,
+                     'linestyle': 'solid', 'linewidth': 5.},
+            'NARRE_MEAN': {'color': '#000000',
                      'marker': 'o', 'markersize': 12,
                      'linestyle': 'solid', 'linewidth': 5.},
             'EC': {'color': '#fb2020',
@@ -423,8 +549,7 @@ class Reference():
                                     'REFC': 'Composite Reflectivity',
                                     'REFD': 'Above Ground Level Reflectivity',
                                     'RETOP': 'Echo Top Height'}
-        self.domain_translator = {'G002': 'Global',
-                                  'NHX': 'Northern Hemisphere 20N-80N',
+        self.domain_translator = {'NHX': 'Northern Hemisphere 20N-80N',
                                   'SHX': 'Southern Hemisphere 20S-80S',
                                   'TRO': 'Tropics 20S-20N',
                                   'PNA': 'Pacific North America',
@@ -434,9 +559,12 @@ class Reference():
                                   'SPO': 'Southern Pacific Ocean',
                                   'NAO': 'Northern Atlantic Ocean',
                                   'SAO': 'Southern Atlantic Ocean',
-                                  'G003': 'Global',
                                   'NH': 'Northern Hemisphere 20N-90N',
                                   'SH': 'Southern Hemisphere 20S-90S',
+                                  'G002': 'Global',
+                                  'G003': 'Global',
+                                  'G130': 'CONUS - NCEP Grid 130',
+                                  'G211': 'CONUS - NCEP Grid 211',
                                   'G236': 'CONUS - NCEP Grid 236',
                                   'G223': 'CONUS - NCEP Grid 223',
                                   'CONUS': 'CONUS',
@@ -460,7 +588,6 @@ class Reference():
                                   'GMC': 'Gulf of Mexico Coast',
                                   'NAK': 'Northern Alaska',
                                   'SAK': 'Southern Alaska',
-                                  'G211': 'CONUS - NCEP Grid 211',
                                   'SEA_ICE': 'Global - Sea Ice',
                                   'SEA_ICE_FREE': 'Global - Sea Ice Free',
                                   'SEA_ICE_POLAR': 'Polar - Sea Ice',
@@ -858,7 +985,7 @@ class Reference():
                     'interp': 'NEAREST',
                     'vx_mask_list' : [
                         'NHX', 'SHX', 'N60', 'S60', 'TRO', 'NPO', 'SPO', 
-                        'NAO', 'SAO', 'CONUS'
+                        'NAO', 'SAO', 'G130', 'CONUS'
                     ],
                     'var_dict': {
                         'TMP2m': {'fcst_var_name': 'TMP',
@@ -1041,7 +1168,7 @@ class Reference():
                                         + ' sratio'),
                     'interp': 'NEAREST, NBRHD_CIRCLE, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'APL', 'GMC', 'GRB', 'LMV', 'MDW', 'NEC', 
+                        'CONUS', 'G130', 'APL', 'GMC', 'GRB', 'LMV', 'MDW', 'NEC', 
                         'NMT', 'NPL', 'NWC', 'SEC', 'SMT', 'SPL', 'SWC', 
                         'SWD', 'DAY1_1200_TSTM', 'DAY2_1730_TSTM'
                     ],
@@ -1089,7 +1216,7 @@ class Reference():
                                         + ' sratio'),
                     'interp': 'NEAREST, NBRHD_CIRCLE, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'APL', 'GMC', 'GRB', 'LMV', 'MDW', 'NEC', 
+                        'CONUS', 'G130', 'APL', 'GMC', 'GRB', 'LMV', 'MDW', 'NEC', 
                         'NMT', 'NPL', 'NWC', 'SEC', 'SMT', 'SPL', 'SWC', 
                         'SWD', 'DAY1_1200_TSTM', 'DAY2_1730_TSTM'
                     ],
@@ -1137,7 +1264,7 @@ class Reference():
                                         + ' obar'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'NH', 'SH', 'TRO', 'G236', 'POLAR', 'ARCTIC', 
+                        'CONUS', 'G130', 'NH', 'SH', 'TRO', 'G236', 'POLAR', 'ARCTIC', 
                         'NAK', 'SAK'
                     ],
                     'var_dict': {
@@ -1216,7 +1343,7 @@ class Reference():
                                         + ' obar'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'NH', 'SH', 'TRO', 'G236', 'POLAR', 'ARCTIC', 
+                        'CONUS', 'G130', 'NH', 'SH', 'TRO', 'G236', 'POLAR', 'ARCTIC', 
                         'NAK', 'SAK'
                     ],
                     'var_dict': {
@@ -1248,7 +1375,7 @@ class Reference():
                                         + ' obar'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
+                        'CONUS', 'G130', 'G214', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
                         'SEC', 'NWC', 'SWC', 'NMT', 'SMT', 'SWD', 'GRB', 
                         'LMV', 'GMC', 'APL', 'NAK', 'SAK'
                     ],
@@ -1369,7 +1496,7 @@ class Reference():
                                         + ' obar'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
+                        'CONUS', 'G130', 'G214', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
                         'SEC', 'NWC', 'SWC', 'NMT', 'SMT', 'SWD', 'GRB', 
                         'LMV', 'GMC', 'APL', 'NAK', 'SAK'
                     ],
@@ -1390,7 +1517,7 @@ class Reference():
                                         + ' faratio, sratio'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
+                        'CONUS', 'G130', 'G214', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
                         'SEC', 'NWC', 'SWC', 'NMT', 'SMT', 'SWD', 'GRB', 
                         'LMV', 'GMC', 'APL', 'NAK', 'SAK'
                     ],
