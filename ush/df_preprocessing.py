@@ -89,8 +89,8 @@ def run_prune_data(logger, stats_dir, prune_dir, verif_case, verif_type,
 
 def check_empty(df, logger, called_from):
     if df.empty:
-        logger.warning(f"Called from {called_from}:")
-        logger.warning(f"Empty Dataframe. Continuing onto next plot...")
+        logger.error(f"Called from {called_from}:")
+        logger.error(f"Empty Dataframe. Continuing onto next plot...")
         logger.info("========================================")
         return True
     else:
