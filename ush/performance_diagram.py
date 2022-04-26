@@ -98,6 +98,11 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
+    if str(line_type).upper() == 'CTC' and np.array(thresh).size == 0:
+        logger.warning(f"Empty list of thresholds. Continuing onto next"
+                       + f" plot...")
+        logger.info("========================================")
+        return None
 
     # filter by forecast lead times
     if isinstance(flead, list):
