@@ -319,7 +319,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
             )
     # Reindex pivot table with full list of dates, introducing NaNs 
     date_hours_incr = np.diff(date_hours)
-    if not date_hours_incr:
+    if date_hours_incr.size == 0:
         min_incr = 24
     else:
         min_incr = np.min(date_hours_incr)
