@@ -70,6 +70,11 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         logger.warning(f"Empty Dataframe. Continuing onto next plot...")
         logger.info("========================================")
         return None
+    if str(line_type).upper() == 'CTC' and np.array(thresh).size == 0:
+        logger.warning(f"Empty list of thresholds. Continuing onto next"
+                       + f" plot...")
+        logger.info("========================================")
+        return None
 
     fig, ax = plotter.get_plots(num)  
     variable_translator = reference.variable_translator
@@ -778,10 +783,11 @@ def main():
         init_end = presets.date_presets[EVAL_PERIOD]['init_end']
     if str(DATE_TYPE).upper() == 'VALID':
         e = (f"You requested a valid_hour_average plot with the DATE_TYPE "
-             + f"set to {str(DATE_TYPE).upper()}. Series by valid hour are "
-             + f"automatically displayed at every valid hour from 00Z-23Z. "
-             + f"Please set the DATE_TYPE to 'INIT', to equalize data by "
-             + f"initialization time.")
+             + f"set to 'VALID'. Valid time is already used as the independent"
+             + f" variable in valid_hour_average plots, therfore please set"
+             + f" the DATE_TYPE to 'INIT', to equalize data by initialization"
+             + f" time.  Also, make sure neither FCST_INIT_HOUR nor"
+             + f" FCST_VALID_HOUR is an empty list.")
         logger.error(e)
         raise ValueError(e)
     elif str(DATE_TYPE).upper() == 'INIT':
