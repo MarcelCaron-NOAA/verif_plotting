@@ -249,7 +249,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         stat_output = plot_util.calculate_stat(
             logger, df_aggregated, str(metric_name).lower()
         )
-        df_aggregated[str(metric_name)] = stat_output[0]
+        df_aggregated[str(metric_name).upper()] = stat_output[0]
         metric_long_names.append(stat_output[2])
         if confidence_intervals:
             ci_output = df_groups.apply(
@@ -264,13 +264,12 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                 .reindex(df_aggregated.index)
                 .reindex(ci_output.index)
             )
-            df_aggregated[str(metric_name)+'_BLERR'] = ci_output[
+            df_aggregated[str(metric_name).upper()+'_BLERR'] = ci_output[
                 'CI_LOWER'
             ].values
-            df_aggregated[str(metric_name)+'_BUERR'] = ci_output[
+            df_aggregated[str(metric_name).upper()+'_BUERR'] = ci_output[
                 'CI_UPPER'
             ].values
-
     df_aggregated[str(metric1_name).upper()] = (
         df_aggregated[str(metric1_name).upper()]
     ).astype(float).tolist()
