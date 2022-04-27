@@ -730,7 +730,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
       else:
          logger.error("Could not recognize line type from columns")
          exit(1)
-   if str(bs_method).upper() == 'BASIC':
+   if str(bs_method).upper() == 'MATCHED_PAIRS':
       lower_pctile = 100.*((1.-level)/2.)
       upper_pctile = 100.-lower_pctile
       if line_type == 'CTC':
@@ -821,18 +821,72 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
       else:
          logger.error(line_type+" is not currently a valid option")
          exit(1)
+   elif str(bs_method).upper() == 'FORECASTS':
+      lower_pctile = 100.*((1.-level)/2.)
+      upper_pctile = 100.-lower_pctile
+      if line_type == 'CTC':
+         ctc = np.array([fy_oy, fy_on, fn_oy, fn_on])
+         fy_oy_samp, fy_on_samp, fn_oy_samp, fn_on_samp = [
+            [] for item in range(4)
+         ]
+         for _ in range(nrepl):
+            ctc_bs = ctc.T[
+               np.random.choice(
+                  range(len(ctc.T)), 
+                  size=len(ctc.T), 
+                  replace=True
+               )
+            ].sum(axis=0)
+            fy_oy_samp.append(ctc_bs[0])
+            fy_on_samp.append(ctc_bs[1])
+            fn_oy_samp.append(ctc_bs[2])
+            fn_on_samp.append(ctc_bs[3])
+         fy_oy_samp = np.array(fy_oy_samp)
+         fy_on_samp = np.array(fy_on_samp)
+         fn_oy_samp = np.array(fn_oy_samp)
+         fn_on_samp = np.array(fn_on_samp)
+      elif line_type == 'SL1L2':
+         fbar_est_mean = fbar.mean()
+         obar_est_mean = obar.mean()
+         fobar_est_mean = fobar.mean()
+         ffbar_est_mean = ffbar.mean()
+         oobar_est_mean = oobar.mean()
+         stat_indices = range(len(fbar))
+         fbar_est_samp, obar_est_samp = [[] for item in range(2)]
+         fobar_est_samp, ffbar_est_samp, oobar_est_samp = [
+            [] for item in range(3)
+         ]
+         for _ in range(nrepl):
+            stat_indices_bs = np.random.choice(
+               stat_indices,
+               size=len(stat_indices),
+               replace=True
+            )
+            fbar_est_samp.append(fbar[stat_indices_bs].mean())
+            obar_est_samp.append(obar[stat_indices_bs].mean())
+            fobar_est_samp.append(fobar[stat_indices_bs].mean())
+            ffbar_est_samp.append(ffbar[stat_indices_bs].mean())
+            oobar_est_samp.append(oobar[stat_indices_bs].mean())
+         fbar_est_samp = np.array(fbar_est_samp)
+         obar_est_samp = np.array(obar_est_samp)
+         fobar_est_samp = np.array(fobar_est_samp)
+         ffbar_est_samp = np.array(ffbar_est_samp)
+         oobar_est_samp = np.array(oobar_est_samp)
+      else:
+         logger.error(line_type+" is not currently a valid option")
+         exit(1)
    else:
       logger.error(bs_method+" is not a valid option")
       exit(1)
    if stat == 'bias':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             stat_values_mean = np.mean(fbar_est_mean) - np.mean(obar_est_mean)
             stat_values = fbar_est_samp - obar_est_samp
          elif line_type == 'CTC':
             stat_values = (fy_oy_samp + fy_on_samp)/(fy_oy_samp + fn_oy_samp)
    elif stat == 'rmse':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             stat_values_pre_mean = np.sqrt(
                ffbar_est_mean + oobar_est_mean - 2*fobar_est_mean
@@ -842,7 +896,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
                ffbar_est_samp + oobar_est_samp - 2*fobar_est_samp
             )
    elif stat == 'bcrmse':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             var_f_mean = (
                np.mean(ffbar_est_mean) 
@@ -862,7 +916,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             covar = fobar_est_samp - fbar_est_samp*obar_est_samp
             stat_values = np.sqrt(var_f+var_o-2*covar)
    elif stat == 'msess':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             mse_mean = ffbar_est_mean + oobar_est_mean - 2*fobar_est_mean
             var_o_mean = oobar_est_mean - obar_est_mean*obar_est_mean
@@ -872,7 +926,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             var_o = oobar_est_samp - obar_est_samp*obar_est_samp
             stat_values = 1 - mse/var_o
    elif stat == 'rsd':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             var_f_mean = ffbar_est_mean - fbar_est_mean*fbar_est_mean
             var_o_mean = oobar_est_mean - obar_est_mean*obar_est_mean
@@ -882,13 +936,13 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             var_o = oobar_est_samp - obar_est_samp*obar_est_samp
             stat_values = np.sqrt(var_f)/np.sqrt(var_o)
    elif stat == 'rmse_md':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             stat_values_pre_mean = np.sqrt((fbar_est_mean-obar_est_mean)**2)
             stat_values_mean = np.mean(stat_values_pre_mean)
             stat_values = np.sqrt((fbar_est_samp-obar_est_samp)**2)
    elif stat == 'rmse_pv':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             var_f_mean = ffbar_est_mean - fbar_est_mean**2
             var_o_mean = oobar_est_mean - obar_est_mean**2
@@ -906,7 +960,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             R = covar/np.sqrt(var_f*var_o)
             stat_values = np.sqrt(var_f + var_o - 2*np.sqrt(var_f*var_o)*R)
    elif stat == 'pcor':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             var_f_mean = ffbar_est_mean - fbar_est_mean*obar_est_mean
             var_o_mean = oobar_est_mean - obar_est_mean*obar_est_mean
@@ -918,7 +972,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             covar = fobar_est_samp - fbar_est_samp*obar_est_samp
             stat_values = covar/np.sqrt(var_f*var_o)
    elif stat == 'acc':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SAL1L2':
             var_f_mean = ffabar_est_mean - fabar_est_mean*fabar_est_mean
             var_o_mean = ooabar_est_mean - oabar_est_mean*oabar_est_mean
@@ -930,13 +984,13 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             covar = foabar_est_samp - fabar_est_samp*oabar_est_samp
             stat_values = covar_samp/np.sqrt(var_f_samp*var_o_samp)
    elif stat == 'fbar':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             stat_values_pre_mean = fbar_est_mean
             stat_values_mean = np.mean(stat_values_pre_mean)
             stat_values = fbar_est_samp
    elif stat == 'obar':
-      if str(bs_method).upper() == 'BASIC':
+      if str(bs_method).upper() in ['MATCHED_PAIRS','FORECASTS']:
          if line_type == 'SL1L2':
             stat_values_pre_mean = obar_est_mean
             stat_values_mean = np.mean(stat_values_pre_mean)

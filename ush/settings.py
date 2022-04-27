@@ -11,6 +11,7 @@ class Toggle():
             'y_lim_lock': False,
             'ci_lev':.95,
             'bs_nrep':5000,
+            'bs_method':'FORECASTS',
             'display_averages': False,
             'event_equalization': False,
         }

@@ -57,9 +57,9 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                       verif_type: str = 'pres', save_dir: str = '.',
                       requested_var: str = 'HGT', line_type: str = 'SL1L2',
                       dpi: int = 300, confidence_intervals: bool = False,
-                      bs_nrep: int = 5000, ci_lev: float = .95,
-                      eval_period: str = 'TEST', save_header: str = '',
-                      display_averages: bool = True, 
+                      bs_nrep: int = 5000, bs_method: str = 'MATCHED_PAIRS', 
+                      ci_lev: float = .95, eval_period: str = 'TEST', 
+                      save_header: str = '', display_averages: bool = True, 
                       plot_group: str = 'sfc_upper'):
 
     logger.info("========================================")
@@ -229,7 +229,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             if confidence_intervals:
                 ci_output = df_groups.apply(
                     lambda x: plot_util.calculate_bootstrap_ci(
-                        logger, 'BASIC', x, str(stat).lower(), bs_nrep, 
+                        logger, bs_method, x, str(stat).lower(), bs_nrep, 
                         ci_lev
                     )
                 )
@@ -919,7 +919,7 @@ def main():
                     eval_period=EVAL_PERIOD, display_averages=display_averages, 
                     save_header=URL_HEADER, plot_group=plot_group, 
                     confidence_intervals=CONFIDENCE_INTERVALS, bs_nrep=bs_nrep, 
-                    ci_lev=ci_lev
+                    bs_method=bs_method, ci_lev=ci_lev
                 )
                 num+=1
 
@@ -991,6 +991,7 @@ if __name__ == "__main__":
     CONFIDENCE_INTERVALS = os.environ['CONFIDENCE_INTERVALS'].replace(' ','')
     bs_nrep = toggle.plot_settings['bs_nrep']
     ci_lev = toggle.plot_settings['ci_lev']
+    bs_method = toggle.plot_settings['bs_method']
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']

@@ -56,9 +56,9 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
                       verif_type: str = 'pres', save_dir: str = '.',
                       requested_var: str = 'HGT', line_type: str = 'SL1L2',
                       dpi: int = 300, confidence_intervals: bool = False,
-                      bs_nrep: int = 5000, ci_lev: float = .95,
-                      eval_period: str = 'TEST', save_header: str = '',
-                      display_averages: bool = True, 
+                      bs_nrep: int = 5000, bs_method: str = 'MATCHED_PAIRS', 
+                      ci_lev: float = .95, eval_period: str = 'TEST', 
+                      save_header: str = '', display_averages: bool = True, 
                       plot_group: str = 'sfc_upper'):
 
     logger.info("========================================")
@@ -200,7 +200,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-    print(df)
     df_groups = df.groupby(['MODEL','FCST_THRESH_VALUE'])
     # Aggregate unit statistics before calculating metrics
     if str(line_type).upper() == 'CTC':
@@ -238,7 +237,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     if confidence_intervals:
         ci_output = df_groups.apply(
             lambda x: plot_util.calculate_bootstrap_ci(
-                logger, 'BASIC', x, str(metric_name).lower(), bs_nrep,
+                logger, bs_method, x, str(metric_name).lower(), bs_nrep,
                 ci_lev
             )
         )
@@ -782,7 +781,7 @@ def main():
                         display_averages=display_averages, 
                         save_header=URL_HEADER, plot_group=plot_group,
                         confidence_intervals=CONFIDENCE_INTERVALS, 
-                        bs_nrep=bs_nrep, ci_lev=ci_lev
+                        bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev
                     )
                     num+=1
 
@@ -850,6 +849,7 @@ if __name__ == "__main__":
     # Still need to configure CIs (doesn't work yet)
     CONFIDENCE_INTERVALS = os.environ['CONFIDENCE_INTERVALS'].replace(' ','')
     bs_nrep = toggle.plot_settings['bs_nrep']
+    bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
 
     # Whether or not to display average values beside legend labels

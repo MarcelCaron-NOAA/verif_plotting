@@ -60,9 +60,9 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                       date_hours: list = [0,6,12,18], verif_type: str = 'pres', 
                       line_type: str = 'CTC', save_dir: str = '.', dpi: int = 300, 
                       confidence_intervals: bool = False, bs_nrep: int = 5000, 
-                      ci_lev: float = .95, eval_period: str = 'TEST',
-                      display_averages: bool = True, save_header: str = '', 
-                      plot_group: str = 'sfc_upper'):
+                      bs_method: str = 'MATCHED_PAIRS', ci_lev: float = .95, 
+                      eval_period: str = 'TEST', display_averages: bool = True, 
+                      save_header: str = '', plot_group: str = 'sfc_upper'):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -254,7 +254,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         if confidence_intervals:
             ci_output = df_groups.apply(
                 lambda x: plot_util.calculate_bootstrap_ci(
-                    logger, 'BASIC', x, str(metric_name).lower(), bs_nrep,
+                    logger, bs_method, x, str(metric_name).lower(), bs_nrep,
                     ci_lev
                 )
             )
@@ -934,7 +934,7 @@ def main():
                     display_averages=display_averages, save_header=URL_HEADER,
                     plot_group=plot_group, 
                     confidence_intervals=CONFIDENCE_INTERVALS, 
-                    bs_nrep=bs_nrep, ci_lev = ci_lev
+                    bs_nrep=bs_nrep, bs_method=bs_method, ci_lev = ci_lev
                 )
                 num+=1
 
@@ -1002,6 +1002,7 @@ if __name__ == "__main__":
     # Still need to configure CIs (doesn't work yet)
     CONFIDENCE_INTERVALS = os.environ['CONFIDENCE_INTERVALS'].replace(' ','')
     bs_nrep = toggle.plot_settings['bs_nrep']
+    bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
 
     # Whether or not to display average values beside legend labels
