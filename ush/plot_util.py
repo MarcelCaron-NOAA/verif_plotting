@@ -774,6 +774,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
          ffbar_est_samples = []
          oobar_est_samples = []
          # attempt to bootstrap in batches to save time
+         # if sampling array is too large for batches, traditional bootstrap
          if batch_size <= 1:
             for _ in range(nrepl):
                fo_matched_indices = np.random.choice(
@@ -792,7 +793,6 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
             fobar_est_samp = np.array(fobar_est_samples)
             ffbar_est_samp = np.array(ffbar_est_samples)
             oobar_est_samp = np.array(oobar_est_samples)
-         # if sampling array is too large for batches, traditional bootstrap
          else:
             rep_arr = np.arange(0,nrepl)
             for b in range(0, nrepl, batch_size):
@@ -851,27 +851,63 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
          fobar_est_mean = fobar.mean()
          ffbar_est_mean = ffbar.mean()
          oobar_est_mean = oobar.mean()
-         stat_indices = range(len(fbar))
-         fbar_est_samp, obar_est_samp = [[] for item in range(2)]
-         fobar_est_samp, ffbar_est_samp, oobar_est_samp = [
-            [] for item in range(3)
-         ]
-         for _ in range(nrepl):
-            stat_indices_bs = np.random.choice(
-               stat_indices,
-               size=len(stat_indices),
-               replace=True
-            )
-            fbar_est_samp.append(fbar[stat_indices_bs].mean())
-            obar_est_samp.append(obar[stat_indices_bs].mean())
-            fobar_est_samp.append(fobar[stat_indices_bs].mean())
-            ffbar_est_samp.append(ffbar[stat_indices_bs].mean())
-            oobar_est_samp.append(oobar[stat_indices_bs].mean())
-         fbar_est_samp = np.array(fbar_est_samp)
-         obar_est_samp = np.array(obar_est_samp)
-         fobar_est_samp = np.array(fobar_est_samp)
-         ffbar_est_samp = np.array(ffbar_est_samp)
-         oobar_est_samp = np.array(oobar_est_samp)
+         max_mem_per_array = 32 # MB
+         max_array_size = max_mem_per_array*1E6/8
+         batch_size = int(max_array_size/len(fbar))
+         fbar_samples = []
+         obar_samples = []
+         fobar_samples = []
+         ffbar_samples = []
+         oobar_samples = []
+         # attempt to bootstrap in batches to save time
+         # if sampling array is too large for batches, traditional bootstrap
+         if batch_size <= 1:
+            for _ in range(nrepl):
+               idx = np.random.choice(
+                  len(fbar), 
+                  size=fbar.size, 
+                  replace=True
+               )
+               fbar_bs, obar_bs, fobar_bs, ffbar_bs, oobar_bs = [
+                  summary_stat[idx].T 
+                  for summary_stat in [fbar, obar, fobar, ffbar, oobar]
+               ]
+               fbar_samples.append(fbar_bs.mean())
+               obar_samples.append(obar_bs.mean())
+               fobar_samples.append(fobar_bs.mean())
+               ffbar_samples.append(ffbar_bs.mean())
+               oobar_samples.append(oobar_bs.mean())
+            fbar_est_samp = np.array(fbar_samples)
+            obar_est_samp = np.array(obar_samples)
+            fobar_est_samp = np.array(fobar_samples)
+            ffbar_est_samp = np.array(ffbar_samples)
+            oobar_est_samp = np.array(oobar_samples)
+         else:
+            rep_arr = np.arange(0,nrepl)
+            for b in range(0, nrepl, batch_size):
+               curr_batch_size = len(rep_arr[b:b+batch_size])
+               idxs = [
+                  np.random.choice(
+                     len(fbar), 
+                     size=fbar.size, 
+                     replace=True
+                  ) 
+                  for _ in range(curr_batch_size)
+               ]
+               fbar_bs, obar_bs, fobar_bs, ffbar_bs, oobar_bs = [
+                  np.take(np.array(summary_stat), idxs) 
+                  for s, summary_stat in enumerate([fbar, obar, fobar, ffbar, oobar])
+               ]
+               fbar_samples.append(fbar_bs.mean(axis=1))
+               obar_samples.append(obar_bs.mean(axis=1))
+               fobar_samples.append(fobar_bs.mean(axis=1))
+               ffbar_samples.append(ffbar_bs.mean(axis=1))
+               oobar_samples.append(oobar_bs.mean(axis=1))
+            fbar_est_samp = np.concatenate((fbar_samples))
+            obar_est_samp = np.concatenate((obar_samples))
+            fobar_est_samp = np.concatenate((fobar_samples))
+            ffbar_est_samp = np.concatenate((ffbar_samples))
+            oobar_est_samp = np.concatenate((oobar_samples))
       else:
          logger.error(line_type+" is not currently a valid option")
          exit(1)
