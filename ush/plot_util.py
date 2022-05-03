@@ -625,7 +625,8 @@ def get_stat_plot_name(logger, stat):
       exit(1)
    return stat_plot_name
 
-def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
+def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level, 
+                           bs_min_samp):
    """! Calculate the upper and lower bound bootstrap statistic from the 
         data from the read in MET .stat file(s)
 
@@ -641,11 +642,17 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
                                distribution
            level             - float confidence level (0.-1.) of the 
                                confidence interval
+           bs_min_samp       - minimum number of samples allowed for 
+                               confidence intervals to be computed
 
         Returns:
            stat_values       - Dataframe of the statistic values lower and
                                upper bounds
+           status            - integer to provide the parent script with 
+                               information about the outcome of the bootstrap 
+                               resampling
    """
+   status=0
    model_data.reset_index(inplace=True)
    model_data_columns = model_data.columns.values.tolist()
    if model_data_columns == [ 'TOTAL' ]:
@@ -731,6 +738,14 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
          logger.error("Could not recognize line type from columns")
          exit(1)
    if str(bs_method).upper() == 'MATCHED_PAIRS':
+      if total.sum() < bs_min_samp:
+         logger.warning(f"Sample too small for bootstrapping. (Matched pairs"
+                        + f" sample size: {total.sum()}; minimum sample"
+                        + f" size: {bs_min_samp}")
+         status = 1
+         return pd.DataFrame(
+            dict(CI_LOWER=[np.nan], CI_UPPER=[np.nan], STATUS=[status])
+         )
       lower_pctile = 100.*((1.-level)/2.)
       upper_pctile = 100.-lower_pctile
       if line_type == 'CTC':
@@ -822,6 +837,14 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
          logger.error(line_type+" is not currently a valid option")
          exit(1)
    elif str(bs_method).upper() == 'FORECASTS':
+      if total.size < bs_min_samp:
+         logger.warning(f"Sample too small for bootstrapping. (Forecasts"
+                        + f" sample size: {total.size}; minimum sample"
+                        + f" size: {bs_min_samp}")
+         status = 1
+         return pd.DataFrame(
+            dict(CI_LOWER=[np.nan], CI_UPPER=[np.nan], STATUS=[status])
+         )
       lower_pctile = 100.*((1.-level)/2.)
       upper_pctile = 100.-lower_pctile
       if line_type == 'CTC':
@@ -1174,7 +1197,7 @@ def calculate_bootstrap_ci(logger, bs_method, model_data, stat, nrepl, level):
    stat_ci_lower = np.nanpercentile(stat_deltas, lower_pctile)
    stat_ci_upper = np.nanpercentile(stat_deltas, upper_pctile)
    return pd.DataFrame(
-      dict(CI_LOWER=[stat_ci_lower], CI_UPPER=[stat_ci_upper])
+      dict(CI_LOWER=[stat_ci_lower], CI_UPPER=[stat_ci_upper], STATUS=[status])
    )
 
 def calculate_stat(logger, model_data, stat):

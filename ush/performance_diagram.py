@@ -61,8 +61,9 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                       line_type: str = 'CTC', save_dir: str = '.', dpi: int = 300, 
                       confidence_intervals: bool = False, bs_nrep: int = 5000, 
                       bs_method: str = 'MATCHED_PAIRS', ci_lev: float = .95, 
-                      eval_period: str = 'TEST', display_averages: bool = True, 
-                      save_header: str = '', plot_group: str = 'sfc_upper'):
+                      bs_min_samp: int = 30, eval_period: str = 'TEST', 
+                      display_averages: bool = True, save_header: str = '', 
+                      plot_group: str = 'sfc_upper'):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -255,9 +256,19 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             ci_output = df_groups.apply(
                 lambda x: plot_util.calculate_bootstrap_ci(
                     logger, bs_method, x, str(metric_name).lower(), bs_nrep,
-                    ci_lev
+                    ci_lev, bs_min_samp
                 )
             )
+            if any(ci_output['STATUS'] == 1):
+                logger.warning(f"Failed attempt to compute bootstrap"
+                               + f" confidence intervals.  Sample size"
+                               + f" for one or more groups is too small."
+                               + f" Minimum sample size can be changed"
+                               + f" in settings.py.")
+                logger.warning(f"Confidence intervals will not be"
+                               + f" plotted.")
+                confidence_intervals = False
+                continue
             ci_output = ci_output.reset_index(level=2, drop=True)
             ci_output = (
                 ci_output
@@ -305,6 +316,13 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             pivot_metric3.index
         ])
     )
+    all_model_col = np.unique(
+        np.concatenate([
+            pivot_metric1.columns,
+            pivot_metric2.columns,
+            pivot_metric3.columns
+        ])
+    )
     if confidence_intervals:
         pivot_ci_lower1 = pd.pivot_table(
             df_aggregated, values=str(metric1_name).upper()+'_BLERR',
@@ -347,20 +365,68 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
     if confidence_intervals:
         for ci_thresh_idx in all_ci_thresh_idx:
             if np.any([
-                    thresh_idx not in pivot_metric.index for pivot_metric
+                    ci_thresh_idx not in pivot_metric.index for pivot_metric
                     in [pivot_metric1, pivot_metric2, pivot_metric3]]):
                 pivot_ci_lower1.drop(
-                    labels=thresh_idx, inplace=True, errors='ignore'
+                    labels=ci_thresh_idx, inplace=True, errors='ignore'
                 )
                 pivot_ci_upper1.drop(
-                    labels=thresh_idx, inplace=True, errors='ignore'
+                    labels=ci_thresh_idx, inplace=True, errors='ignore'
                 )
                 pivot_ci_lower2.drop(
-                    labels=thresh_idx, inplace=True, errors='ignore'
+                    labels=ci_thresh_idx, inplace=True, errors='ignore'
                 )
                 pivot_ci_upper2.drop(
-                    labels=thresh_idx, inplace=True, errors='ignore'
+                    labels=ci_thresh_idx, inplace=True, errors='ignore'
                 )
+    models_in_pivot_metric = []
+    for model_col in all_model_col:
+        if np.any([
+                model_col not in pivot_metric.columns for pivot_metric
+                in [pivot_metric1, pivot_metric2, pivot_metric3]]):
+            pivot_metric1.drop(
+                columns=model_col, inplace=True, errors='ignore'
+            )
+            pivot_metric2.drop(
+                columns=model_col, inplace=True, errors='ignore'
+            )
+            pivot_metric3.drop(
+                columns=model_col, inplace=True, errors='ignore'
+            )
+            if confidence_intervals:
+                pivot_ci_lower1.drop(
+                    columns=model_col, inplace=True, errors='ignore'
+                )
+                pivot_ci_upper1.drop(
+                    columns=model_col, inplace=True, errors='ignore'
+                )
+                pivot_ci_lower2.drop(
+                    columns=model_col, inplace=True, errors='ignore'
+                )
+                pivot_ci_upper2.drop(
+                    columns=model_col, inplace=True, errors='ignore'
+                )
+        else:
+            models_in_pivot_metric.append(model_col)
+    cols_to_keep = [
+        str(model)
+        in models_in_pivot_metric 
+        for model in model_list
+    ]
+    models_removed = [
+        str(m)
+        for (m, keep) in zip(model_list, cols_to_keep) if not keep
+    ]
+    models_removed_string = ', '.join(models_removed)
+    model_list = [
+        str(m)
+        for (m, keep) in zip(model_list, cols_to_keep) if keep
+    ]
+    if not all(cols_to_keep):
+        logger.warning(
+            f"{models_removed_string} data were all NaNs and will not be"
+            + f" plotted."
+        )
     if pivot_metric1.empty or pivot_metric2.empty:
         print_varname = df['FCST_VAR'].tolist()[0]
         logger.warning(
@@ -511,6 +577,9 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         f'{opt}{thresh_label} {units}'
         for thresh_label in thresh_labels
     ]
+    print(pivot_metric1)
+    print(pivot_metric2)
+    print(pivot_metric3)
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -934,7 +1003,8 @@ def main():
                     display_averages=display_averages, save_header=URL_HEADER,
                     plot_group=plot_group, 
                     confidence_intervals=CONFIDENCE_INTERVALS, 
-                    bs_nrep=bs_nrep, bs_method=bs_method, ci_lev = ci_lev
+                    bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev, 
+                    bs_min_samp=bs_min_samp
                 )
                 num+=1
 
@@ -1004,6 +1074,7 @@ if __name__ == "__main__":
     bs_nrep = toggle.plot_settings['bs_nrep']
     bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
+    bs_min_samp = toggle.plot_settings['bs_min_samp']
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']

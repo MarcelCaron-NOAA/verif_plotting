@@ -64,8 +64,9 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
                      line_type: str = 'SL1L2', dpi: int = 300, 
                      confidence_intervals: bool = False,
                      bs_nrep: int = 5000, bs_method: str = 'MATCHED_PAIRS',
-                     ci_lev: float = .95, eval_period: str = 'TEST', 
-                     save_header='', display_averages: bool = True, 
+                     ci_lev: float = .95, bs_min_samp: int = 30,
+                     eval_period: str = 'TEST', save_header='', 
+                     display_averages: bool = True, 
                      event_equalization: bool = False,
                      plot_group: str = 'sfc_upper'):
 
@@ -261,9 +262,19 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
                 ci_output = df_groups.apply(
                     lambda x: plot_util.calculate_bootstrap_ci(
                         logger, bs_method, x, str(stat).lower(), bs_nrep,
-                        ci_lev
+                        ci_lev, bs_min_samp
                     )
                 )
+                if any(ci_output['STATUS'] == 1):
+                    logger.warning(f"Failed attempt to compute bootstrap"
+                                   + f" confidence intervals.  Sample size"
+                                   + f" for one or more groups is too small."
+                                   + f" Minimum sample size can be changed"
+                                   + f" in settings.py.")
+                    logger.warning(f"Confidence intervals will not be"
+                                   + f" plotted.")
+                    confidence_intervals = False
+                    continue
                 ci_output = ci_output.reset_index(level=2, drop=True)
                 ci_output = (
                     ci_output
@@ -956,6 +967,7 @@ def main():
                     save_header=URL_HEADER, plot_group=plot_group,
                     confidence_intervals=CONFIDENCE_INTERVALS,
                     bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev
+                    bs_min_samp=bs_min_samp
                 )
                 num+=1
 
@@ -1025,6 +1037,7 @@ if __name__ == "__main__":
     bs_nrep = toggle.plot_settings['bs_nrep']
     bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
+    bs_min_samp = toggle.plot_settings['bs_min_samp']
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']

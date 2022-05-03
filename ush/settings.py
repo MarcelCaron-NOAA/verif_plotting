@@ -9,9 +9,10 @@ class Toggle():
             'y_min_limit': -9999.,
             'y_max_limit': 9999.,
             'y_lim_lock': False,
-            'ci_lev':.95,
-            'bs_nrep':5000,
-            'bs_method':'FORECASTS',
+            'ci_lev': .95,
+            'bs_nrep': 5000,
+            'bs_method': 'FORECASTS',
+            'bs_min_samp': 30,
             'display_averages': False,
             'event_equalization': False,
         }
