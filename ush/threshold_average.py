@@ -792,7 +792,7 @@ def main():
                         display_averages=display_averages, 
                         save_header=URL_HEADER, plot_group=plot_group,
                         confidence_intervals=CONFIDENCE_INTERVALS, 
-                        bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev
+                        bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev,
                         bs_min_samp=bs_min_samp
                     )
                     num+=1
