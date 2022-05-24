@@ -198,20 +198,38 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
-    # Effective "event equalization", i.e. removing datapoints that aren't 
-    # shared among all models. Otherwise plot_util.calculate_stat will throw 
-    # an error
-    df_split = [df_aggregated.xs(str(model)) for model in model_list]
-    df_reduced = reduce(
-        lambda x,y: pd.merge(
-            x, y, on='LEAD_HOURS', how='inner'
+    df_aggregated = df_aggregated.reindex(
+        pd.MultiIndex.from_product(
+            [
+                np.unique(df_aggregated.index.get_level_values('MODEL')), 
+                np.unique(df_aggregated.index.get_level_values('LEAD_HOURS'))
+            ], 
+            names=['MODEL','LEAD_HOURS']
         ), 
-        df_split
+        fill_value=np.nan
     )
-    df_aggregated = df_aggregated[
-        df_aggregated.index.get_level_values('LEAD_HOURS')
-        .isin(df_reduced.index)
+    df_agg_no_nan_rows = ~df_aggregated.isna().any(axis=1)
+    max_leads = [
+        df_aggregated[df_agg_no_nan_rows].iloc[
+            df_aggregated[df_agg_no_nan_rows]
+            .index.get_level_values('MODEL') == model
+        ].index.get_level_values('LEAD_HOURS').max() for model in model_list
     ]
+    remove_rows_by_lead = []
+    for m, model in enumerate(model_list):
+        df_model_group = df_aggregated.iloc[
+            df_aggregated.index.get_level_values('MODEL') == model
+        ]
+        rows_with_nans = df_model_group.index.get_level_values('LEAD_HOURS')[
+            df_model_group.isna().any(axis=1)
+        ]
+        remove_rows_by_lead_m = [
+            int(lead) for lead in rows_with_nans if lead < max_leads[m]
+        ]
+        remove_rows_by_lead = np.concatenate(
+            (remove_rows_by_lead, remove_rows_by_lead_m)
+        )
+    df_aggregated = df_aggregated.drop(index=np.unique(remove_rows_by_lead), level=1)
     if df_aggregated.empty:
         logger.warning(f"Empty Dataframe. Continuing onto next plot...")
         plt.close(num)
@@ -271,13 +289,13 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index='LEAD_HOURS'
     )
-    pivot_metric1 = pivot_metric1.dropna() 
+    #pivot_metric1 = pivot_metric1.dropna() 
     if metric2_name is not None:
         pivot_metric2 = pd.pivot_table(
             df_aggregated, values=str(metric2_name).upper(), columns='MODEL', 
             index='LEAD_HOURS'
         )
-        pivot_metric2 = pivot_metric2.dropna() 
+        #pivot_metric2 = pivot_metric2.dropna() 
     if confidence_intervals:
         pivot_ci_lower1 = pd.pivot_table(
             df_aggregated, values=str(metric1_name).upper()+'_BLERR',
