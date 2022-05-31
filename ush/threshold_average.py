@@ -251,19 +251,19 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
             logger.warning(f"Confidence intervals will not be"
                            + f" plotted.")
             confidence_intervals = False
-            continue
-        ci_output = ci_output.reset_index(level=2, drop=True)
-        ci_output = (
-            ci_output
-            .reindex(df_aggregated.index)
-            .reindex(ci_output.index)
-        )
-        df_aggregated[str(metric_name).upper()+'_BLERR'] = ci_output[
-            'CI_LOWER'
-        ].values
-        df_aggregated[str(metric_name).upper()+'_BUERR'] = ci_output[
-            'CI_UPPER'
-        ].values
+        else:
+            ci_output = ci_output.reset_index(level=2, drop=True)
+            ci_output = (
+                ci_output
+                .reindex(df_aggregated.index)
+                .reindex(ci_output.index)
+            )
+            df_aggregated[str(metric_name).upper()+'_BLERR'] = ci_output[
+                'CI_LOWER'
+            ].values
+            df_aggregated[str(metric_name).upper()+'_BUERR'] = ci_output[
+                'CI_UPPER'
+            ].values
 
     df_aggregated[str(metric_name).upper()] = (
         df_aggregated[str(metric_name).upper()]
