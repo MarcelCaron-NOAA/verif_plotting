@@ -603,7 +603,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         x_val for x_val in daterange(x_vals1[0], x_vals1[-1], td(hours=incr))
     ] 
     xtick_labels = [xtick.strftime('%HZ %m/%d') for xtick in xticks]
-    number_of_ticks_dig = [10,20,30,40,50,60]
+    number_of_ticks_dig = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150]
     show_xtick_every = np.ceil((
         np.digitize(len(xtick_labels), number_of_ticks_dig) + 2
     )/2.)*2
