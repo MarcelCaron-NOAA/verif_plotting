@@ -32,6 +32,7 @@ from plotter import Plotter
 from prune_stat_files import prune_data
 import plot_util
 import df_preprocessing
+from check_variables import *
 
 # ================ GLOBALS AND CONSTANTS ================
 
@@ -975,52 +976,54 @@ def main():
 # ============ START USER CONFIGURATIONS ================
 
 if __name__ == "__main__":
-    LOG_METPLUS = os.environ['LOG_METPLUS']
-    LOG_LEVEL = os.environ['LOG_LEVEL']
-    MET_VERSION = os.environ['MET_VERSION']
-    URL_HEADER = os.environ['URL_HEADER']
-    VERIF_CASE = os.environ['VERIF_CASE']
-    VERIF_TYPE = os.environ['VERIF_TYPE']
-    OUTPUT_BASE_DIR = os.environ['OUTPUT_BASE_DIR']
+    print("\n=================== CHECKING CONFIG VARIABLES =====================\n")
+    LOG_METPLUS = check_LOG_METPLUS(os.environ['LOG_METPLUS'])
+    LOG_LEVEL = check_LOG_LEVEL(os.environ['LOG_LEVEL'])
+    MET_VERSION = check_MET_VERSION(os.environ['MET_VERSION'])
+    URL_HEADER = check_URL_HEADER(os.environ['URL_HEADER'])
+    VERIF_CASE = check_VERIF_CASE(os.environ['VERIF_CASE'])
+    VERIF_TYPE = check_VERIF_TYPE(os.environ['VERIF_TYPE'])
+    OUTPUT_BASE_DIR = check_OUTPUT_BASE_DIR(os.environ['OUTPUT_BASE_DIR'])
     STATS_DIR = OUTPUT_BASE_DIR
-    PRUNE_DIR = os.environ['PRUNE_DIR']
-    SAVE_DIR = os.environ['SAVE_DIR']
-    DATE_TYPE = os.environ['DATE_TYPE']
-    LINE_TYPE = os.environ['LINE_TYPE']
-    INTERP = os.environ['INTERP']
-    MODELS = os.environ['MODEL'].replace(' ','').split(',')
-    DOMAINS = os.environ['VX_MASK_LIST'].replace(' ','').split(',')
+    PRUNE_DIR = check_PRUNE_DIR(os.environ['PRUNE_DIR'])
+    SAVE_DIR = check_SAVE_DIR(os.environ['SAVE_DIR'])
+    DATE_TYPE = check_DATE_TYPE(os.environ['DATE_TYPE'])
+    LINE_TYPE = check_LINE_TYPE(os.environ['LINE_TYPE'])
+    INTERP = check_INTERP(os.environ['INTERP'])
+    MODELS = check_MODEL(os.environ['MODEL']).replace(' ','').split(',')
+    DOMAINS = check_VX_MASK_LIST(os.environ['VX_MASK_LIST']).replace(' ','').split(',')
 
     # valid hour (each plot will use all available valid_hours listed below)
-    VALID_HOURS = os.environ['FCST_VALID_HOUR'].replace(' ','').split(',')
-    INIT_HOURS = os.environ['FCST_INIT_HOUR'].replace(' ','').split(',')
+    VALID_HOURS = check_FCST_VALID_HOUR(os.environ['FCST_VALID_HOUR'], DATE_TYPE).replace(' ','').split(',')
+    INIT_HOURS = check_FCST_INIT_HOUR(os.environ['FCST_INIT_HOUR'], DATE_TYPE).replace(' ','').split(',')
 
     # time period to cover (inclusive)
-    VALID_BEG = os.environ['VALID_BEG']
-    VALID_END = os.environ['VALID_END']
-    INIT_BEG = os.environ['INIT_BEG']
-    INIT_END = os.environ['INIT_END']
-    EVAL_PERIOD = os.environ['EVAL_PERIOD']
+    EVAL_PERIOD = check_EVAL_PERIOD(os.environ['EVAL_PERIOD'])
+    VALID_BEG = check_VALID_BEG(os.environ['VALID_BEG'], DATE_TYPE, EVAL_PERIOD, plot_type='time_series')
+    VALID_END = check_VALID_END(os.environ['VALID_END'], DATE_TYPE, EVAL_PERIOD, plot_type='time_series')
+    INIT_BEG = check_INIT_BEG(os.environ['INIT_BEG'], DATE_TYPE, EVAL_PERIOD, plot_type='time_series')
+    INIT_END = check_INIT_END(os.environ['INIT_END'], DATE_TYPE, EVAL_PERIOD, plot_type='time_series')
 
     # list of variables
     # Options: {'TMP','HGT','CAPE','RH','DPT','UGRD','VGRD','UGRD_VGRD','TCDC',
     #           'VIS'}
-    VARIABLES = os.environ['var_name'].replace(' ','').split(',')
+    VARIABLES = check_var_name(os.environ['var_name']).replace(' ','').split(',')
 
     # list of lead hours
     # Options: {list of lead hours; string, 'all'; tuple, start/stop flead; 
     #           string, single flead}
-    FLEADS = os.environ['FCST_LEAD'].replace(' ','').split(',')
+    FLEADS = check_FCST_LEAD(os.environ['FCST_LEAD']).replace(' ','').split(',')
 
     # list of levels
-    FCST_LEVELS = os.environ['FCST_LEVEL'].replace(' ','').split(',')
-    OBS_LEVELS = os.environ['OBS_LEVEL'].replace(' ','').split(',')
+    FCST_LEVELS = check_FCST_LEVEL(os.environ['FCST_LEVEL']).replace(' ','').split(',')
+    OBS_LEVELS = check_OBS_LEVEL(os.environ['OBS_LEVEL']).replace(' ','').split(',')
 
-    FCST_THRESH = os.environ['FCST_THRESH'].replace(' ','').split(',')
-    OBS_THRESH = os.environ['OBS_THRESH'].replace(' ','').split(',')
+    FCST_THRESH = check_FCST_THRESH(os.environ['FCST_THRESH'], LINE_TYPE)
+    OBS_THRESH = check_OBS_THRESH(os.environ['OBS_THRESH'], FCST_THRESH, LINE_TYPE).replace(' ','').split(',')
+    FCST_THRESH = FCST_THRESH.replace(' ','').split(',')
     
     # requires two metrics to plot
-    METRICS = list(filter(None, os.environ['STATS'].replace(' ','').split(',')))
+    METRICS = list(filter(None, check_STATS(os.environ['STATS']).replace(' ','').split(',')))
 
     # set the lowest possible lower (and highest possible upper) axis limits. 
     # E.g.: If Y_LIM_LOCK == True, use Y_MIN_LIMIT as the definitive lower 
@@ -1032,8 +1035,8 @@ if __name__ == "__main__":
     Y_LIM_LOCK = toggle.plot_settings['y_lim_lock']
 
 
-    # Still need to configure CIs (doesn't work yet)
-    CONFIDENCE_INTERVALS = os.environ['CONFIDENCE_INTERVALS'].replace(' ','')
+    # configure CIs
+    CONFIDENCE_INTERVALS = check_CONFIDENCE_INTERVALS(os.environ['CONFIDENCE_INTERVALS']).replace(' ','')
     bs_nrep = toggle.plot_settings['bs_nrep']
     bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
@@ -1045,6 +1048,7 @@ if __name__ == "__main__":
     # Whether or not to display events shared among all models
     event_equalization = toggle.plot_settings['event_equalization']
 
+    print("\n===================================================================\n")
     # ============= END USER CONFIGURATIONS =================
 
     LOG_METPLUS = str(LOG_METPLUS)
