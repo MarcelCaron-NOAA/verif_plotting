@@ -39,12 +39,12 @@ be able to point to a correctly structured metplus statistics archive (see the
 comment for Directory Settings in py_plotting.config for details).
 
 ### Limitations
-In some cases, settings will be limited to what is listed in the
-metplus .stat files or the statistics archive (e.g., `FCST_LEAD` or `MODEL`).  In
+In some cases, possible settings will be limited to what is listed in the
+metplus .stat files or the statistics archive (e.g., settings for `FCST_LEAD` or `MODEL`).  In
 others, they will be limited to what has been predefined elsewhere in verif_plotting 
-(e.g., `EVAL_PERIOD`).  Finally, some settings must match certain
+(e.g., settings for `EVAL_PERIOD`).  Finally, some settings must match certain
 allowable settings, which are defined in ${USH_DIR}/settings.py in the `case_type`
-attribute of the `Reference()` class.  Two asterisks mark these latter settings in
+attribute of the `Reference()` class.  Two asterisks (\*\*) mark these latter settings in
 the comments in py_plotting.config.
 
 ### Configuring Plot Type
@@ -66,7 +66,7 @@ After configuring py_plotting.config, it can be run on the command line:
 
 ... which will set the environment variables and run the python code. The python
 code then follows these steps:
-1. Save environment variables as global python variables. Make sure the
+1. Store environment variables as global python variables. Make sure the
 datatypes are correct
 2. Check the user settings and throw errors if an issue is encountered
 3. Send the settings to df_preprocessing.py, which pulls and prunes the .stat
@@ -75,7 +75,7 @@ PRUNE_DIR--then loads the data as pandas dataframes, which are filtered
 several times according to user settings.
 4. Send the dataframe and user settings to a plotting function, which creates a
 figure object, filters the data, plots the data, adjusts plot features, then
-saves the plot as a png.
+saves the plot in SAVE_DIR as a png.
 
 ## DEBUGGING:        
 Part of the configuration in py_plotting.config involves setting a logfile path.
