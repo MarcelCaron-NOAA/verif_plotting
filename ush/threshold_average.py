@@ -453,7 +453,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         x_val for x_val in np.arange(xlim_min, xlim_max+incr, incr)
     ] 
     xtick_labels = [opt+str(xtick) for xtick in xticks]
-    number_of_ticks_dig = [30,60,90,120,150,180,210,240]
+    number_of_ticks_dig = [25,50,75,100,125,150,175,200]
     show_xtick_every = np.ceil((
         np.digitize(len(xtick_labels), number_of_ticks_dig) + 2
     )/2.)*2
