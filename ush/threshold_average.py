@@ -453,10 +453,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         x_val for x_val in np.arange(xlim_min, xlim_max+incr, incr)
     ] 
     xtick_labels = [opt+str(xtick) for xtick in xticks]
-    if len(xticks) < 15:
-        show_xtick_every = 1
-    else:
-        show_xtick_every = 2
+    number_of_ticks_dig = [30,60,90,120,150,180,210,240]
+    show_xtick_every = np.ceil((
+        np.digitize(len(xtick_labels), number_of_ticks_dig) + 2
+    )/2.)*2
     xtick_labels_with_blanks = ['' for item in xtick_labels]
     for i, item in enumerate(xtick_labels[::int(show_xtick_every)]):
          xtick_labels_with_blanks[int(show_xtick_every)*i] = item
@@ -508,7 +508,9 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         left=False, labelleft=False, labelright=False, labelbottom=False, 
         labeltop=False, which='minor', axis='y', pad=15
     )
-
+    majticks = [i for i, item in enumerate(xtick_labels_with_blanks) if item]
+    for mt in majticks:
+        ax.xaxis.get_major_ticks()[mt].tick1line.set_markersize(8)
     ax.legend(
         loc='upper center', fontsize=15, framealpha=1, 
         bbox_to_anchor=(0.5, -0.08), ncol=4, frameon=True, numpoints=2, 
