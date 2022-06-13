@@ -440,7 +440,7 @@ def check_FCST_VALID_HOUR(FCST_VALID_HOUR, DATE_TYPE, plot_type=None):
                          + f" '{str(plot_type).lower()}', FCST_VALID_HOUR cannot be"
                          + f" empty. Check the plotting configuration file.")
             #sys.exit(1)
-        if not re.search(r'^[ 0-9,]+)$', FCST_VALID_HOUR):
+        if not re.search(r'(^[ 0-9,]+)$', FCST_VALID_HOUR):
             sys.exit(f"The provided FCST_VALID_HOUR ('{FCST_VALID_HOUR}') is"
                          + f" not valid. FCST_VALID_HOUR may contain numbers,"
                          + f" commas, and spaces only. Check the plotting"
@@ -609,7 +609,7 @@ def check_FCST_THRESH(FCST_THRESH, LINE_TYPE):
                          + f" cannot be empty. Check the plotting"
                          + f" configuration file.")
             #sys.exit(1)
-        if re.search(r'[^A-Za-z0-9<>=,! /-]', FCST_THRESH):
+        if re.search(r'[^A-Za-z0-9<>=.,! /-]', FCST_THRESH):
             sys.exit(f"The provided FCST_THRESH string ('{FCST_THRESH}') contains"
                          + f" invalid characters. FCST_THRESH must be made of"
                          + f" alphanumeric characters, comparison operators,"
@@ -649,7 +649,7 @@ def check_OBS_THRESH(OBS_THRESH, FCST_THRESH, LINE_TYPE):
                          + f" cannot be empty. Check the plotting"
                          + f" configuration file.")
             #sys.exit(1)
-        if re.search(r'[^A-Za-z0-9<>=,! /-]', OBS_THRESH):
+        if re.search(r'[^A-Za-z0-9<>=.,! /-]', OBS_THRESH):
             sys.exit(f"The provided OBS_THRESH string ('{OBS_THRESH}') contains"
                          + f" invalid characters. OBS_THRESH must be made of"
                          + f" alphanumeric characters, comparison operators,"
