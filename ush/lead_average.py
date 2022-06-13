@@ -695,6 +695,14 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         else:
             level_string = f'{level} '
             level_savename = f'{level}_'
+    elif str(verif_type).lower() in ['ccpa']:
+        if 'A' in str(level):
+            level_num = level.replace('A', '')
+            level_string = f'{level_num}-hour '
+            level_savename = f'{level_num}H_'
+        else:
+            level_string = f''
+            level_savename = f''
     else:
         level_string = f'{level}'
         level_savename = f'{level}_'
