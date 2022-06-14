@@ -648,6 +648,9 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         left=False, labelleft=False, labelright=False, labelbottom=False, 
         labeltop=False, which='minor', axis='y', pad=15
     )
+    majticks = [i for i, item in enumerate(xtick_labels_with_blanks) if item]
+    for mt in majticks:
+        ax.xaxis.get_major_ticks()[mt].tick1line.set_markersize(8)
 
     ax.legend(
         handles, labels, loc='upper center', fontsize=15, framealpha=1, 
