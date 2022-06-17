@@ -50,8 +50,8 @@ def get_valid_range(logger, date_type, date_range, date_hours, fleads):
         raise ValueError(e)
     return valid_range
 
-def run_prune_data(logger, stats_dir, prune_dir, verif_case, verif_type, 
-                   line_type, valid_range, eval_period, var_name, 
+def run_prune_data(logger, stats_dir, prune_dir, lookfor_template, verif_case, 
+                   verif_type, line_type, valid_range, eval_period, var_name, 
                    fcst_var_name, model_list, domain):
     model_list = [str(model) for model in model_list]
     tmp_dir = 'tmp'+str(uuid.uuid4().hex)
@@ -67,7 +67,7 @@ def run_prune_data(logger, stats_dir, prune_dir, verif_case, verif_type,
     if os.path.isdir(stats_dir):
         if len(os.listdir(stats_dir)):
             prune_data(
-                stats_dir, prune_dir, tmp_dir, valid_range, 
+                stats_dir, prune_dir, tmp_dir, lookfor_template, valid_range, 
                 str(eval_period).upper(), str(verif_case).lower(), 
                 str(verif_type).lower(), str(line_type).upper(), 
                 str(domain).upper(), str(fcst_var_name).upper(), 
@@ -268,17 +268,18 @@ def filter_by_hour(df, logger, date_type, date_hours):
     else:
         return df
 
-def get_preprocessed_data(logger, stats_dir, prune_dir, verif_case, verif_type, 
-                          line_type, date_type, date_range, eval_period, 
-                          date_hours, fleads, var_name, fcst_var_name, 
-                          obs_var_name, model_list, domain, interp, 
-                          met_version):
+def get_preprocessed_data(logger, stats_dir, prune_dir, lookfor_template, 
+                          verif_case, verif_type, line_type, date_type, 
+                          date_range, eval_period, date_hours, fleads, 
+                          var_name, fcst_var_name, obs_var_name, model_list, 
+                          domain, interp, met_version):
     valid_range = get_valid_range(
         logger, date_type, date_range, date_hours, fleads
     )
     pruned_data_dir = run_prune_data(
-        logger, stats_dir, prune_dir, verif_case, verif_type, line_type, 
-        valid_range, eval_period, var_name, fcst_var_name, model_list, domain
+        logger, stats_dir, prune_dir, lookfor_template, verif_case, verif_type, 
+        line_type, valid_range, eval_period, var_name, fcst_var_name, model_list, 
+        domain
     )
     df = create_df(
         logger, stats_dir, pruned_data_dir, line_type, date_range, model_list,

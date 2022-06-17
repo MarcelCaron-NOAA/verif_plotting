@@ -16,6 +16,39 @@ class Toggle():
             'display_averages': False,
             'event_equalization': False,
         }
+
+class Templates():
+    def __init__(self):
+        '''
+        Custom template used to find .stat files in OUTPUT_BASE_DIR.
+        lookfor_template must be a string. Use curly braces {} to enclose variable
+        names that will be substituted with the appropriate value according to
+        the current plotting request.   
+
+        Current possible variable names:    Example substituted values:
+        ================================    ===========================
+        RUN_CASE                            grid2obs
+        RUN_TYPE                            conus_sfc
+        LINE_TYPE                           sl1l2
+        VX_MASK                             conus
+        FCST_VAR_NAME                       VIS
+        VAR_NAME                            VISsfc
+        MODEL                               HRRR
+        EVAL_PERIOD                         PAST30DAYS
+        valid?fmt=%Y%m or VALID?fmt=%Y%m    202206
+
+        Additionally, variable names may have the _LOWER or _UPPER suffix to 
+        substitute a lower- or upper-case conversion of the desired string.
+
+        Finally, use asterisk * as a wildcard to match with and use data from
+        several .stat files, or for portions of the .stat file name that vary but 
+        are inconsequential.
+
+        Example: 
+        "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        '''
+        self.lookfor_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+
 class Presets():
     def __init__(self):
         self.date_presets = {
@@ -1743,52 +1776,42 @@ class Reference():
                     'var_dict': {
                         'APCP_01': {'fcst_var_name': 'APCP',
                                     'fcst_var_levels': ['A01','A1'],
-                                    'fcst_var_thresholds': ('>=0.254, >=2.54,'
+                                    'fcst_var_thresholds': ('>=0.254, >=1.27,'
+                                                            + ' >=2.54,'
                                                             + ' >=6.35,'
                                                             + ' >=12.7,'
                                                             + ' >=19.05,'
-                                                            + ' >=25.4,'
-                                                            + ' >=38.7,'
-                                                            + ' >=50.8,'
-                                                            + ' >=76.2,'
-                                                            + ' >=101.6'),
+                                                            + ' >=25.4,'),
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A01','A1'],
-                                    'obs_var_thresholds': ('>=0.254, >=2.54,'
+                                    'obs_var_thresholds': ('>=0.254, >=1.27,'
+                                                           + ' >=2.54,'
                                                            + ' >=6.35,'
                                                            + ' >=12.7,'
                                                            + ' >=19.05,'
-                                                           + ' >=25.4,'
-                                                           + ' >=38.7,'
-                                                           + ' >=50.8,'
-                                                           + ' >=76.2,'
-                                                           + ' >=101.6'),
+                                                           + ' >=25.4,'),
                                     'obs_var_options': '',
                                     'plot_group':'precip'},
                         'APCP_03': {'fcst_var_name': 'APCP',
                                     'fcst_var_levels': ['A03','A3'],
-                                    'fcst_var_thresholds': ('>=0.254, >=2.54,'
+                                    'fcst_var_thresholds': ('>=0.254, >=1.27,'
+                                                            + ' >=2.54,'
                                                             + ' >=6.35,'
                                                             + ' >=12.7,'
                                                             + ' >=19.05,'
                                                             + ' >=25.4,'
-                                                            + ' >=38.7,'
-                                                            + ' >=50.8,'
-                                                            + ' >=76.2,'
-                                                            + ' >=101.6'),
+                                                            + ' >=50.8,'),
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A03','A3'],
-                                    'obs_var_thresholds': ('>=0.254, >=2.54,'
+                                    'obs_var_thresholds': ('>=0.254, >=1.27,'
+                                                           + ' >=2.54,'
                                                            + ' >=6.35,'
                                                            + ' >=12.7,'
                                                            + ' >=19.05,'
                                                            + ' >=25.4,'
-                                                           + ' >=38.7,'
-                                                           + ' >=50.8,'
-                                                           + ' >=76.2,'
-                                                           + ' >=101.6'),
+                                                           + ' >=50.8,'),
                                     'obs_var_options': '',
                                     'plot_group':'precip'},
                         'APCP_06': {'fcst_var_name': 'APCP',
@@ -1798,7 +1821,7 @@ class Reference():
                                                             + ' >=12.7,'
                                                             + ' >=19.05,'
                                                             + ' >=25.4,'
-                                                            + ' >=38.7,'
+                                                            + ' >=38.1,'
                                                             + ' >=50.8,'
                                                             + ' >=76.2,'
                                                             + ' >=101.6'),
@@ -1810,7 +1833,7 @@ class Reference():
                                                            + ' >=12.7,'
                                                            + ' >=19.05,'
                                                            + ' >=25.4,'
-                                                           + ' >=38.7,'
+                                                           + ' >=38.1,'
                                                            + ' >=50.8,'
                                                            + ' >=76.2,'
                                                            + ' >=101.6'),
@@ -1821,24 +1844,24 @@ class Reference():
                                     'fcst_var_thresholds': ('>=0.254, >=2.54,'
                                                             + ' >=6.35,'
                                                             + ' >=12.7,'
-                                                            + ' >=19.05,'
                                                             + ' >=25.4,'
-                                                            + ' >=38.7,'
+                                                            + ' >=38.1,'
                                                             + ' >=50.8,'
                                                             + ' >=76.2,'
-                                                            + ' >=101.6'),
+                                                            + ' >=101.6'
+                                                            + ' >=152.4'),
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A24'],
                                     'obs_var_thresholds': ('>=0.254, >=2.54,'
                                                            + ' >=6.35,'
                                                            + ' >=12.7,'
-                                                           + ' >=19.05,'
                                                            + ' >=25.4,'
-                                                           + ' >=38.7,'
+                                                           + ' >=38.1,'
                                                            + ' >=50.8,'
                                                            + ' >=76.2,'
-                                                           + ' >=101.6'),
+                                                           + ' >=101.6'
+                                                           + ' >=152.4'),
                                     'obs_var_options': '',
                                     'plot_group':'precip'}
                     }

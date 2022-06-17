@@ -27,7 +27,7 @@ from datetime import datetime, timedelta as td
 
 SETTINGS_DIR = os.environ['USH_DIR']
 sys.path.insert(0, os.path.abspath(SETTINGS_DIR))
-from settings import Toggle, Presets, ModelSpecs, Reference
+from settings import Toggle, Templates, Presets, ModelSpecs, Reference
 from plotter import Plotter
 from prune_stat_files import prune_data
 import plot_util
@@ -39,6 +39,7 @@ from check_variables import *
 plotter = Plotter(fig_size=(18., 14.))
 plotter.set_up_plots()
 toggle = Toggle()
+templates = Templates()
 presets = Presets()
 model_colors = ModelSpecs()
 reference = Reference()
@@ -840,10 +841,10 @@ def main():
                 logger.warning("Continuing ...")
                 continue
             df = df_preprocessing.get_preprocessed_data(
-                logger, STATS_DIR, PRUNE_DIR, VERIF_CASE, VERIF_TYPE, 
-                LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, date_hours, 
-                FLEADS, requested_var, fcst_var_name, obs_var_name, MODELS, 
-                domain, INTERP, MET_VERSION
+                logger, STATS_DIR, PRUNE_DIR, LOOKFOR_TEMPLATE, VERIF_CASE, 
+                VERIF_TYPE, LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, 
+                date_hours, FLEADS, requested_var, fcst_var_name, obs_var_name, 
+                MODELS, domain, INTERP, MET_VERSION
             )
             if df is None:
                 continue
@@ -937,6 +938,8 @@ if __name__ == "__main__":
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
+
+    LOOKFOR_TEMPLATE = templates.lookfor_template
 
     print("\n===================================================================\n")
     # ============= END USER CONFIGURATIONS =================

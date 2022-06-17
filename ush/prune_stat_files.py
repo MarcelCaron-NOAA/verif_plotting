@@ -12,8 +12,12 @@ import glob
 import subprocess
 import os
 import re
+import sys
 import numpy as np
 from datetime import datetime, timedelta as td
+SETTINGS_DIR = os.environ['USH_DIR']
+sys.path.insert(0, os.path.abspath(SETTINGS_DIR))
+import string_template_substitution
 
 def daterange(start, end, td):
    curr = start
@@ -21,23 +25,45 @@ def daterange(start, end, td):
       yield curr
       curr+=td
 
-def expand_met_stat_files(met_stat_files, data_dir, RUN_case, RUN_type, 
-                          line_type, vx_mask, fcst_var_name, var_name, model, 
-                          eval_period, valid):
-    valid_string = valid.strftime('%Y%m%d')
+def expand_met_stat_files(met_stat_files, data_dir, lookfor_template, RUN_case, 
+                          RUN_type, line_type, vx_mask, fcst_var_name, 
+                          var_name, model, eval_period, valid):
+    #valid_string = valid.strftime('%Y%m%d')
     met_stat_files_out = np.concatenate((
         met_stat_files, 
         glob.glob(os.path.join(
             # edit below to define stats archive path. Use '*' as wildcard.
-            data_dir, str(RUN_case).lower(), str(model), 
-            valid_string[:-2], model+'_'+valid_string+'*'
+            #data_dir, str(RUN_case).lower(), str(model), 
+            #valid_string[:-2], model+'_'+valid_string+'*'
+            data_dir, 
+            string_template_substitution.do_string_sub(
+                lookfor_template, 
+                RUN_CASE=str(RUN_case), RUN_CASE_UPPER=str(RUN_case).upper(),
+                RUN_CASE_LOWER=str(RUN_case).lower(), RUN_TYPE=str(RUN_type), 
+                RUN_TYPE_UPPER=str(RUN_type).lower(), 
+                RUN_TYPE_LOWER=str(RUN_type).lower(), LINE_TYPE=str(line_type),
+                LINE_TYPE_UPPER=str(line_type).upper(), 
+                LINE_TYPE_LOWER=str(line_type).lower(),
+                VX_MASK=str(vx_mask), VX_MASK_UPPER=str(vx_mask).upper(),
+                VX_MASK_LOWER=str(vx_mask).lower(), 
+                FCST_VAR_NAME=str(fcst_var_name), 
+                FCST_VAR_NAME_UPPER=str(fcst_var_name).upper(), 
+                FCST_VAR_NAME_LOWER=str(fcst_var_name).lower(),
+                VAR_NAME=str(var_name), VAR_NAME_UPPER=str(var_name).upper(),
+                VAR_NAME_LOWER=str(var_name).lower(), MODEL=str(model), 
+                MODEL_UPPER=str(model).upper(), MODEL_LOWER=str(model).lower(),
+                EVAL_PERIOD=str(eval_period), 
+                EVAL_PERIOD_UPPER=str(eval_period).upper(),
+                EVAL_PERIOD_LOWER=str(eval_period).lower(),
+                VALID=valid, valid=valid
+            )
         ))
     ))
     return met_stat_files_out
 
-def prune_data(data_dir, prune_dir, tmp_dir, valid_range, eval_period, 
-               RUN_case, RUN_type, line_type, vx_mask, fcst_var_name, var_name, 
-               model_list):
+def prune_data(data_dir, prune_dir, tmp_dir, lookfor_template, valid_range, 
+               eval_period, RUN_case, RUN_type, line_type, vx_mask, 
+               fcst_var_name, var_name, model_list):
 
    print("BEGIN: "+os.path.basename(__file__))
    # Get list of models and loop through
@@ -46,8 +72,8 @@ def prune_data(data_dir, prune_dir, tmp_dir, valid_range, eval_period,
       met_stat_files = []
       for valid in daterange(valid_range[0], valid_range[1], td(days=1)):
          met_stat_files = expand_met_stat_files(
-            met_stat_files, data_dir, RUN_case, RUN_type, line_type, vx_mask, 
-            fcst_var_name, var_name, model, eval_period, valid
+            met_stat_files, data_dir, lookfor_template, RUN_case, RUN_type, 
+            line_type, vx_mask, fcst_var_name, var_name, model, eval_period, valid
          ) 
       pruned_data_dir = os.path.join(
          prune_dir, line_type+'_'+var_name+'_'+vx_mask+'_'+eval_period, tmp_dir
