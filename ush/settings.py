@@ -3,7 +3,7 @@ from datetime import datetime, timedelta as td
 class Toggle():
     def __init__(self):
         '''
-        Dictionary with values that an be adjusted by the user to change a
+        Dictionary with values that can be adjusted by the user to change a
         particulary plot setting.  
         '''
         self.plot_settings = {
