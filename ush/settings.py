@@ -2,19 +2,23 @@ from datetime import datetime, timedelta as td
 
 class Toggle():
     def __init__(self):
+        '''
+        Dictionary with values that an be adjusted by the user to change a
+        particulary plot setting.  
+        '''
         self.plot_settings = {
-            'x_min_limit': -9999.,
-            'x_max_limit': 9999.,
-            'x_lim_lock': False,
+            'x_min_limit': -9999., # x-axis values will not subceed this value
+            'x_max_limit': 9999., # x-axis values will not exceed this value
+            'x_lim_lock': False, # lock the x-axis lower an upper limits to x_min_limit and x_max_limit, respectively
             'y_min_limit': -9999.,
             'y_max_limit': 9999.,
             'y_lim_lock': False,
-            'ci_lev': .95,
-            'bs_nrep': 5000,
-            'bs_method': 'FORECASTS',
-            'bs_min_samp': 30,
-            'display_averages': False,
-            'event_equalization': False,
+            'ci_lev': .95, # confidence level, as a float > 0. and < 1.
+            'bs_nrep': 5000, # number of bootstrap repetitions when confidence intervals are computed
+            'bs_method': 'FORECASTS', # bootstrap method. 'FORECASTS' bootstraps the lines in the stat files, 'MATCHED_PAIRS' bootstraps the f-o matched pairs
+            'bs_min_samp': 30, # Minimum number of samples allowed for boostrapping to performed (otherwise, no confidence intervals)
+            'display_averages': False, # display mean statistic for each model, averaged across the dimension of the independent variable
+            'event_equalization': False, # Not currently functional.
         }
 
 class Templates():
@@ -51,6 +55,24 @@ class Templates():
 
 class Presets():
     def __init__(self):
+        '''
+        Evaluation periods that are requested regularly can be defined here 
+        and then requested as the 'EVAL_PERIOD' variable in the plotting 
+        configuration file.
+        
+        Additional presets can be added, but must look like this:
+        'NAME_OF_PRESET': {
+            'valid_beg': 'YYYYmmdd',
+            'valid_end': 'YYYYmmdd',
+            'init_beg': 'YYYYmmdd',
+            'init_end': 'YYYYmmdd',
+        },
+
+        Dates must be in YYYYmmdd format.  Date can be written directly as
+        a string, or may be defined using python's built-in datetime and/or 
+        timedelta (use td) libraries, which are already imported.  Check 
+        the online documentation to learn how to use these libraries.
+        '''
         self.date_presets = {
             'PAST30DAYS': {
                 'valid_beg': (datetime.now()-td(days=30)).strftime('%Y%m%d'),
@@ -110,6 +132,15 @@ class Presets():
             
 class ModelSpecs():
     def __init__(self):
+        '''
+        The model_alias dictionary defines the appropriate key to be used
+        when finding settings and the long name for certain requested models 
+        that may have several possible names in MET .stat files and file names.  
+        
+        e.g., AKARW and CONUSARW, although they are different, may use the same 
+        line/marker settings and the same long name on plots, and so both can 
+        be defined here as aliases of the same model settings, if desired.
+        '''
         self.model_alias = {
             'ARW': {
                 'settings_key':'HRW_ARW', 
@@ -420,6 +451,18 @@ class ModelSpecs():
                 'plot_name':'RRFS-A'
             }
         }
+
+        '''
+        model_settings defines the line/marker specifications according
+        to the model being plotted.  See the online documentation for python's
+        matplotlib library for the possible specifications.
+        
+        The first several definitions, however, are for generic model settings 
+        (model1, model2, etc..).  These generic settings are used if a model is 
+        requested in the configuration file but not already included in this 
+        list, in which case generic settings are chosen for that model that 
+        don't match the settings for any other model already included in the plot.
+        '''
         self.model_settings = {
             'model1': {'color': '#000000',
                        'marker': 'o', 'markersize': 12,
@@ -540,6 +583,14 @@ class ModelSpecs():
 
 class Reference():
     def __init__(self):
+        
+        '''
+        Given a var_name, which is used to find the desired forecast field 
+        in the MET .stat files, the plotting scripts will print the long name 
+        of the associated forecast field according to this dictionary.  Add 
+        keys and values, not forgetting to include a comma at the end of any 
+        new lines.
+        '''
         self.variable_translator = {'TMP': 'Temperature',
                                     'TMP_Z0_mean': 'Temperature',
                                     'HGT': 'Geopotential Height',
@@ -589,6 +640,13 @@ class Reference():
                                     'REFC': 'Composite Reflectivity',
                                     'REFD': 'Above Ground Level Reflectivity',
                                     'RETOP': 'Echo Top Height'}
+
+        '''
+        Given a domain requested in the plotting configuration file, the
+        plotting scripts will print the long name of that domain according
+        to this dictionary.  Add keys and values, not forgetting to include
+        a comma at the end of any new lines.
+        '''
         self.domain_translator = {'NHX': 'Northern Hemisphere 20N-80N',
                                   'SHX': 'Southern Hemisphere 20S-80S',
                                   'TRO': 'Tropics 20S-20N',
@@ -778,6 +836,31 @@ class Reference():
                                       'FOM_MIN','FROM_MAX','FOM_MEAN','ZHU_FO',
                                       'ZHU_OF','ZHU_MIN','ZHU_MAX','ZHU_MEAN'],
         }
+
+        '''
+        Define plotting jobs that are allowed in order to draw attention to 
+        configuration typos, to delineate the bounds of expected user
+        configurations, and to prevent unexpected behavior.  
+        
+        The case_type dictionary contains nested dictionaries, each named for
+        a specific configuration, and nested based on the type of configuration.  
+        The hierarchy is this: 
+        self.case_type[VERIF_CASE_VERIF_TYPE][LINE_TYPE]['var_dict'][var_name]
+        
+        The var_name dictionary contains possible settings for the fcst/obs
+        names, levels, thresholds, and options stored in the MET .stat files,
+        and the appropriate plotting group (e.g., 'sfc_upper', 'radar', 
+        'ceil_vis', 'cape', or 'precip') for that var_name.
+
+        The LINE_TYPE dictionary includes a few other variables in addition to 
+        the 'var_dict' dictionary. 'plot_stats_list' is a string containing a 
+        comma-separated list of possible metrics that may be computed using 
+        that LINE_TYPE. 'interp' is a string containing a comma-separated list
+        of possible interpolation methods that may be searched for if the 
+        line type is LINE_TYPE. 'vx_mask_list' is a python list of strings,
+        each string representing a possible domain name in the VX_MASKS column
+        in the MET .stat file.
+        '''
         self.case_type = {
             'grid2grid_anom': {
                 'SAL1L2': {

@@ -83,3 +83,10 @@ Running the script will print the logfile path for your specific task, which you
 can check for debugging.  The lowest log level that is currently functional is
 "INFO". "DEBUG" statements may be included in a later implementation.
 
+## ADDITIONAL SETTINGS:
+Most changes in the plotting configuration are made in py_plotting.config, but a few other aspects 
+of the plotting task may be changed in ${USH_DIR}/settings.py if needed.  These aspects include
+the template used to find .stat files in OUTPUT_BASE_DIR, axis max/min limits, confidence level for
+confidence intervals, bootstrap settings, verification time range presets, model display specs, 
+and allowable plotting requests.  Comments in ${USH_DIR}/settings.py describe how most of these 
+aspects can be changed.
