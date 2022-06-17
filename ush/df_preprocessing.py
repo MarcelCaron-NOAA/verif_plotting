@@ -66,6 +66,8 @@ def run_prune_data(logger, stats_dir, prune_dir, lookfor_template, verif_case,
     # Check for pruned data, and run prune_data() if stat files are available
     if os.path.isdir(stats_dir):
         if len(os.listdir(stats_dir)):
+            logger.info(f"Looking for stat files in {stats_dir} using the"
+                        + f" template: {lookfor_template}")
             prune_data(
                 stats_dir, prune_dir, tmp_dir, lookfor_template, valid_range, 
                 str(eval_period).upper(), str(verif_case).lower(), 
@@ -111,7 +113,8 @@ def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range,
             )
             logger.warning(
                 f"You might check whether the stats_dir ({stats_dir}) includes"
-                + f" {str(model)} data given domain, variable, etc..."
+                + f" {str(model)} data according to the lookfor template,"
+                + f" given domain, variable, etc..."
             )
             logger.warning("Continuing ...")
             continue
