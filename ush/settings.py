@@ -30,7 +30,7 @@ class Templates():
         
         lookfor_template must be a string. Use curly braces {} to enclose variable
         names that will be substituted with the appropriate value according to
-        the current plotting request.   
+        the plotting request.   
 
         Current possible variable names:    Example substituted values:
         ================================    ===========================
