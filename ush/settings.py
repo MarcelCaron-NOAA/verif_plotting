@@ -2,9 +2,10 @@ from datetime import datetime, timedelta as td
 
 class Toggle():
     def __init__(self):
+        
         '''
         Dictionary with values that can be adjusted by the user to change a
-        particulary plot setting.  
+        particular plot setting.  
         '''
         self.plot_settings = {
             'x_min_limit': -9999., # x-axis values will not subceed this value
@@ -16,15 +17,17 @@ class Toggle():
             'ci_lev': .95, # confidence level, as a float > 0. and < 1.
             'bs_nrep': 5000, # number of bootstrap repetitions when confidence intervals are computed
             'bs_method': 'FORECASTS', # bootstrap method. 'FORECASTS' bootstraps the lines in the stat files, 'MATCHED_PAIRS' bootstraps the f-o matched pairs
-            'bs_min_samp': 30, # Minimum number of samples allowed for boostrapping to performed (otherwise, no confidence intervals)
+            'bs_min_samp': 30, # Minimum number of samples allowed for boostrapping to performed (if there are fewer samples, no confidence intervals)
             'display_averages': False, # display mean statistic for each model, averaged across the dimension of the independent variable
             'event_equalization': False, # Not currently functional.
         }
 
 class Templates():
     def __init__(self):
+        
         '''
         Custom template used to find .stat files in OUTPUT_BASE_DIR.
+        
         lookfor_template must be a string. Use curly braces {} to enclose variable
         names that will be substituted with the appropriate value according to
         the current plotting request.   
@@ -55,6 +58,7 @@ class Templates():
 
 class Presets():
     def __init__(self):
+        
         '''
         Evaluation periods that are requested regularly can be defined here 
         and then requested as the 'EVAL_PERIOD' variable in the plotting 
@@ -68,7 +72,7 @@ class Presets():
             'init_end': 'YYYYmmdd',
         },
 
-        Dates must be in YYYYmmdd format.  Date can be written directly as
+        Dates must be in YYYYmmdd format.  A date can be written directly as
         a string, or may be defined using python's built-in datetime and/or 
         timedelta (use td) libraries, which are already imported.  Check 
         the online documentation to learn how to use these libraries.
@@ -132,6 +136,7 @@ class Presets():
             
 class ModelSpecs():
     def __init__(self):
+        
         '''
         The model_alias dictionary defines the appropriate key to be used
         when finding settings and the long name for certain requested models 
@@ -455,13 +460,13 @@ class ModelSpecs():
         '''
         model_settings defines the line/marker specifications according
         to the model being plotted.  See the online documentation for python's
-        matplotlib library for the possible specifications.
+        matplotlib library to learn the possible specifications.
         
-        The first several definitions, however, are for generic model settings 
-        (model1, model2, etc..).  These generic settings are used if a model is 
-        requested in the configuration file but not already included in this 
-        list, in which case generic settings are chosen for that model that 
-        don't match the settings for any other model already included in the plot.
+        Some keys, however, represent generic model settings (model1, model2, etc..).  
+        These generic settings are used if a model is requested in the configuration 
+        file but not already included in this list, in which case generic settings 
+        are chosen that don't match the settings for any other model already included 
+        in the plot.
         '''
         self.model_settings = {
             'model1': {'color': '#000000',
@@ -848,17 +853,17 @@ class Reference():
         self.case_type[VERIF_CASE_VERIF_TYPE][LINE_TYPE]['var_dict'][var_name]
         
         The var_name dictionary contains possible settings for the fcst/obs
-        names, levels, thresholds, and options stored in the MET .stat files,
-        and the appropriate plotting group (e.g., 'sfc_upper', 'radar', 
-        'ceil_vis', 'cape', or 'precip') for that var_name.
+        names, levels, thresholds, and options stored in the MET .stat files.
+        It also includes the appropriate plotting group for that var_name
+        (e.g., 'sfc_upper', 'radar', 'ceil_vis', 'cape', or 'precip').
 
-        The LINE_TYPE dictionary includes a few other variables in addition to 
-        the 'var_dict' dictionary. 'plot_stats_list' is a string containing a 
+        The LINE_TYPE dictionary includes the 'var_dict' dictionary and a few 
+        additional variables. 'plot_stats_list' is a string containing a 
         comma-separated list of possible metrics that may be computed using 
-        that LINE_TYPE. 'interp' is a string containing a comma-separated list
+        LINE_TYPE lines. 'interp' is a string containing a comma-separated list
         of possible interpolation methods that may be searched for if the 
         line type is LINE_TYPE. 'vx_mask_list' is a python list of strings,
-        each string representing a possible domain name in the VX_MASKS column
+        each string representing a possible domain name in the VX_MASK column
         in the MET .stat file.
         '''
         self.case_type = {
