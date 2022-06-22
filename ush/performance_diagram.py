@@ -738,7 +738,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         level_string = f'{level_num} hPa '
         level_savename = f'{level_num}MB_'
     elif (str(verif_type).lower() 
-            in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms','ccpa']):
+            in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms']):
         if 'Z' in str(level):
             if str(level).upper() == 'Z0':
                 level_string = 'Surface '
