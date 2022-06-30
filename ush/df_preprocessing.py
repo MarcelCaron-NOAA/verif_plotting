@@ -50,7 +50,7 @@ def get_valid_range(logger, date_type, date_range, date_hours, fleads):
         raise ValueError(e)
     return valid_range
 
-def run_prune_data(logger, stats_dir, prune_dir, lookfor_template, verif_case, 
+def run_prune_data(logger, stats_dir, prune_dir, output_base_template, verif_case, 
                    verif_type, line_type, valid_range, eval_period, var_name, 
                    fcst_var_name, model_list, domain):
     model_list = [str(model) for model in model_list]
@@ -67,9 +67,9 @@ def run_prune_data(logger, stats_dir, prune_dir, lookfor_template, verif_case,
     if os.path.isdir(stats_dir):
         if len(os.listdir(stats_dir)):
             logger.info(f"Looking for stat files in {stats_dir} using the"
-                        + f" template: {lookfor_template}")
+                        + f" template: {output_base_template}")
             prune_data(
-                stats_dir, prune_dir, tmp_dir, lookfor_template, valid_range, 
+                stats_dir, prune_dir, tmp_dir, output_base_template, valid_range, 
                 str(eval_period).upper(), str(verif_case).lower(), 
                 str(verif_type).lower(), str(line_type).upper(), 
                 str(domain).upper(), str(fcst_var_name).upper(), 
@@ -113,7 +113,7 @@ def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range,
             )
             logger.warning(
                 f"You might check whether the stats_dir ({stats_dir}) includes"
-                + f" {str(model)} data according to the lookfor template,"
+                + f" {str(model)} data according to the output_base template,"
                 + f" given domain, variable, etc..."
             )
             logger.warning("Continuing ...")
@@ -271,7 +271,7 @@ def filter_by_hour(df, logger, date_type, date_hours):
     else:
         return df
 
-def get_preprocessed_data(logger, stats_dir, prune_dir, lookfor_template, 
+def get_preprocessed_data(logger, stats_dir, prune_dir, output_base_template, 
                           verif_case, verif_type, line_type, date_type, 
                           date_range, eval_period, date_hours, fleads, 
                           var_name, fcst_var_name, obs_var_name, model_list, 
@@ -280,7 +280,7 @@ def get_preprocessed_data(logger, stats_dir, prune_dir, lookfor_template,
         logger, date_type, date_range, date_hours, fleads
     )
     pruned_data_dir = run_prune_data(
-        logger, stats_dir, prune_dir, lookfor_template, verif_case, verif_type, 
+        logger, stats_dir, prune_dir, output_base_template, verif_case, verif_type, 
         line_type, valid_range, eval_period, var_name, fcst_var_name, model_list, 
         domain
     )

@@ -774,7 +774,7 @@ def main():
                     logger.warning("Continuing ...")
                     continue
                 df = df_preprocessing.get_preprocessed_data(
-                    logger, STATS_DIR, PRUNE_DIR, LOOKFOR_TEMPLATE, VERIF_CASE, VERIF_TYPE, 
+                    logger, STATS_DIR, PRUNE_DIR, OUTPUT_BASE_TEMPLATE, VERIF_CASE, VERIF_TYPE, 
                     LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, date_hours, 
                     FLEADS, requested_var, fcst_var_name, obs_var_name, MODELS, 
                     domain, INTERP, MET_VERSION
@@ -882,7 +882,7 @@ if __name__ == "__main__":
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
 
-    LOOKFOR_TEMPLATE = templates.lookfor_template
+    OUTPUT_BASE_TEMPLATE = templates.output_base_template
 
     print("\n===================================================================\n")
     # ============= END USER CONFIGURATIONS =================

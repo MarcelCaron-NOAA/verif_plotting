@@ -25,7 +25,7 @@ def daterange(start, end, td):
       yield curr
       curr+=td
 
-def expand_met_stat_files(met_stat_files, data_dir, lookfor_template, RUN_case, 
+def expand_met_stat_files(met_stat_files, data_dir, output_base_template, RUN_case, 
                           RUN_type, line_type, vx_mask, fcst_var_name, 
                           var_name, model, eval_period, valid):
     #valid_string = valid.strftime('%Y%m%d')
@@ -37,7 +37,7 @@ def expand_met_stat_files(met_stat_files, data_dir, lookfor_template, RUN_case,
             #valid_string[:-2], model+'_'+valid_string+'*'
             data_dir, 
             string_template_substitution.do_string_sub(
-                lookfor_template, 
+                output_base_template, 
                 RUN_CASE=str(RUN_case), RUN_CASE_UPPER=str(RUN_case).upper(),
                 RUN_CASE_LOWER=str(RUN_case).lower(), RUN_TYPE=str(RUN_type), 
                 RUN_TYPE_UPPER=str(RUN_type).lower(), 
@@ -61,7 +61,7 @@ def expand_met_stat_files(met_stat_files, data_dir, lookfor_template, RUN_case,
     ))
     return met_stat_files_out
 
-def prune_data(data_dir, prune_dir, tmp_dir, lookfor_template, valid_range, 
+def prune_data(data_dir, prune_dir, tmp_dir, output_base_template, valid_range, 
                eval_period, RUN_case, RUN_type, line_type, vx_mask, 
                fcst_var_name, var_name, model_list):
 
@@ -72,7 +72,7 @@ def prune_data(data_dir, prune_dir, tmp_dir, lookfor_template, valid_range,
       met_stat_files = []
       for valid in daterange(valid_range[0], valid_range[1], td(days=1)):
          met_stat_files = expand_met_stat_files(
-            met_stat_files, data_dir, lookfor_template, RUN_case, RUN_type, 
+            met_stat_files, data_dir, output_base_template, RUN_case, RUN_type, 
             line_type, vx_mask, fcst_var_name, var_name, model, eval_period, valid
          ) 
       pruned_data_dir = os.path.join(

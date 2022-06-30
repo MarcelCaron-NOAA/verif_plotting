@@ -28,7 +28,7 @@ class Templates():
         '''
         Custom template used to find .stat files in OUTPUT_BASE_DIR.
         
-        lookfor_template must be a string. Use curly braces {} to enclose variable
+        output_base_template must be a string. Use curly braces {} to enclose variable
         names that will be substituted with the appropriate value according to
         the plotting request.   
 
@@ -54,7 +54,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.lookfor_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Presets():
     def __init__(self):
