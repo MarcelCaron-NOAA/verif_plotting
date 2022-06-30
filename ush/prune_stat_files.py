@@ -28,13 +28,10 @@ def daterange(start, end, td):
 def expand_met_stat_files(met_stat_files, data_dir, output_base_template, RUN_case, 
                           RUN_type, line_type, vx_mask, fcst_var_name, 
                           var_name, model, eval_period, valid):
-    #valid_string = valid.strftime('%Y%m%d')
     met_stat_files_out = np.concatenate((
         met_stat_files, 
         glob.glob(os.path.join(
             # edit below to define stats archive path. Use '*' as wildcard.
-            #data_dir, str(RUN_case).lower(), str(model), 
-            #valid_string[:-2], model+'_'+valid_string+'*'
             data_dir, 
             string_template_substitution.do_string_sub(
                 output_base_template, 

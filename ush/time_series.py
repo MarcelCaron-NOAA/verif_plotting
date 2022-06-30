@@ -133,8 +133,6 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         str(x) in df[str(date_type).upper()].dt.hour.astype(str).tolist() 
         for x in date_hours
     ]]
-    #levs = df['OBS_LEV'].str[1:].astype(int)
-    #df['LEV'] = levs.tolist()
  
     if thresh and '' not in thresh:
         requested_thresh_symbol, requested_thresh_letter = list(

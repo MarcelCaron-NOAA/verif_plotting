@@ -1725,84 +1725,6 @@ class Reference():
                                                          + '>125, >150'),
                                   'obs_var_options': '',
                                   'plot_group':'aq'},
-                        'OZCON2': {'fcst_var_name': 'OZCON2',
-                                  'fcst_var_levels': ['A2'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A2'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
-                        'OZCON3': {'fcst_var_name': 'OZCON3',
-                                  'fcst_var_levels': ['A3'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A3'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
-                        'OZCON4': {'fcst_var_name': 'OZCON4',
-                                  'fcst_var_levels': ['A4'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A4'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
-                        'OZCON5': {'fcst_var_name': 'OZCON5',
-                                  'fcst_var_levels': ['A5'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A5'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
-                        'OZCON6': {'fcst_var_name': 'OZCON6',
-                                  'fcst_var_levels': ['A6'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A6'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
-                        'OZCON7': {'fcst_var_name': 'OZCON7',
-                                  'fcst_var_levels': ['A7'],
-                                  'fcst_var_thresholds': ('>50, >60, >65, >70,'
-                                                          + '>75, >85, >105,'
-                                                          + '>125, >150'),
-                                  'fcst_var_options': '',
-                                  'obs_var_name': 'COPO',
-                                  'obs_var_levels': ['A7'],
-                                  'obs_var_thresholds': ('>50, >60, >65, >70,'
-                                                         + '>75, >85, >105,'
-                                                         + '>125, >150'),
-                                  'obs_var_options': '',
-                                  'plot_group':'aq'},
                         'OZCON8': {'fcst_var_name': 'OZCON8',
                                   'fcst_var_levels': ['A8'],
                                   'fcst_var_thresholds': ('>50, >60, >65, >70,'
@@ -1856,6 +1778,106 @@ class Reference():
                 }
             },
             'precip_ccpa': {
+                'CTC': {
+                    'plot_stats_list': ('bias, ets, fss, csi, fbias, fbar,'
+                                        + ' obar, pod, faratio, sratio'),
+                    'interp': 'NEAREST',
+                    'vx_mask_list' : ['CONUS', 'EAST', 'WEST'],
+                    'var_dict': {
+                        'APCP_01': {'fcst_var_name': 'APCP',
+                                    'fcst_var_levels': ['A01','A1'],
+                                    'fcst_var_thresholds': ('>=0.254, >=1.27,'
+                                                            + ' >=2.54,'
+                                                            + ' >=6.35,'
+                                                            + ' >=12.7,'
+                                                            + ' >=19.05,'
+                                                            + ' >=25.4,'),
+                                    'fcst_var_options': '',
+                                    'obs_var_name': 'APCP',
+                                    'obs_var_levels': ['A01','A1'],
+                                    'obs_var_thresholds': ('>=0.254, >=1.27,'
+                                                           + ' >=2.54,'
+                                                           + ' >=6.35,'
+                                                           + ' >=12.7,'
+                                                           + ' >=19.05,'
+                                                           + ' >=25.4,'),
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_03': {'fcst_var_name': 'APCP',
+                                    'fcst_var_levels': ['A03','A3'],
+                                    'fcst_var_thresholds': ('>=0.254, >=1.27,'
+                                                            + ' >=2.54,'
+                                                            + ' >=6.35,'
+                                                            + ' >=12.7,'
+                                                            + ' >=19.05,'
+                                                            + ' >=25.4,'
+                                                            + ' >=50.8,'),
+                                    'fcst_var_options': '',
+                                    'obs_var_name': 'APCP',
+                                    'obs_var_levels': ['A03','A3'],
+                                    'obs_var_thresholds': ('>=0.254, >=1.27,'
+                                                           + ' >=2.54,'
+                                                           + ' >=6.35,'
+                                                           + ' >=12.7,'
+                                                           + ' >=19.05,'
+                                                           + ' >=25.4,'
+                                                           + ' >=50.8,'),
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_06': {'fcst_var_name': 'APCP',
+                                    'fcst_var_levels': ['A06','A6'],
+                                    'fcst_var_thresholds': ('>=0.254, >=2.54,'
+                                                            + ' >=6.35,'
+                                                            + ' >=12.7,'
+                                                            + ' >=19.05,'
+                                                            + ' >=25.4,'
+                                                            + ' >=38.1,'
+                                                            + ' >=50.8,'
+                                                            + ' >=76.2,'
+                                                            + ' >=101.6'),
+                                    'fcst_var_options': '',
+                                    'obs_var_name': 'APCP',
+                                    'obs_var_levels': ['A06','A6'],
+                                    'obs_var_thresholds': ('>=0.254, >=2.54,'
+                                                           + ' >=6.35,'
+                                                           + ' >=12.7,'
+                                                           + ' >=19.05,'
+                                                           + ' >=25.4,'
+                                                           + ' >=38.1,'
+                                                           + ' >=50.8,'
+                                                           + ' >=76.2,'
+                                                           + ' >=101.6'),
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_24': {'fcst_var_name': 'APCP',
+                                    'fcst_var_levels': ['A24'],
+                                    'fcst_var_thresholds': ('>=0.254, >=2.54,'
+                                                            + ' >=6.35,'
+                                                            + ' >=12.7,'
+                                                            + ' >=25.4,'
+                                                            + ' >=38.1,'
+                                                            + ' >=50.8,'
+                                                            + ' >=76.2,'
+                                                            + ' >=101.6'
+                                                            + ' >=152.4'),
+                                    'fcst_var_options': '',
+                                    'obs_var_name': 'APCP',
+                                    'obs_var_levels': ['A24'],
+                                    'obs_var_thresholds': ('>=0.254, >=2.54,'
+                                                           + ' >=6.35,'
+                                                           + ' >=12.7,'
+                                                           + ' >=25.4,'
+                                                           + ' >=38.1,'
+                                                           + ' >=50.8,'
+                                                           + ' >=76.2,'
+                                                           + ' >=101.6'
+                                                           + ' >=152.4'),
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'}
+                    }
+                }
+            },
+            'grid2grid_ccpa': {
                 'CTC': {
                     'plot_stats_list': ('bias, ets, fss, csi, fbias, fbar,'
                                         + ' obar, pod, faratio, sratio'),

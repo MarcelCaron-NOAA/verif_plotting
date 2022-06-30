@@ -210,7 +210,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     else:
         df_aggregated = df_groups.mean()
 
-    # Effective "event equalization", i.e. removing datapoints that aren't 
+    # Effective threshold equalization, i.e. removing datapoints that aren't 
     # shared among all models. Otherwise plot_util.calculate_stat will throw 
     # an error
     df_split = [df_aggregated.xs(str(model)) for model in model_list]
@@ -445,7 +445,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         plt.axhline(y=1, color='black', linestyle='--', linewidth=1, zorder=0)
 
     # Configure axis ticks
-    #incr = 500.
     xticks_min = np.min(x_vals)
     xticks_max = np.max(x_vals)
     xlim_min = np.floor(xticks_min/incr)*incr

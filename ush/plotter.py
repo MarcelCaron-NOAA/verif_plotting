@@ -109,7 +109,6 @@ class Plotter():
             Path.LINETO,
          ]
       path = Path(verts, codes)
-      #errorbrackets.append(path)
       pp = PathPatch(
          path, facecolor=fc, alpha=alpha, edgecolor=ec, linewidth=lw
       )

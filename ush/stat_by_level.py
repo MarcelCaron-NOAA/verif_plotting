@@ -156,7 +156,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     else:
         df_aggregated = df_groups.mean()
 
-    # Effective "event equalization", i.e. removing datapoints that aren't 
+    # Effective p-level equalization, i.e. removing datapoints that aren't 
     # shared among all models. Otherwise plot_util.calculate_stat will throw 
     # an error
     df_split = [df_aggregated.xs(str(model)) for model in model_list]
