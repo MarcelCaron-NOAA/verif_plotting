@@ -88,12 +88,12 @@ def prune_data(data_dir, prune_dir, tmp_dir, lookfor_template, valid_range,
       if RUN_type == 'anom' and 'HGT' in var_name:
          print("Pruning "+data_dir+" files for model "+model+", vx_mask "
                +vx_mask+", variable "+fcst_var_name+", line_type "+line_type
-               +", interp "+os.environ['interp'])
+               +", interp "+os.environ['INTERP'])
          filter_cmd = (
             ' | grep "'+vx_mask
             +'" | grep "'+fcst_var_name
             +'" | grep "'+line_type
-            +'" | grep "'+os.environ['interp']+'"'
+            +'" | grep "'+os.environ['INTERP']+'"'
          )
       else:
          print("Pruning "+data_dir+" files for model "+model+", vx_mask "
