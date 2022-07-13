@@ -1794,38 +1794,38 @@ class Reference():
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A01','A1'],
-                                    'obs_var_thresholds': ''
+                                    'obs_var_thresholds': '',
                                     'obs_var_options': '',
                                     'plot_group':'precip'},
                         'APCP_03': {'fcst_var_name': 'APCP',
                                     'fcst_var_levels': ['A03','A3'],
-                                    'fcst_var_thresholds': ''
+                                    'fcst_var_thresholds': '',
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A03','A3'],
-                                    'obs_var_thresholds': ''
+                                    'obs_var_thresholds': '',
                                     'obs_var_options': '',
                                     'plot_group':'precip'},
                         'APCP_06': {'fcst_var_name': 'APCP',
                                     'fcst_var_levels': ['A06','A6'],
-                                    'fcst_var_thresholds': ''
+                                    'fcst_var_thresholds': '',
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A06','A6'],
-                                    'obs_var_thresholds': ''
+                                    'obs_var_thresholds': '',
                                     'obs_var_options': '',
                                     'plot_group':'precip'},
                         'APCP_24': {'fcst_var_name': 'APCP',
                                     'fcst_var_levels': ['A24'],
-                                    'fcst_var_thresholds': ''
+                                    'fcst_var_thresholds': '',
                                     'fcst_var_options': '',
                                     'obs_var_name': 'APCP',
                                     'obs_var_levels': ['A24'],
-                                    'obs_var_thresholds': ''
+                                    'obs_var_thresholds': '',
                                     'obs_var_options': '',
                                     'plot_group':'precip'}
                     }
-                }
+                },
                 'CTC': {
                     'plot_stats_list': ('bias, ets, fss, csi, fbias, fbar,'
                                         + ' obar, pod, faratio, sratio'),
