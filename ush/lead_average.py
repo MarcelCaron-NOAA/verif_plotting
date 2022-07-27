@@ -820,6 +820,64 @@ def main():
              + f" VALID or INIT")
         logger.error(e)
         raise ValueError(e)
+    
+    logger.debug('========================================')
+    logger.debug("Config file settings")
+    logger.debug(f"LOG_LEVEL: {LOG_LEVEL}")
+    logger.debug(f"MET_VERSION: {MET_VERSION}")
+    logger.debug(f"URL_HEADER: {URL_HEADER if URL_HEADER else 'No header'}")
+    logger.debug(f"OUTPUT_BASE_DIR: {OUTPUT_BASE_DIR}")
+    logger.debug(f"STATS_DIR: {STATS_DIR}")
+    logger.debug(f"PRUNE_DIR: {PRUNE_DIR}")
+    logger.debug(f"SAVE_DIR: {SAVE_DIR}")
+    logger.debug(f"VERIF_CASETYPE: {VERIF_CASETYPE}")
+    logger.debug(f"MODELS: {MODELS}")
+    logger.debug(f"VARIABLES: {VARIABLES}")
+    logger.debug(f"DOMAINS: {DOMAINS}")
+    logger.debug(f"INTERP: {INTERP}")
+    logger.debug(f"DATE_TYPE: {DATE_TYPE}")
+    logger.debug(
+        f"EVAL_PERIOD: {EVAL_PERIOD}"
+    )
+    logger.debug(
+        f"{DATE_TYPE}_BEG: {date_beg}"
+    )
+    logger.debug(
+        f"{DATE_TYPE}_END: {date_end}"
+    )
+    logger.debug(f"VALID_HOURS: {VALID_HOURS}")
+    logger.debug(f"INIT_HOURS: {INIT_HOURS}")
+    logger.debug(f"FCST_LEADS: {FLEADS}")
+    logger.debug(f"FCST_LEVELS: {FCST_LEVELS}")
+    logger.debug(f"OBS_LEVELS: {OBS_LEVELS}")
+    logger.debug(
+        f"FCST_THRESH: {FCST_THRESH if FCST_THRESH else 'No thresholds'}"
+    )
+    logger.debug(
+        f"OBS_THRESH: {OBS_THRESH if OBS_THRESH else 'No thresholds'}"
+    )
+    logger.debug(f"LINE_TYPE: {LINE_TYPE}")
+    logger.debug(f"METRICS: {METRICS}")
+    logger.debug(f"CONFIDENCE_INTERVALS: {CONFIDENCE_INTERVALS}")
+
+    logger.debug('----------------------------------------')
+    logger.debug(f"Advanced settings (configurable in {SETTINGS_DIR}/settings.py)")
+    logger.debug(f"Y_MIN_LIMIT: {Y_MIN_LIMIT}")
+    logger.debug(f"Y_MAX_LIMIT: {Y_MAX_LIMIT}")
+    logger.debug(f"Y_LIM_LOCK: {Y_LIM_LOCK}")
+    logger.debug(f"X_MIN_LIMIT: {X_MIN_LIMIT}")
+    logger.debug(f"X_MAX_LIMIT: {X_MAX_LIMIT}")
+    logger.debug(f"X_LIM_LOCK: {X_LIM_LOCK}")
+    logger.debug(f"Display averages? {'yes' if display_averages else 'no'}")
+    if CONFIDENCE_INTERVALS:
+        logger.debug(f"Confidence Level: {int(ci_lev*100)}%")
+        logger.debug(f"Bootstrap method: {bs_method}")
+        logger.debug(f"Bootstrap repetitions: {bs_nrep}")
+        logger.debug(
+            f"Minimum sample size for confidence intervals: {bs_min_samp}"
+        )
+    logger.debug('========================================')
+
     date_range = (
         datetime.strptime(date_beg, '%Y%m%d'), 
         datetime.strptime(date_end, '%Y%m%d')

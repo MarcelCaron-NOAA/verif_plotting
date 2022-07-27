@@ -167,10 +167,10 @@ def check_LOG_LEVEL(LOG_LEVEL):
                        + f" supported by the logger.  Consider using one of"
                        + f" 'DEBUG', 'INFO', 'WARNING', 'ERROR', or"
                        + f" 'CRITICAL'.")
-    if str(LOG_LEVEL).upper() not in ["ERROR", "WARNING", "INFO"]:
+    if str(LOG_LEVEL).upper() not in ["ERROR", "WARNING", "INFO", "DEBUG"]:
         print(f"WARNING: You provided the following LOG_LEVEL: '{LOG_LEVEL}'."
                        + f" Note that the plotting scripts currently only log at"
-                       + f" 'ERROR', 'WARNING', and 'INFO' levels.")
+                       + f" 'ERROR', 'WARNING', 'INFO' and 'DEBUG' levels.")
     if not LOG_LEVEL:
         sys.exit(f"The provided LOG_LEVEL is empty. LOG_LEVEL cannot be"
                      + f" empty. Check the plotting configuration file.")

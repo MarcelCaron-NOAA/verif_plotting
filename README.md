@@ -32,6 +32,25 @@ cp -r ${BASE_DIR}/ush/* ${PY_PLOT_DIR}/ush/.
 cp ${BASE_DIR}/py_plotting.config ${PY_PLOT_DIR}/.
 ```
 
+These scripts require python v3.6+.  Here's how you can set up the environment to run verif_plotting on
+some of the NCEP supercomputers:
+
+WCOSS2
+```
+module purge
+ml intel/19.1.3.304
+ml python/3.8.6
+```
+
+Hera
+```
+module purge
+ml hpc/1.2.0
+ml hpc-intel/18.0.5.274
+module use /contrib/anaconda/modulefiles
+ml anaconda/latest
+```
+
 ## CONFIGURATION:    
 After setting up verif_plotting, edit the exported variables in py_plotting.config.  Each
 variable is a string that will be ingested by the python code.  You'll need to
@@ -81,7 +100,7 @@ saves the plot in SAVE_DIR as a png.
 Part of the configuration in py_plotting.config involves setting a logfile path.
 Running the script will print the logfile path for your specific task, which you
 can check for debugging.  The lowest log level that is currently functional is
-"INFO". "DEBUG" statements may be included in a later implementation.
+"DEBUG". More "DEBUG" statements may be included in a later implementation.
 
 ## ADDITIONAL SETTINGS:
 Most changes in the plotting configuration are made in py_plotting.config, but a few other aspects 
