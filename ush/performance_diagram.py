@@ -928,8 +928,8 @@ def main():
             logger.warning(e)
             logger.warning("Continuing ...")
             continue
-        fcst_var_name = var_specs['fcst_var_name']
-        obs_var_name = var_specs['obs_var_name']
+        fcst_var_names = var_specs['fcst_var_names']
+        obs_var_names = var_specs['obs_var_names']
         symbol_keep = []
         letter_keep = []
         for fcst_thresh, obs_thresh in list(
@@ -983,8 +983,8 @@ def main():
                 df = df_preprocessing.get_preprocessed_data(
                     logger, STATS_DIR, PRUNE_DIR, OUTPUT_BASE_TEMPLATE, VERIF_CASE, 
                     VERIF_TYPE, LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, 
-                    date_hours, FLEADS, requested_var, fcst_var_name, 
-                    obs_var_name, MODELS, domain, INTERP, MET_VERSION
+                    date_hours, FLEADS, requested_var, fcst_var_names, 
+                    obs_var_names, MODELS, domain, INTERP, MET_VERSION
                 )
                 if df is None:
                     continue

@@ -52,7 +52,7 @@ def get_valid_range(logger, date_type, date_range, date_hours, fleads):
 
 def run_prune_data(logger, stats_dir, prune_dir, output_base_template, verif_case, 
                    verif_type, line_type, valid_range, eval_period, var_name, 
-                   fcst_var_name, model_list, domain):
+                   fcst_var_names, model_list, domain):
     model_list = [str(model) for model in model_list]
     tmp_dir = 'tmp'+str(uuid.uuid4().hex)
     pruned_data_dir = os.path.join(
@@ -72,7 +72,8 @@ def run_prune_data(logger, stats_dir, prune_dir, output_base_template, verif_cas
                 stats_dir, prune_dir, tmp_dir, output_base_template, valid_range, 
                 str(eval_period).upper(), str(verif_case).lower(), 
                 str(verif_type).lower(), str(line_type).upper(), 
-                str(domain).upper(), str(fcst_var_name).upper(), 
+                str(domain).upper(), 
+                [str(fcst_var_name).upper() for fcst_var_name in fcst_var_names], 
                 str(var_name).upper(), model_list
             )
         else:
@@ -189,12 +190,12 @@ def filter_by_level_type(df, logger, verif_type):
     else:
         return df
 
-def filter_by_var_name(df, logger, fcst_var_name, obs_var_name):
+def filter_by_var_name(df, logger, fcst_var_names, obs_var_names):
     if df is None:
         return None
     df = df[
-        df['FCST_VAR'].eq(fcst_var_name) 
-        & df['OBS_VAR'].eq(obs_var_name)
+        df['FCST_VAR'].isin(fcst_var_names) 
+        & df['OBS_VAR'].isin(obs_var_names)
     ]
     if check_empty(df, logger, 'filter_by_var_name'):
         return None
@@ -274,14 +275,14 @@ def filter_by_hour(df, logger, date_type, date_hours):
 def get_preprocessed_data(logger, stats_dir, prune_dir, output_base_template, 
                           verif_case, verif_type, line_type, date_type, 
                           date_range, eval_period, date_hours, fleads, 
-                          var_name, fcst_var_name, obs_var_name, model_list, 
+                          var_name, fcst_var_names, obs_var_names, model_list, 
                           domain, interp, met_version):
     valid_range = get_valid_range(
         logger, date_type, date_range, date_hours, fleads
     )
     pruned_data_dir = run_prune_data(
         logger, stats_dir, prune_dir, output_base_template, verif_case, verif_type, 
-        line_type, valid_range, eval_period, var_name, fcst_var_name, model_list, 
+        line_type, valid_range, eval_period, var_name, fcst_var_names, model_list, 
         domain
     )
     df = create_df(
@@ -289,7 +290,7 @@ def get_preprocessed_data(logger, stats_dir, prune_dir, output_base_template,
         met_version
     )
     df = filter_by_level_type(df, logger, verif_type)
-    df = filter_by_var_name(df, logger, fcst_var_name, obs_var_name)
+    df = filter_by_var_name(df, logger, fcst_var_names, obs_var_names)
     df = filter_by_interp(df, logger, interp)
     df = filter_by_domain(df, logger, domain)
     df = create_lead_hours(df, logger)

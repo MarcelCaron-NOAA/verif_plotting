@@ -805,9 +805,9 @@ def main():
     if str(DATE_TYPE).upper() == 'VALID':
         e = (f"You requested a valid_hour_average plot with the DATE_TYPE "
              + f"set to 'VALID'. Valid time is already used as the independent"
-             + f" variable in valid_hour_average plots, therfore please set"
-             + f" the DATE_TYPE to 'INIT', to equalize data by initialization"
-             + f" time.  Also, make sure neither FCST_INIT_HOUR nor"
+             + f" variable in valid_hour_average plots. Set the DATE_TYPE to"
+             + f" 'INIT' to equalize data by initialization"
+             + f" time.  Make sure neither FCST_INIT_HOUR nor"
              + f" FCST_VALID_HOUR is an empty list.")
         logger.error(e)
         raise ValueError(e)
@@ -891,8 +891,8 @@ def main():
             logger.warning(e)
             logger.warning("Continuing ...")
             continue
-        fcst_var_name = var_specs['fcst_var_name']
-        obs_var_name = var_specs['obs_var_name']
+        fcst_var_names = var_specs['fcst_var_names']
+        obs_var_names = var_specs['obs_var_names']
         symbol_keep = []
         letter_keep = []
         for fcst_thresh, obs_thresh in list(
@@ -945,7 +945,7 @@ def main():
                 df = df_preprocessing.get_preprocessed_data(
                     logger, STATS_DIR, PRUNE_DIR, OUTPUT_BASE_TEMPLATE, VERIF_CASE, 
                     VERIF_TYPE, LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, 
-                    date_hours, FLEADS, requested_var, fcst_var_name, obs_var_name, 
+                    date_hours, FLEADS, requested_var, fcst_var_names, obs_var_names, 
                     MODELS, domain, INTERP, MET_VERSION
                 )
                 if df is None:

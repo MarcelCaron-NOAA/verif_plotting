@@ -26,8 +26,8 @@ def daterange(start, end, td):
       curr+=td
 
 def expand_met_stat_files(met_stat_files, data_dir, output_base_template, RUN_case, 
-                          RUN_type, line_type, vx_mask, fcst_var_name, 
-                          var_name, model, eval_period, valid):
+                          RUN_type, line_type, vx_mask, var_name, model, 
+                          eval_period, valid):
     met_stat_files_out = np.concatenate((
         met_stat_files, 
         glob.glob(os.path.join(
@@ -43,9 +43,6 @@ def expand_met_stat_files(met_stat_files, data_dir, output_base_template, RUN_ca
                 LINE_TYPE_LOWER=str(line_type).lower(),
                 VX_MASK=str(vx_mask), VX_MASK_UPPER=str(vx_mask).upper(),
                 VX_MASK_LOWER=str(vx_mask).lower(), 
-                FCST_VAR_NAME=str(fcst_var_name), 
-                FCST_VAR_NAME_UPPER=str(fcst_var_name).upper(), 
-                FCST_VAR_NAME_LOWER=str(fcst_var_name).lower(),
                 VAR_NAME=str(var_name), VAR_NAME_UPPER=str(var_name).upper(),
                 VAR_NAME_LOWER=str(var_name).lower(), MODEL=str(model), 
                 MODEL_UPPER=str(model).upper(), MODEL_LOWER=str(model).lower(),
@@ -60,7 +57,7 @@ def expand_met_stat_files(met_stat_files, data_dir, output_base_template, RUN_ca
 
 def prune_data(data_dir, prune_dir, tmp_dir, output_base_template, valid_range, 
                eval_period, RUN_case, RUN_type, line_type, vx_mask, 
-               fcst_var_name, var_name, model_list):
+               fcst_var_names, var_name, model_list):
 
    print("BEGIN: "+os.path.basename(__file__))
    # Get list of models and loop through
@@ -70,7 +67,7 @@ def prune_data(data_dir, prune_dir, tmp_dir, output_base_template, valid_range,
       for valid in daterange(valid_range[0], valid_range[1], td(days=1)):
          met_stat_files = expand_met_stat_files(
             met_stat_files, data_dir, output_base_template, RUN_case, RUN_type, 
-            line_type, vx_mask, fcst_var_name, var_name, model, eval_period, valid
+            line_type, vx_mask, var_name, model, eval_period, valid
          ) 
       pruned_data_dir = os.path.join(
          prune_dir, line_type+'_'+var_name+'_'+vx_mask+'_'+eval_period, tmp_dir
@@ -84,20 +81,20 @@ def prune_data(data_dir, prune_dir, tmp_dir, output_base_template, valid_range,
       all_grep_output = ''
       if RUN_type == 'anom' and 'HGT' in var_name:
          print("Pruning "+data_dir+" files for model "+model+", vx_mask "
-               +vx_mask+", variable "+fcst_var_name+", line_type "+line_type
+               +vx_mask+", variable "+'/'.join(fcst_var_names)+", line_type "+line_type
                +", interp "+os.environ['INTERP'])
          filter_cmd = (
             ' | grep "'+vx_mask
-            +'" | grep "'+fcst_var_name
+            +'" | grep "'+'" | grep "'.join(fcst_var_names)
             +'" | grep "'+line_type
             +'" | grep "'+os.environ['INTERP']+'"'
          )
       else:
          print("Pruning "+data_dir+" files for model "+model+", vx_mask "
-               +vx_mask+", variable "+fcst_var_name+", line_type "+line_type)
+               +vx_mask+", variable "+'/'.join(fcst_var_names)+", line_type "+line_type)
          filter_cmd = (
             ' | grep "'+vx_mask
-            +'" | grep "'+fcst_var_name
+            +'" | grep "'+'" | grep "'.join(fcst_var_names)
             +'" | grep "'+line_type+'"'
          )
       # Prune the MET .stat files and write to new file
