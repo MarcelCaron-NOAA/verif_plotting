@@ -36,14 +36,14 @@ cp ${BASE_DIR}/py_plotting.config ${PY_PLOT_DIR}/.
 These scripts use python v3.6+.  To set up the environment to run verif_plotting on
 some of the NCEP supercomputers, use the following commands:
 
-####WCOSS2
+#### WCOSS2
 ```
 module purge
 ml intel/19.1.3.304
 ml python/3.8.6
 ```
 
-####Hera
+#### Hera
 ```
 module purge
 ml hpc/1.2.0
