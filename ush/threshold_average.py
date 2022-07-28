@@ -707,9 +707,9 @@ def main():
     logger.debug(f"Y_MIN_LIMIT: {Y_MIN_LIMIT}")
     logger.debug(f"Y_MAX_LIMIT: {Y_MAX_LIMIT}")
     logger.debug(f"Y_LIM_LOCK: {Y_LIM_LOCK}")
-    logger.debug(f"X_MIN_LIMIT: {X_MIN_LIMIT}")
-    logger.debug(f"X_MAX_LIMIT: {X_MAX_LIMIT}")
-    logger.debug(f"X_LIM_LOCK: {X_LIM_LOCK}")
+    logger.debug(f"X_MIN_LIMIT: Ignored for series by threshold")
+    logger.debug(f"X_MAX_LIMIT: Ignored for series by threshold")
+    logger.debug(f"X_LIM_LOCK: Ignored for series by threshold")
     logger.debug(f"Display averages? {'yes' if display_averages else 'no'}")
     if CONFIDENCE_INTERVALS:
         logger.debug(f"Confidence Level: {int(ci_lev*100)}%")
