@@ -670,7 +670,9 @@ def check_OBS_THRESH(OBS_THRESH, FCST_THRESH, LINE_TYPE):
                          + f" be valid.  Check the plotting configuration"
                          + f" file.")
             #sys.exit(1)
-        if OBS_THRESH.replace(' ','') != FCST_THRESH.replace(' ',''):
+        if (OBS_THRESH.replace(' ','') != FCST_THRESH.replace(' ','')
+                or len(re.split(r'[\s,]+', OBS_THRESH)) 
+                != len(re.split(r'[\s,]+', FCST_THRESH))):
             print(f"WARNING: The provided OBS_THRESH string ('{OBS_THRESH}')"
                            + f" is not equivalent to the provided FCST_THRESH"
                            + f" string ('{FCST_THRESH}').")

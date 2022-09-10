@@ -65,7 +65,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                       bs_method: str = 'MATCHED_PAIRS', ci_lev: float = .95, 
                       bs_min_samp: int = 30, eval_period: str = 'TEST', 
                       display_averages: bool = True, save_header: str = '', 
-                      plot_group: str = 'sfc_upper'):
+                      plot_group: str = 'sfc_upper',
+                      sample_equalization: bool = True):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -223,12 +224,17 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-    df_groups = df.groupby(['MODEL','FCST_THRESH_VALUE'])
+    group_by = ['MODEL','FCST_THRESH_VALUE']
+    if sample_equalization:
+        df, bool_success = plot_util.equalize_samples(logger, df, group_by)
+        if not bool_success:
+            sample_equalization = False
+    df_groups = df.groupby(group_by)
     # Aggregate unit statistics before calculating metrics
     df_aggregated = df_groups.sum()
-    # Effective threshold equalization, i.e. removing datapoints that aren't 
-    # shared among all models. Otherwise plot_util.calculate_stat will throw 
-    # an error
+    # Remove data if they exist for some but not all models at some value of 
+    # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
+    # error
     df_split = [df_aggregated.xs(str(model)) for model in model_list]
     df_reduced = reduce(
         lambda x,y: pd.merge(
@@ -1069,7 +1075,8 @@ def main():
                     plot_group=plot_group, 
                     confidence_intervals=CONFIDENCE_INTERVALS, 
                     bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev, 
-                    bs_min_samp=bs_min_samp
+                    bs_min_samp=bs_min_samp,
+                    sample_equalization=sample_equalization
                 )
                 num+=1
 
@@ -1142,6 +1149,11 @@ if __name__ == "__main__":
     bs_method = toggle.plot_settings['bs_method']
     ci_lev = toggle.plot_settings['ci_lev']
     bs_min_samp = toggle.plot_settings['bs_min_samp']
+
+    # At each value of the independent variable, whether or not to remove
+    # samples used to aggregate each statistic if the samples are not shared
+    # by all models.  Required to display sample sizes
+    sample_equalization = toggle.plot_settings['sample_equalization']
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']

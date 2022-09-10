@@ -63,7 +63,8 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                       ci_lev: float = .95, bs_min_samp: int = 30, 
                       eval_period: str = 'TEST', save_header: str = '', 
                       display_averages: bool = True, 
-                      plot_group: str = 'sfc_upper'):
+                      plot_group: str = 'sfc_upper',
+                      sample_equalization: bool = True):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -194,7 +195,12 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-    df_groups = df.groupby(['MODEL', 'LEAD_HOURS'])
+    group_by = ['MODEL', 'LEAD_HOURS']
+    if sample_equalization:
+        df, bool_success = plot_util.equalize_samples(logger, df, group_by)
+        if not bool_success:
+            sample_equalization = False
+    df_groups = df.groupby(group_by)
     # Aggregate unit statistics before calculating metrics
     if str(line_type).upper() == 'CTC':
         df_aggregated = df_groups.sum()
@@ -1020,7 +1026,8 @@ def main():
                     save_header=URL_HEADER, plot_group=plot_group, 
                     confidence_intervals=CONFIDENCE_INTERVALS, bs_nrep=bs_nrep, 
                     bs_method=bs_method, ci_lev=ci_lev, 
-                    bs_min_samp=bs_min_samp
+                    bs_min_samp=bs_min_samp, 
+                    sample_equalization=sample_equalization
                 )
                 num+=1
 
@@ -1099,6 +1106,11 @@ if __name__ == "__main__":
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
+
+    # At each value of the independent variable, whether or not to remove 
+    # samples used to aggregate each statistic if the samples are not shared 
+    # by all models.  Required to display sample sizes 
+    sample_equalization = toggle.plot_settings['sample_equalization']
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 

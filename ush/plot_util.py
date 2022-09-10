@@ -1,3 +1,4 @@
+import pickle
 import os
 import datetime as datetime
 import time
@@ -1620,4 +1621,83 @@ def get_ci_file(stat, input_filename, fcst_lead, output_base_dir, ci_method):
    CI_filename += '_CI_' + ci_method + '.txt'
    CI_file = os.path.join(output_base_dir, 'data',
                           CI_filename)
-   return CI_file            
+   return CI_file          
+
+def equalize_samples(logger, df, group_by):
+    with open('/u/marcel.caron/test.pkl','wb') as f:
+        pickle.dump(df, f)
+    # columns that will be used to drop duplicate rows across model groups
+    cols_to_check = [
+        'LEAD_HOURS', 'VALID', 'INIT', 'FCST_THRESH_SYMBOL', 
+        'FCST_THRESH_VALUE', 'OBS_LEV'
+    ]
+    df_groups = df.groupby(group_by)
+    indexes = []
+    # List all of the independent variables that are found in the data
+    unique_indep_vars = np.unique(np.array(list(df_groups.groups.keys())).T[1])
+    for unique_indep_var in unique_indep_vars:
+        # Get all groups, in the form of DataFrames, that include the given 
+        # independent variable
+        dfs = [
+            df_groups.get_group(name)[cols_to_check]
+            for name in list(df_groups.groups.keys()) 
+            if str(name[1]) == str(unique_indep_var)
+        ]
+        # merge all of these DataFrames together according to 
+        # the columns in cols_to_check
+        for i, dfs_i in enumerate(dfs):
+            if i == 0:
+                df_merged = dfs_i
+            else:
+                df_merged = df_merged.merge(
+                    dfs_i, how='inner', indicator=False
+                )
+        # make sure to remove duplicate rows (looking only at the columns in 
+        # cols_to_check) to reduce comp time in the next in the next step
+        match_these = df_merged.drop_duplicates()
+        # Get all the indices for rows in each group that match the merged df
+        for dfs_i in dfs:
+            for idx, row in dfs_i.iterrows():
+                if (
+                        row.to_numpy()[1:].tolist() 
+                        in match_these.to_numpy()[:,1:].tolist()):
+                    indexes.append(idx)
+    # Select the matched rows by index among the rows in the original DataFrame
+    df_equalized = df.loc[indexes]
+    # Remove duplicates again, this time among both the columns 
+    # in cols_to_check and the 'MODEL' column, which avoids, say, models with
+    # repeated data from multiple entities
+    df_equalized = df_equalized.loc[
+        df_equalized[cols_to_check+['MODEL']].drop_duplicates().index
+    ]
+    # Regroup the data and move forward with this groups!
+    df_equalized_groups = df_equalized.groupby(group_by)
+    # Check that groups are indeed equally sized for each independent variable
+    df_groups_sizes = df_equalized_groups.size()
+    df_groups_sizes.index = df_groups_sizes.index.set_levels(
+        df_groups_sizes.index.levels[-1].astype(str), level=-1
+    )
+    data_are_equalized = np.all([
+        np.unique(df_groups_sizes.xs(str(unique_indep_var), level=1)).size == 1
+        for unique_indep_var 
+        in np.unique(np.array(list(df_groups_sizes.keys())).T[1])
+    ])
+    if data_are_equalized:
+        logger.info(
+            "Data were successfully equalized along the independent"
+            + " variable."
+        )
+        return df_equalized, data_are_equalized
+    else:
+        logger.error(
+            "Data equalization along the independent variable failed."
+        )
+        logger.error(
+            "This may be a bug in the verif_plotting code. Please contact"
+            + " the verif_plotting code manager about your issue."
+        )
+        logger.error(
+            "Skipping equalization.  Sample sizes will not be plotted."
+        )
+        return df, data_are_equalized
+

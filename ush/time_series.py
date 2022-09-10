@@ -69,8 +69,9 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
                      ci_lev: float = .95, bs_min_samp: int = 30,
                      eval_period: str = 'TEST', save_header='', 
                      display_averages: bool = True, 
-                     event_equalization: bool = False,
-                     plot_group: str = 'sfc_upper'):
+                     keep_shared_events_only: bool = False,
+                     plot_group: str = 'sfc_upper',
+                     sample_equalization: bool = True):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -212,16 +213,21 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-    df_groups = df.groupby(['MODEL',str(date_type).upper()])
+    group_by = ['MODEL',str(date_type).upper()]
+    if sample_equalization:
+        df, bool_success = plot_util.equalize_samples(logger, df, group_by)
+        if not bool_success:
+            sample_equalization = False
+    df_groups = df.groupby(group_by)
     # Aggregate unit statistics before calculating metrics
     if str(line_type).upper() == 'CTC':
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
-    if event_equalization:
-        # Effective "event equalization", i.e. removing datapoints that aren't 
-        # shared among all models. Otherwise plot_util.calculate_stat will 
-        # throw an error
+    if keep_shared_events_only:
+        # Remove data if they exist for some but not all models at some value of 
+        # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
+        # error
         df_split = [
             df_aggregated.xs(str(model)) for model in model_list
         ]
@@ -301,14 +307,14 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index=str(date_type).upper()
     )
-    if event_equalization:
+    if keep_shared_events_only:
         pivot_metric1 = pivot_metric1.dropna() 
     if metric2_name is not None:
         pivot_metric2 = pd.pivot_table(
             df_aggregated, values=str(metric2_name).upper(), columns='MODEL', 
             index=str(date_type).upper()
         )
-        if event_equalization:
+        if keep_shared_events_only:
             pivot_metric2 = pivot_metric2.dropna()
     if confidence_intervals:
         pivot_ci_lower1 = pd.pivot_table(
@@ -1032,11 +1038,12 @@ def main():
                     line_type=LINE_TYPE, save_dir=SAVE_DIR, 
                     eval_period=EVAL_PERIOD, 
                     display_averages=display_averages, 
-                    event_equalization=event_equalization,
+                    keep_shared_events_only=keep_shared_events_only,
                     save_header=URL_HEADER, plot_group=plot_group,
                     confidence_intervals=CONFIDENCE_INTERVALS,
                     bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev,
-                    bs_min_samp=bs_min_samp
+                    bs_min_samp=bs_min_samp,
+                    sample_equalization=sample_equalization
                 )
                 num+=1
 
@@ -1110,11 +1117,16 @@ if __name__ == "__main__":
     ci_lev = toggle.plot_settings['ci_lev']
     bs_min_samp = toggle.plot_settings['bs_min_samp']
 
+    # At each value of the independent variable, whether or not to remove
+    # samples used to aggregate each statistic if the samples are not shared
+    # by all models.  Required to display sample sizes
+    sample_equalization = toggle.plot_settings['sample_equalization']
+
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
 
-    # Whether or not to display events shared among all models
-    event_equalization = toggle.plot_settings['event_equalization']
+    # Whether or not to display events shared among some but not all models
+    keep_shared_events_only = toggle.plot_settings['keep_shared_events_only']
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 
