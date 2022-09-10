@@ -10,7 +10,7 @@ Create plots from METplus output statistics
 
 ## DESCRIPTION:      
 The user edits a py_plotting.config configuration file to 
-define a plotting task and then and executes the file to create one or more images 
+define a plotting task and then executes the file to create one or more images 
 from METplus statistics files. 
 
 ## BEFORE YOU BEGIN: 
