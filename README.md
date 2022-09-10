@@ -9,9 +9,9 @@ Marcel Caron, marcel.caron@noaa.gov, NOAA/NWS/NCEP/EMC-VPPPGB
 Create plots from METplus output statistics
 
 ## DESCRIPTION:      
-The py_plotting.config configuration file defines environment variables that are meant to be
-edited by the user and that are called by python scripts at runtime to define
-the plotting task, resulting in one or more graphics output files.
+The user edits a py_plotting.config configuration file to 
+define a plotting task and then and executes the file to create one or more images 
+from METplus statistics files. 
 
 ## BEFORE YOU BEGIN: 
 Make sure to set up verif_plotting if you haven't already.  To set up,
