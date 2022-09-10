@@ -9,9 +9,9 @@ Marcel Caron, marcel.caron@noaa.gov, NOAA/NWS/NCEP/EMC-VPPPGB
 Create plots from METplus output statistics
 
 ## DESCRIPTION:      
-The user edits a py_plotting.config configuration file to 
-define a plotting task and then executes the file to create one or more images 
-from METplus statistics files. 
+Edit a py_plotting.config configuration file to 
+define a plotting task and then execute the configuration file 
+to create one or more images from METplus statistics files. 
 
 ## BEFORE YOU BEGIN: 
 Make sure to set up verif_plotting if you haven't already.  To set up,
@@ -53,24 +53,25 @@ ml anaconda/latest
 ```
 
 ## CONFIGURATION:    
-After setting up verif_plotting, edit the exported variables in py_plotting.config.  Each
-variable is a string that will be ingested by the python code.  You'll need to
+After setting up verif_plotting, edit the configuration variables in py_plotting.config.  Each
+variable contains a string that will be ingested by the python code.  You'll need to
 be able to point to a correctly structured metplus statistics archive (see the
 comment for Directory Settings in py_plotting.config for details).
 
 ### Limitations
-In some cases, possible values for exported variables will be limited to what is listed in the
+In some cases, possible values for configuration variables will be limited to what is listed in the
 metplus .stat files or the statistics archive you are using (e.g., values for `FCST_LEAD` or `MODEL`).  In
 others, possible values will be limited to what has been predefined elsewhere in verif_plotting 
 (e.g., values for `EVAL_PERIOD`).  Finally, some settings must match certain
-allowable settings, which are defined in ${USH_DIR}/settings.py in the `case_type`
-attribute of the `Reference()` class.  Two asterisks (\*\*) mark these latter settings in
-the comments in py_plotting.config.
+allowable settings, which are hard-coded to prevent unexpected behaviors 
+and are defined in ${USH_DIR}/settings.py in the `case_type` attribute of the `Reference()` class.  
+Two asterisks (\*\*) mark these latter settings in the comments in py_plotting.config.
 
 ### Configuring Plot Type
-The plot type is requested via the last export variable in py_plotting.config.  Replace the string with
-the desired plot type as explained in the comment.  In most cases, a plot will
-include all of the listed settings; for example, the python code will attempt to
+The plot type is requested via the last configuration variable in py_plotting.config.  
+Replace the value with the desired plot type as explained in the comment.  Most plots will
+include all of the listed values in each user-defined configuration; 
+for example, the python code will attempt to
 plot all of the listed models in `MODEL` on the same plot, as well as all of the
 init/valid hours in `FCST_INIT/VALID_HOUR` and lead times in `FCST_LEAD`.
 Exceptions to this are any listed `var_name`s and listed domains (`VX_MASK_LIST`),
