@@ -1628,8 +1628,10 @@ def equalize_samples(logger, df, group_by):
         pickle.dump(df, f)
     # columns that will be used to drop duplicate rows across model groups
     cols_to_check = [
-        'LEAD_HOURS', 'VALID', 'INIT', 'FCST_THRESH_SYMBOL', 
-        'FCST_THRESH_VALUE', 'OBS_LEV'
+        key for key in [
+            'LEAD_HOURS', 'VALID', 'INIT', 'FCST_THRESH_SYMBOL', 
+            'FCST_THRESH_VALUE', 'OBS_LEV']
+        if key in df.keys()
     ]
     df_groups = df.groupby(group_by)
     indexes = []
