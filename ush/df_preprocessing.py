@@ -59,7 +59,7 @@ def run_prune_data(logger, stats_dir, prune_dir, output_base_template, verif_cas
         prune_dir,
         (
             str(line_type).upper()+'_'+str(var_name).upper()+'_'
-            +str(domain).upper()+'_'+str(eval_period).upper()
+            +str(domain)+'_'+str(eval_period).upper()
         ),
         tmp_dir
     )
@@ -72,7 +72,7 @@ def run_prune_data(logger, stats_dir, prune_dir, output_base_template, verif_cas
                 stats_dir, prune_dir, tmp_dir, output_base_template, valid_range, 
                 str(eval_period).upper(), str(verif_case).lower(), 
                 str(verif_type).lower(), str(line_type).upper(), 
-                str(domain).upper(), 
+                str(domain), 
                 [str(fcst_var_name).upper() for fcst_var_name in fcst_var_names], 
                 str(var_name).upper(), model_list
             )
@@ -214,7 +214,7 @@ def filter_by_interp(df, logger, interp):
 def filter_by_domain(df, logger, domain):
     if df is None:
         return None
-    df = df[df['VX_MASK'].eq(str(domain).upper())]
+    df = df[df['VX_MASK'].eq(str(domain))]
     if check_empty(df, logger, 'filter_by_domain'):
         return None
     else:

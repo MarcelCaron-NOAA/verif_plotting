@@ -172,17 +172,17 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
 
     # Remove from model_list the models that don't exist in the dataframe
     cols_to_keep = [
-        str(model).upper() 
+        str(model)
         in df['MODEL'].tolist() 
         for model in model_list
     ]
     models_removed = [
-        str(m).upper() 
+        str(m)
         for (m, keep) in zip(model_list, cols_to_keep) if not keep
     ]
     models_removed_string = ', '.join(models_removed)
     model_list = [
-        str(m).upper() 
+        str(m)
         for (m, keep) in zip(model_list, cols_to_keep) if keep
     ]
     if not all(cols_to_keep):
@@ -677,9 +677,15 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         domain_string = domain_translator[domain]
     else:
         domain_string = domain
+    date_hours_string = plot_util.get_name_for_listed_items(
+        [f'{date_hour:02d}' for date_hour in date_hours],
+        ', ', '', 'Z', 'and ', ''
+    )
+    '''
     date_hours_string = ' '.join([
         f'{date_hour:02d}Z,' for date_hour in date_hours
     ])
+    '''
     date_start_string = date_range[0].strftime('%d %b %Y')
     date_end_string = date_range[1].strftime('%d %b %Y')
     if str(verif_type).lower() in ['pres', 'upper_air'] or 'P' in str(level):
@@ -886,7 +892,7 @@ def main():
 
     date_range = (
         datetime.strptime(date_beg, '%Y%m%d'), 
-        datetime.strptime(date_end, '%Y%m%d')
+        datetime.strptime(date_end, '%Y%m%d')+td(days=1)-td(milliseconds=1)
     )
     if len(METRICS) == 1:
         metrics = (METRICS[0], None)
@@ -996,7 +1002,7 @@ def main():
                 logger.warning(e)
                 continue
             for domain in DOMAINS:
-                if str(domain).upper() not in case_specs['vx_mask_list']:
+                if str(domain) not in case_specs['vx_mask_list']:
                     e = (f"The requested domain is not valid for the requested"
                          + f" case type ({VERIF_CASETYPE}) and line_type"
                          + f" ({LINE_TYPE}): {domain}")

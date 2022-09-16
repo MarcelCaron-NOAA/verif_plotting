@@ -1703,3 +1703,38 @@ def equalize_samples(logger, df, group_by):
         )
         return df, data_are_equalized
 
+def get_name_for_listed_items(listed_items, joinchars, prechars, postchars, prechars_last, postchars_last):
+    new_items = []
+    if len(listed_items) == 1:
+        return f"{prechars}{listed_items[0]}{postchars}"
+    elif len(listed_items) == 2:
+        return (f"{prechars}{listed_items[0]}{postchars} {prechars_last}"
+                + f"{prechars}{listed_items[1]}{postchars}{postchars_last}")
+    else:
+        for i, item in enumerate(listed_items):
+            if i == 0:
+                start = item
+            elif i == (len(listed_items)-1):
+                if int(item) == int(listed_items[i-1]):
+                    new_items.append(f"{prechars_last}{prechars}{start}{postchars}{postchars_last}")
+                elif int(item) != int(listed_items[i-1])+1:
+                    if int(start) != int(listed_items[i-1]):
+                        new_items.append(f"{prechars}{start}-{listed_items[i-1]}{postchars}")
+                        new_items.append(f"{prechars_last}{prechars}{item}{postchars}{postchars_last}")
+                    else:
+                        new_items.append(f"{prechars}{listed_items[i-1]}{postchars}")
+                        new_items.append(f"{prechars_last}{prechars}{item}{postchars}{postchars_last}")
+                elif int(start) == int(listed_items[0]):
+                    new_items.append(f"{prechars}{start}-{item}{postchars}")
+                else:
+                    new_items.append(f"{prechars_last}{prechars}{start}-{item}{postchars}{postchars_last}")
+            elif int(item) != int(listed_items[i-1])+1:
+                if int(start) == int(listed_items[i-1]):
+                    new_items.append(f"{prechars}{start}{postchars}")
+                else:
+                    new_items.append(
+                        f"{prechars}{start}-{listed_items[i-1]}{postchars}"
+                    )
+                start=item
+    return joinchars.join(new_items)
+

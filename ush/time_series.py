@@ -692,9 +692,15 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         domain_string = domain_translator[domain]
     else:
         domain_string = domain
+    '''
     date_hours_string = ' '.join([
         f'{date_hour:02d}Z,' for date_hour in date_hours
     ])
+    '''
+    date_hours_string = plot_util.get_name_for_listed_items(
+        [f'{date_hour:02d}' for date_hour in date_hours],
+        ', ', '', 'Z', 'and ', ''
+    )
     date_start_string = date_range[0].strftime('%d %b %Y')
     date_end_string = date_range[1].strftime('%d %b %Y')
     if str(verif_type).lower() in ['pres', 'upper_air'] or 'P' in str(level):
@@ -902,7 +908,7 @@ def main():
 
     date_range = (
         datetime.strptime(date_beg, '%Y%m%d'), 
-        datetime.strptime(date_end, '%Y%m%d')
+        datetime.strptime(date_end, '%Y%m%d')+td(days=1)-td(milliseconds=1)
     )
     if len(METRICS) == 1:
         metrics = (METRICS[0], None)
@@ -1012,7 +1018,7 @@ def main():
                 logger.warning(e)
                 continue
             for domain in DOMAINS:
-                if str(domain).upper() not in case_specs['vx_mask_list']:
+                if str(domain) not in case_specs['vx_mask_list']:
                     e = (f"The requested domain is not valid for the"
                          + f" requested case type ({VERIF_CASETYPE}) and"
                          + f" line_type ({LINE_TYPE}): {domain}")
