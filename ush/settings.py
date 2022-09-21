@@ -21,6 +21,7 @@ class Toggle():
             'display_averages': False, # display mean statistic for each model, averaged across the dimension of the independent variable
             'sample_equalization': False, # equalize samples along each value of the independent variable where data exist
             'keep_shared_events_only': False, # functional for time_series only.
+            'clear_prune_directory': True, # remove the intermediate directory created to store pruned data files temporarily
         }
 
 class Templates():
@@ -55,7 +56,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/{MODEL}_precip_*_v{valid?fmt=%Y%m%d}.stat"
+        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Presets():
     def __init__(self):

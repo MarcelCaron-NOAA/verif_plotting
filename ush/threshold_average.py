@@ -457,7 +457,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     xlim_max = np.ceil(xticks_max/incr)*incr
     xticks = [
         x_val for x_val in np.arange(xlim_min, xlim_max+incr, incr)
-    ] 
+    ]
     xtick_labels = [opt+str(xtick) for xtick in xticks]
     number_of_ticks_dig = [25,50,75,100,125,150,175,200]
     show_xtick_every = np.ceil((
@@ -466,6 +466,45 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     xtick_labels_with_blanks = ['' for item in xtick_labels]
     for i, item in enumerate(xtick_labels[::int(show_xtick_every)]):
          xtick_labels_with_blanks[int(show_xtick_every)*i] = item
+    ''' 
+    print(f"xticks: {xticks}")
+    print(f"thresholds: {x_vals.tolist()}")
+    replace_xtick_args = [
+        np.absolute(np.array(xticks)-x_val).argmin()
+        for x_val in x_vals.tolist()
+    ]
+    print(f"replace_xtick_args: {replace_xtick_args}")
+    replace_xticks = [
+        xtick for xtick in xticks 
+        if np.any([
+            np.absolute(xtick-x_val) < incr*show_xtick_every 
+            for x_val in x_vals.tolist()
+        ])
+    ]
+    #replace_xticks = [
+    #    xticks[xtick_arg] for xtick_arg in replace_xtick_args
+    #]
+    print(f"replace_xticks: {replace_xticks}")
+    res_xticks = [val for val in xticks if val not in replace_xticks]
+    print(f"res_xticks: {res_xticks}")
+    res_xlabels = [
+        xtick_labels_with_blanks[v] 
+        for v, val in enumerate(xticks) if val not in replace_xticks
+    ]
+    print(f"res_xlabels: {res_xlabels}")
+    add_labels = [opt+str(x_val) for x_val in x_vals.tolist()]
+    print(f"add_labels: {add_labels}")
+    xticks_argsort = np.argsort(np.concatenate((res_xticks, x_vals.tolist())))
+    print(f"xticks_argsort: {xticks_argsort}")
+    xticks = np.concatenate((
+        res_xticks, x_vals.tolist()
+    ))[xticks_argsort]
+    print(f"xticks: {xticks}")
+    xtick_labels_with_blanks = np.concatenate((
+        res_xlabels, add_labels
+    ))[xticks_argsort]
+    print(f"xtick_labels_with_blanks: {xtick_labels_with_blanks}")
+    '''
     x_buffer_size = .015
     ax.set_xlim(
         xlim_min-incr*x_buffer_size, xlim_max+incr*x_buffer_size
@@ -723,6 +762,9 @@ def main():
     logger.debug(f"X_MAX_LIMIT: Ignored for series by threshold")
     logger.debug(f"X_LIM_LOCK: Ignored for series by threshold")
     logger.debug(f"Display averages? {'yes' if display_averages else 'no'}")
+    logger.debug(
+        f"Clear prune directories? {'yes' if clear_prune_dir else 'no'}"
+    )
     if CONFIDENCE_INTERVALS:
         logger.debug(f"Confidence Level: {int(ci_lev*100)}%")
         logger.debug(f"Bootstrap method: {bs_method}")
@@ -846,7 +888,7 @@ def main():
                     logger, STATS_DIR, PRUNE_DIR, OUTPUT_BASE_TEMPLATE, VERIF_CASE, VERIF_TYPE, 
                     LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, date_hours, 
                     FLEADS, requested_var, fcst_var_names, obs_var_names, MODELS, 
-                    domain, INTERP, MET_VERSION
+                    domain, INTERP, MET_VERSION, clear_prune_dir
                 )
                 if df is None:
                     continue
@@ -956,6 +998,9 @@ if __name__ == "__main__":
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
+
+    # Whether or not to clear the intermediate directory that stores pruned data
+    clear_prune_dir = toggle.plot_settings['clear_prune_directory']
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 

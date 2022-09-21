@@ -100,7 +100,7 @@ def check_empty(df, logger, called_from):
         return False
 
 def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range, 
-              model_list, met_version):
+              model_list, met_version, clear_prune_dir):
     model_list = [str(model) for model in model_list]
     # Create df combining pruned stats for all models in model_list
     start_string = date_range[0].strftime('%HZ %d %B %Y')
@@ -119,6 +119,8 @@ def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range,
             )
             logger.warning("Continuing ...")
             continue
+        if not clear_prune_dir:
+            logger.debug(f"Creating dataframe using pruned data from {fpath}")
         try:
             df_og_colnames = plot_util.get_stat_file_base_columns(met_version)
             df_line_type_colnames = plot_util.get_stat_file_line_type_columns(
@@ -150,13 +152,14 @@ def create_df(logger, stats_dir, pruned_data_dir, line_type, date_range,
             logger.error(f"The file in question:")
             logger.error(f"{fpath}")
             logger.error("Continuing ...")
-    try:
-        shutil.rmtree(pruned_data_dir)
-    except OSError as e:
-        logger.error(e)
-        logger.error(f"The directory in question:")
-        logger.error(f"{pruned_data_dir}")
-        logger.error("Continuing ...")
+    if clear_prune_dir:
+        try:
+            shutil.rmtree(pruned_data_dir)
+        except OSError as e:
+            logger.error(e)
+            logger.error(f"The directory in question:")
+            logger.error(f"{pruned_data_dir}")
+            logger.error("Continuing ...")
     try:
         if check_empty(df, logger, 'create_df'):
             return None
@@ -276,7 +279,7 @@ def get_preprocessed_data(logger, stats_dir, prune_dir, output_base_template,
                           verif_case, verif_type, line_type, date_type, 
                           date_range, eval_period, date_hours, fleads, 
                           var_name, fcst_var_names, obs_var_names, model_list, 
-                          domain, interp, met_version):
+                          domain, interp, met_version, clear_prune_dir):
     valid_range = get_valid_range(
         logger, date_type, date_range, date_hours, fleads
     )
@@ -287,7 +290,7 @@ def get_preprocessed_data(logger, stats_dir, prune_dir, output_base_template,
     )
     df = create_df(
         logger, stats_dir, pruned_data_dir, line_type, date_range, model_list,
-        met_version
+        met_version, clear_prune_dir
     )
     df = filter_by_level_type(df, logger, verif_type)
     df = filter_by_var_name(df, logger, fcst_var_names, obs_var_names)

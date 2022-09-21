@@ -884,6 +884,9 @@ def main():
     logger.debug(f"X_MAX_LIMIT: Ignored for series by valid hour")
     logger.debug(f"X_LIM_LOCK: Ignored for series by valid hour")
     logger.debug(f"Display averages? {'yes' if display_averages else 'no'}")
+    logger.debug(
+        f"Clear prune directories? {'yes' if clear_prune_dir else 'no'}"
+    )
     if CONFIDENCE_INTERVALS:
         logger.debug(f"Confidence Level: {int(ci_lev*100)}%")
         logger.debug(f"Bootstrap method: {bs_method}")
@@ -1016,7 +1019,7 @@ def main():
                     logger, STATS_DIR, PRUNE_DIR, OUTPUT_BASE_TEMPLATE, VERIF_CASE, 
                     VERIF_TYPE, LINE_TYPE, DATE_TYPE, date_range, EVAL_PERIOD, 
                     date_hours, FLEADS, requested_var, fcst_var_names, obs_var_names, 
-                    MODELS, domain, INTERP, MET_VERSION
+                    MODELS, domain, INTERP, MET_VERSION, clear_prune_dir
                 )
                 if df is None:
                     continue
@@ -1115,6 +1118,9 @@ if __name__ == "__main__":
 
     # Whether or not to display average values beside legend labels
     display_averages = toggle.plot_settings['display_averages']
+
+    # Whether or not to clear the intermediate directory that stores pruned data
+    clear_prune_dir = toggle.plot_settings['clear_prune_directory']
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 
