@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta as td
+import numpy as np
 
 class Toggle():
     def __init__(self):
@@ -610,7 +611,26 @@ class ModelSpecs():
 
 class Reference():
     def __init__(self):
-        
+        '''
+        The plotting scripts will convert MET units if they are listed below.
+        The name of the unit must match one of the keys in the 
+        unit_conversions dictionary.  The name of the new unit will become the
+        value of the 'convert_to' key, and if necessary, the data and axis 
+        labels will be converted according to the value of the 'formula' key.
+        Formulas are defined as regular functions in the formulas() subclass 
+        of the Reference() class (i.e., below...)
+        '''
+        self.unit_conversions = {
+            'kg/m^2': {
+                'convert_to': 'in',
+                'formula': self.formulas.mm_to_in
+            },
+            'K': {
+                'convert_to': 'F',
+                'formula': self.formulas.K_to_F
+            }
+        }
+
         '''
         Given a var_name, which is used to find the desired forecast field 
         in the MET .stat files, the plotting scripts will print the long name 
@@ -2022,4 +2042,10 @@ class Reference():
             }
         }
 
-
+    class formulas():
+        def mm_to_in(mm_vals):
+            inch_vals = np.divide(mm_vals, 25.4)
+            return inch_vals
+        def K_to_F(K_vals):
+            F_vals = ((np.array(K_vals)-273.15)*9./5.)+32.
+            return F_vals

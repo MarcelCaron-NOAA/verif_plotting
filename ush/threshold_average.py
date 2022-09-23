@@ -24,6 +24,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from datetime import datetime, timedelta as td
+from decimal import Decimal
 
 SETTINGS_DIR = os.environ['USH_DIR']
 sys.path.insert(0, os.path.abspath(SETTINGS_DIR))
@@ -373,7 +374,13 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         pivot_metric = pivot_metric[pivot_metric.index.isin(indices_in_common)]
         pivot_ci_lower = pivot_ci_lower[pivot_ci_lower.index.isin(indices_in_common)]
         pivot_ci_upper = pivot_ci_upper[pivot_ci_upper.index.isin(indices_in_common)]
+    units = df['FCST_UNITS'].tolist()[0]
+    #pivot_metric = 
     x_vals = pivot_metric.index.astype(float).tolist()
+    if units in reference.unit_conversions:
+        x_vals = reference.unit_conversions[units]['formula'](x_vals)
+        units = reference.unit_conversions[units]['convert_to']
+    print(x_vals)
     x_vals_argsort = np.argsort(x_vals)
     x_vals = np.sort(x_vals)
     x_vals_incr = np.diff(x_vals)
@@ -451,14 +458,28 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         plt.axhline(y=1, color='black', linestyle='--', linewidth=1, zorder=0)
 
     # Configure axis ticks
+    if units in reference.unit_conversions:
+        x_vals_incr = reference.unit_conversions[units]['formulas'](x_vals)
+
     xticks_min = np.min(x_vals)
     xticks_max = np.max(x_vals)
     xlim_min = np.floor(xticks_min/incr)*incr
     xlim_max = np.ceil(xticks_max/incr)*incr
+    print(xlim_min, xlim_max, incr, xlim_max+incr)
+    if incr < 1.:
+        precision_scale = 100/incr
+    else:
+        precision_scale = 1.
     xticks = [
-        x_val for x_val in np.arange(xlim_min, xlim_max+incr, incr)
+        x_val for x_val 
+        in np.arange(
+            xlim_min*precision_scale, 
+            xlim_max*precision_scale+incr*precision_scale, 
+            incr*precision_scale
+        )
     ]
-    xtick_labels = [opt+str(xtick) for xtick in xticks]
+    xticks=np.divide(xticks,precision_scale)
+    xtick_labels = [f'{opt}{xtick}' for xtick in xticks]
     number_of_ticks_dig = [25,50,75,100,125,150,175,200]
     show_xtick_every = np.ceil((
         np.digitize(len(xtick_labels), number_of_ticks_dig) + 2
@@ -466,45 +487,42 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     xtick_labels_with_blanks = ['' for item in xtick_labels]
     for i, item in enumerate(xtick_labels[::int(show_xtick_every)]):
          xtick_labels_with_blanks[int(show_xtick_every)*i] = item
-    ''' 
-    print(f"xticks: {xticks}")
-    print(f"thresholds: {x_vals.tolist()}")
-    replace_xtick_args = [
-        np.absolute(np.array(xticks)-x_val).argmin()
-        for x_val in x_vals.tolist()
-    ]
-    print(f"replace_xtick_args: {replace_xtick_args}")
+     
     replace_xticks = [
         xtick for xtick in xticks 
         if np.any([
-            np.absolute(xtick-x_val) < incr*show_xtick_every 
+            np.absolute(xtick-x_val) < incr/2.*show_xtick_every 
             for x_val in x_vals.tolist()
         ])
     ]
-    #replace_xticks = [
-    #    xticks[xtick_arg] for xtick_arg in replace_xtick_args
-    #]
-    print(f"replace_xticks: {replace_xticks}")
     res_xticks = [val for val in xticks if val not in replace_xticks]
-    print(f"res_xticks: {res_xticks}")
     res_xlabels = [
-        xtick_labels_with_blanks[v] 
-        for v, val in enumerate(xticks) if val not in replace_xticks
+        xtick_labels_with_blanks[v] if val not in replace_xticks
+        else '' for v, val in enumerate(xticks)  
     ]
-    print(f"res_xlabels: {res_xlabels}")
-    add_labels = [opt+str(x_val) for x_val in x_vals.tolist()]
-    print(f"add_labels: {add_labels}")
-    xticks_argsort = np.argsort(np.concatenate((res_xticks, x_vals.tolist())))
-    print(f"xticks_argsort: {xticks_argsort}")
+    print(x_vals)
+    add_labels = [
+        f'{opt}{np.round(x_val)/precision_scale}' for x_val in x_vals*precision_scale
+    ]
+    print(add_labels)
+    xticks_argsort = np.argsort(np.concatenate((xticks, x_vals.tolist())))
     xticks = np.concatenate((
-        res_xticks, x_vals.tolist()
+        xticks, x_vals.tolist()
     ))[xticks_argsort]
-    print(f"xticks: {xticks}")
     xtick_labels_with_blanks = np.concatenate((
         res_xlabels, add_labels
     ))[xticks_argsort]
-    print(f"xtick_labels_with_blanks: {xtick_labels_with_blanks}")
-    '''
+    res_diff = np.diff(
+        [xtick for x, xtick in enumerate(xticks) if xtick_labels_with_blanks[x]]
+    )
+    arg_xtick_labels = [
+        i for i, lab in enumerate(xtick_labels_with_blanks) if lab
+    ]
+    for i, d in enumerate(res_diff):
+        if d < (incr/2.*show_xtick_every):
+            xtick_labels_with_blanks[arg_xtick_labels[i+1]] = ''
+    print(xtick_labels_with_blanks)
+
     x_buffer_size = .015
     ax.set_xlim(
         xlim_min-incr*x_buffer_size, xlim_max+incr*x_buffer_size
@@ -530,7 +548,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         if str(df['OBS_VAR'].tolist()[0]).upper() == 'CEILING':
             var_long_name_key = 'HGTCLDCEIL'
     var_long_name = variable_translator[var_long_name_key]
-    units = df['FCST_UNITS'].tolist()[0]
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
         'SPEED_ERR','DIR_ERR','RMSVE','VDIFF_SPEED','VDIF_DIR',
