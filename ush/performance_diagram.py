@@ -573,6 +573,29 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         logger.info("========================================")
         return None
     units = df['FCST_UNITS'].tolist()[0]
+    if units in reference.unit_conversions:
+        thresh_labels = [float(tlab) for tlab in thresh_labels]
+        thresh_labels = reference.unit_conversions[units]['formula'](thresh_labels)
+        thresh_diff_categories = np.array([
+            [np.power(10., y)]
+            for y in [-5,-4,-3,-2,-1,0,1,2,3,4,5]
+        ]).flatten()
+        precision_scale_indiv_mult = [
+            thresh_diff_categories[item] 
+            for item in np.digitize(thresh_labels, thresh_diff_categories)
+        ]
+        precision_scale_collective_mult = 100/min(precision_scale_indiv_mult)
+        precision_scale = np.multiply(
+            precision_scale_indiv_mult, precision_scale_collective_mult
+        )
+        thresh_labels = [
+            f'{np.round(tlab)/precision_scale[t]}' 
+            for t, tlab in enumerate(
+                np.multiply(thresh_labels, precision_scale)
+            )
+        ]
+        #thresh_labels = [f'{tlab}' for tlab in thresh_labels]
+        units = reference.unit_conversions[units]['convert_to']
     f = lambda m,c,ls,lw,ms,mec: plt.plot(
         [], [], marker=m, mec=mec, mew=2., c=c, ls=ls, lw=lw, ms=ms)[0]
     handles = [

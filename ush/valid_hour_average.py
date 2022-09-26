@@ -623,6 +623,12 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             var_long_name_key = 'HGTCLDCEIL'
     var_long_name = variable_translator[var_long_name_key]
     units = df['FCST_UNITS'].tolist()[0]
+    if units in reference.unit_conversions:
+        if thresh and '' not in thresh:
+            thresh_labels = [float(tlab) for tlab in thresh_labels]
+            thresh_labels = reference.unit_conversions[units]['formula'](thresh_labels)
+            thresh_labels = [str(tlab) for tlab in thresh_labels]
+        units = reference.unit_conversions[units]['convert_to']
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
         'SPEED_ERR','DIR_ERR','RMSVE','VDIFF_SPEED','VDIF_DIR',

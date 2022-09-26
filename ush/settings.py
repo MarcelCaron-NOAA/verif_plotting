@@ -20,7 +20,7 @@ class Toggle():
             'bs_method': 'FORECASTS', # bootstrap method. 'FORECASTS' bootstraps the lines in the stat files, 'MATCHED_PAIRS' bootstraps the f-o matched pairs
             'bs_min_samp': 30, # Minimum number of samples allowed for boostrapping to performed (if there are fewer samples, no confidence intervals)
             'display_averages': False, # display mean statistic for each model, averaged across the dimension of the independent variable
-            'sample_equalization': False, # equalize samples along each value of the independent variable where data exist
+            'sample_equalization': True, # equalize samples along each value of the independent variable where data exist
             'keep_shared_events_only': False, # functional for time_series only.
             'clear_prune_directory': True, # remove the intermediate directory created to store pruned data files temporarily
         }
@@ -57,7 +57,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/{MODEL}_precip_*_v{valid?fmt=%Y%m%d}.stat"
 
 class Presets():
     def __init__(self):

@@ -16,6 +16,7 @@
 import os
 import sys
 import numpy as np
+import math
 import pandas as pd
 import logging
 from functools import reduce
@@ -87,7 +88,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-
     # filter by forecast lead times
     if isinstance(flead, list):
         if len(flead) <= 8:
@@ -354,7 +354,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         print("Quitting due to missing data.  Check the log file for details.")
         return None
 
-
     models_renamed = []
     count_renamed = 1
     for requested_model in model_list:
@@ -489,17 +488,32 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                 ].values
         if not y_lim_lock:
             if metric2_name is not None:
-                y_vals_metric_min = np.nanmin(np.concatenate((y_vals_metric1, y_vals_metric2)))
-                y_vals_metric_max = np.nanmax(np.concatenate((y_vals_metric1, y_vals_metric2)))
+                y_vals_both_metrics = np.concatenate((y_vals_metric1, y_vals_metric2))
+                if np.any(y_vals_both_metrics != np.inf):
+                    y_vals_metric_min = np.nanmin(y_vals_both_metrics[y_vals_both_metrics != np.inf])
+                    y_vals_metric_max = np.nanmax(y_vals_both_metrics[y_vals_both_metrics != np.inf])
+                else:
+                    y_vals_metric_min = np.nanmin(y_vals_both_metrics)
+                    y_vals_metric_max = np.nanmax(y_vals_both_metrics)
             else:
-                y_vals_metric_min = np.nanmin(y_vals_metric1)
-                y_vals_metric_max = np.nanmax(y_vals_metric1)
+                if np.any(y_vals_metric1 != np.inf):
+                    y_vals_metric_min = np.nanmin(y_vals_metric1[y_vals_metric1 != np.inf])
+                    y_vals_metric_max = np.nanmax(y_vals_metric1[y_vals_metric1 != np.inf])
+                else:
+                    y_vals_metric_min = np.nanmin(y_vals_metric1)
+                    y_vals_metric_max = np.nanmax(y_vals_metric1)
             if m == 0:
                 y_mod_min = y_vals_metric_min
                 y_mod_max = y_vals_metric_max
             else:
-                y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
-                y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
+                if math.isinf(y_mod_min):
+                    y_mod_min = y_vals_metric_min
+                else:
+                    y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
+                if math.isinf(y_mod_max):
+                    y_mod_max = y_vals_metric_max
+                else:
+                    y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
             if (y_vals_metric_min > y_min_limit 
                     and y_vals_metric_min <= y_mod_min):
                 y_min = y_vals_metric_min
@@ -624,6 +638,12 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             var_long_name_key = 'HGTCLDCEIL'
     var_long_name = variable_translator[var_long_name_key]
     units = df['FCST_UNITS'].tolist()[0]
+    if units in reference.unit_conversions:
+        if thresh and '' not in thresh:
+            thresh_labels = [float(tlab) for tlab in thresh_labels]
+            thresh_labels = reference.unit_conversions[units]['formula'](thresh_labels)
+            thresh_labels = [str(tlab) for tlab in thresh_labels]
+        units = reference.unit_conversions[units]['convert_to']
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
         'SPEED_ERR','DIR_ERR','RMSVE','VDIFF_SPEED','VDIF_DIR',

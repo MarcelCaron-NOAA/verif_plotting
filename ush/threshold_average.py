@@ -380,7 +380,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     if units in reference.unit_conversions:
         x_vals = reference.unit_conversions[units]['formula'](x_vals)
         units = reference.unit_conversions[units]['convert_to']
-    print(x_vals)
     x_vals_argsort = np.argsort(x_vals)
     x_vals = np.sort(x_vals)
     x_vals_incr = np.diff(x_vals)
@@ -465,7 +464,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     xticks_max = np.max(x_vals)
     xlim_min = np.floor(xticks_min/incr)*incr
     xlim_max = np.ceil(xticks_max/incr)*incr
-    print(xlim_min, xlim_max, incr, xlim_max+incr)
     if incr < 1.:
         precision_scale = 100/incr
     else:
@@ -500,11 +498,9 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         xtick_labels_with_blanks[v] if val not in replace_xticks
         else '' for v, val in enumerate(xticks)  
     ]
-    print(x_vals)
     add_labels = [
         f'{opt}{np.round(x_val)/precision_scale}' for x_val in x_vals*precision_scale
     ]
-    print(add_labels)
     xticks_argsort = np.argsort(np.concatenate((xticks, x_vals.tolist())))
     xticks = np.concatenate((
         xticks, x_vals.tolist()
@@ -521,7 +517,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     for i, d in enumerate(res_diff):
         if d < (incr/2.*show_xtick_every):
             xtick_labels_with_blanks[arg_xtick_labels[i+1]] = ''
-    print(xtick_labels_with_blanks)
 
     x_buffer_size = .015
     ax.set_xlim(
