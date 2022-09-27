@@ -57,7 +57,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/{MODEL}_precip_*_v{valid?fmt=%Y%m%d}.stat"
+        self.output_base_template = "{MODEL}_{RUN_CASE}_*_v{valid?fmt=%Y%m%d}.us.stat"
 
 class Presets():
     def __init__(self):
@@ -477,6 +477,10 @@ class ModelSpecs():
             'RRFS_A': {
                 'settings_key':'RRFS_A', 
                 'plot_name':'RRFS-A'
+            },
+            'wafs': {
+                'settings_key':'WAFS', 
+                'plot_name':'WAFS'
             }
         }
 
@@ -684,6 +688,7 @@ class Reference():
                                     'HGTCLDCEIL': 'Cloud Ceiling Height',
                                     'VIS': 'Visibility',
                                     'ICEC_Z0_mean': 'Sea Ice Concentration',
+                                    'ICESEV': 'Icing Severity',
                                     'REFC': 'Composite Reflectivity',
                                     'REFD': 'Above Ground Level Reflectivity',
                                     'RETOP': 'Echo Top Height'}
@@ -706,6 +711,14 @@ class Reference():
                                   'SAO': 'Southern Atlantic Ocean',
                                   'NH': 'Northern Hemisphere 20N-90N',
                                   'SH': 'Southern Hemisphere 20S-90S',
+                                  'AR2': 'AR2',
+                                  'ASIA': 'Asia',
+                                  'AUNZ': 'Australia and New Zealand',
+                                  'NAMR': 'North America',
+                                  'NHM': 'Northern Hemisphere',
+                                  'NPCF': 'North Pacific Ocean',
+                                  'SHM': 'Southern Hemisphere',
+                                  'TRP': 'TRP',
                                   'G002': 'Global',
                                   'G003': 'Global',
                                   'G130': 'CONUS - NCEP Grid 130',
@@ -2039,7 +2052,28 @@ class Reference():
                                  'plot_group':'sfc_upper'}
                     }
                 }
-            }
+            },
+            'aviation_analysis': {
+                'CTC': {
+                    'plot_stats_list': ('bias, ets, fss, csi, fbias, fbar,'
+                                        + ' obar, pod, farate, faratio, sratio'),
+                    'interp': 'NEAREST',
+                    'vx_mask_list' : [
+                        'AR2','ASIA','AUNZ','EAST','NAMR','NHM','NPCF','SHM','TRP'
+                    ],
+                    'var_dict': {
+                        'ICESEV': {'fcst_var_names': ['ICESEV'],
+                                  'fcst_var_levels': ['P812','P696.8','P595.2','P506','P392.7'],
+                                  'fcst_var_thresholds': '>=1, >=2, >=3, >=4',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['ICESEV'],
+                                  'obs_var_levels': ['P800','P700','P600','P500','P400'],
+                                  'obs_var_thresholds': '>=1, >=2, >=3, >=4',
+                                  'obs_var_options': '',
+                                  'plot_group':'aviation'},
+                    }
+                }
+            },
         }
 
     class formulas():

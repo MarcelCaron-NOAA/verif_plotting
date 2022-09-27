@@ -560,6 +560,8 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     units = df['FCST_UNITS'].tolist()[0]
     if units in reference.unit_conversions:
         units = reference.unit_conversions[units]['convert_to']
+    if units == '-':
+        units = ''
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
         'SPEED_ERR','DIR_ERR','RMSVE','VDIFF_SPEED','VDIF_DIR',
@@ -569,13 +571,19 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         metric1_string, metric2_string = metric_long_names
         if (str(metric1_name).upper() in metrics_using_var_units 
                 and str(metric2_name).upper() in metrics_using_var_units):
-            xlabel = f'{var_long_name} ({units})'
+            if units:
+                xlabel = f'{var_long_name} ({units})'
+            else:
+                xlabel = f'{var_long_name} (unitless)'
         else:
             xlabel = f'{metric1_string} and {metric2_string}'
     else:
         metric1_string = metric_long_names[0]
         if str(metric1_name).upper() in metrics_using_var_units:
-            xlabel = f'{var_long_name} ({units})'
+            if units:
+                xlabel = f'{var_long_name} ({units})'
+            else:
+                xlabel = f'{var_long_name} (unitless)'
         else:
             xlabel = f'{metric1_string}'
     ax.set_xlim(xlim_min, xlim_max)
@@ -652,7 +660,10 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         title1 = f'{metric1_string} and {metric2_string}'
     else:
         title1 = f'{metric1_string}'
-    title2 = f'{var_long_name} ({units}), {domain_string}'
+    if units:
+        title2 = f'{var_long_name} ({units}), {domain_string}'
+    else:
+        title2 = f'{var_long_name} (unitless), {domain_string}'
     title3 = (f'{str(date_type).capitalize()} {date_hours_string}'
               + f' {date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])

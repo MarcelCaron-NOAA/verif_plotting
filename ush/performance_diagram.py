@@ -596,6 +596,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         ]
         #thresh_labels = [f'{tlab}' for tlab in thresh_labels]
         units = reference.unit_conversions[units]['convert_to']
+    if units == '-':
+        units = ''
     f = lambda m,c,ls,lw,ms,mec: plt.plot(
         [], [], marker=m, mec=mec, mew=2., c=c, ls=ls, lw=lw, ms=ms)[0]
     handles = [
@@ -812,7 +814,10 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
     ])
     thresholds_string = f'Forecast Thresholds {thresholds_phrase}'
     title1 = f'Performance Diagram'
-    title2 = (f'{level_string}{var_long_name} ({units}), {domain_string}')
+    if not units:
+        title2 = (f'{level_string}{var_long_name} (unitless), {domain_string}')
+    else:
+        title2 = (f'{level_string}{var_long_name} ({units}), {domain_string}')
     title3 = (f'{str(date_type).capitalize()} {date_hours_string} '
               + f'{date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])

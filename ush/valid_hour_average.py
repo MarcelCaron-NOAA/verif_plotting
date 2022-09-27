@@ -629,6 +629,8 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             thresh_labels = reference.unit_conversions[units]['formula'](thresh_labels)
             thresh_labels = [str(tlab) for tlab in thresh_labels]
         units = reference.unit_conversions[units]['convert_to']
+    if units == '-':
+        units = ''
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
         'SPEED_ERR','DIR_ERR','RMSVE','VDIFF_SPEED','VDIF_DIR',
@@ -638,13 +640,19 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         metric1_string, metric2_string = metric_long_names
         if (str(metric1_name).upper() in metrics_using_var_units
                 and str(metric2_name).upper() in metrics_using_var_units):
-            ylabel = f'{var_long_name} ({units})'
+            if units:
+                ylabel = f'{var_long_name} ({units})'
+            else:
+                ylabel = f'{var_long_name} (unitless)'
         else:
             ylabel = f'{metric1_string} and {metric2_string}'
     else:
         metric1_string = metric_long_names[0]
         if str(metric1_name).upper() in metrics_using_var_units:
-            ylabel = f'{var_long_name} ({units})'
+            if units:
+                ylabel = f'{var_long_name} ({units})'
+            else:
+                ylabel = f'{var_long_name} (unitless)'
         else:
             ylabel = f'{metric1_string}'
     ax.set_ylim(ylim_min, ylim_max)
@@ -736,10 +744,17 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             f'{opt_letter}{thresh_label}' 
             for thresh_label in requested_thresh_labels
         ])
-        title2 = (f'{level_string}{var_long_name} ({thresholds_phrase}'
-                  + f' {units}), {domain_string}')
+        if units:
+            title2 = (f'{level_string}{var_long_name} ({thresholds_phrase}'
+                      + f' {units}), {domain_string}')
+        else:
+            title2 = (f'{level_string}{var_long_name} ({thresholds_phrase}'
+                      + f' unitless), {domain_string}')
     else:
-        title2 = f'{level_string}{var_long_name} ({units}), {domain_string}'
+        if units:
+            title2 = f'{level_string}{var_long_name} ({units}), {domain_string}'
+        else:
+            title2 = f'{level_string}{var_long_name} (unitless), {domain_string}'
     title3 = (f'{str(date_type).capitalize()} {date_hours_string} '
               + f'{date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])

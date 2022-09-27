@@ -380,6 +380,8 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     if units in reference.unit_conversions:
         x_vals = reference.unit_conversions[units]['formula'](x_vals)
         units = reference.unit_conversions[units]['convert_to']
+    if units == '-':
+        units = ''
     x_vals_argsort = np.argsort(x_vals)
     x_vals = np.sort(x_vals)
     x_vals_incr = np.diff(x_vals)
@@ -549,12 +551,18 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         'FBAR_OBAR_SPEED','FBAR_OBAR_DIR','FBAR_SPEED','FBAR_DIR'
     ]
     if str(metric_name).upper() in metrics_using_var_units:
-        ylabel = f'{var_long_name} ({units})'
+        if units:
+            ylabel = f'{var_long_name} ({units})'
+        else:
+            ylabel = f'{var_long_name} (unitless)'
     else:
         ylabel = f'{metric_long_name}'
     ax.set_ylim(ylim_min, ylim_max)
     ax.set_ylabel(ylabel)
-    ax.set_xlabel(f'Forecast Threshold ({units})') 
+    if units:
+        ax.set_xlabel(f'Forecast Threshold ({units})') 
+    else:
+        ax.set_xlabel(f'Forecast Threshold (unitless)')
     ax.set_xticklabels(xtick_labels_with_blanks)
     ax.set_yticks(yticks)
     ax.set_xticks(xticks)
@@ -633,7 +641,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         level_string = f'{level} '
         level_savename = f'{level}_'
     title1 = f'{metric_string}'
-    title2 = f'{level_string}{var_long_name} ({units}), {domain_string}'
+    if units:
+        title2 = f'{level_string}{var_long_name} ({units}), {domain_string}'
+    else:
+        title2 = f'{level_string}{var_long_name} (unitless), {domain_string}'
     title3 = (f'{str(date_type).capitalize()} {date_hours_string} '
               + f'{date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])
