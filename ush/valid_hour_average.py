@@ -301,15 +301,16 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated[str(metric2_name).upper()] = (
             df_aggregated[str(metric2_name).upper()]
         ).astype(float).tolist()
-
+    print(df_aggregated)
     df_aggregated = df_aggregated[
         df_aggregated.index.isin(model_list, level='MODEL')
     ]
-
+    print(df_aggregated)
     pivot_metric1 = pd.pivot_table(
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index='ANTI_DATE_HOURS'
     )
+    print(pivot_metric1)
     pivot_metric1 = pivot_metric1.dropna() 
     if metric2_name is not None:
         pivot_metric2 = pd.pivot_table(
@@ -438,6 +439,7 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 pivot_ci_upper1.index
             ]
         )))
+        print(pivot_metric1)
         pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
         pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
         pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
@@ -475,6 +477,9 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             )
         else:
             model_plot_name = model_list[m]
+        print(pivot_metric1)
+        print(model_list)
+        print(m)
         y_vals_metric1 = pivot_metric1[str(model_list[m])].values
         y_vals_metric1_mean = np.nanmean(y_vals_metric1)
         if metric2_name is not None:
@@ -1105,8 +1110,8 @@ if __name__ == "__main__":
     FLEADS = check_FCST_LEAD(os.environ['FCST_LEAD']).replace(' ','').split(',')
 
     # list of levels
-    FCST_LEVELS = check_FCST_LEVEL(os.environ['FCST_LEVEL']).replace(' ','').split(',')
-    OBS_LEVELS = check_OBS_LEVEL(os.environ['OBS_LEVEL']).replace(' ','').split(',')
+    FCST_LEVELS = re.split(r',(?![*])', check_FCST_LEVEL(os.environ['FCST_LEVEL']).replace(' ',''))
+    OBS_LEVELS = re.split(r',(?![*])', check_OBS_LEVEL(os.environ['OBS_LEVEL']).replace(' ',''))
 
     FCST_THRESH = check_FCST_THRESH(os.environ['FCST_THRESH'], LINE_TYPE)
     OBS_THRESH = check_OBS_THRESH(os.environ['OBS_THRESH'], FCST_THRESH, LINE_TYPE).replace(' ','').split(',')

@@ -57,7 +57,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL}_{RUN_CASE}_*_v{valid?fmt=%Y%m%d}.us.stat"
+        self.output_base_template = "{MODEL_LOWER}.{valid?fmt=%Y%m%d}/{MODEL_LOWER}_*{valid?fmt=%Y%m%d}.stat"
 
 class Presets():
     def __init__(self):
@@ -450,6 +450,10 @@ class ModelSpecs():
                 'settings_key':'NAM_NEST', 
                 'plot_name':'NAM Nest'
             },
+            'NAM_FIREWXNEST': {
+                'settings_key':'NAM_NEST', 
+                'plot_name':'NAM Fire Wx Nest'
+            },
             'namnest': {
                 'settings_key':'NAM_NEST', 
                 'plot_name':'NAM Nest'
@@ -632,6 +636,10 @@ class Reference():
             'K': {
                 'convert_to': 'F',
                 'formula': self.formulas.K_to_F
+            },
+            'C': {
+                'convert_to': 'F',
+                'formula': self.formulas.C_to_F
             }
         }
 
@@ -687,6 +695,10 @@ class Reference():
                                     'TCDC': 'Cloud Area Fraction',
                                     'HGTCLDCEIL': 'Cloud Ceiling Height',
                                     'VIS': 'Visibility',
+                                    'sst': 'Sea Surface Temperature',
+                                    'ssh': 'Sea Surface Height',
+                                    'ice_coverage': 'Sea Ice Concentration',
+                                    'sss': 'Sea Surface Salinity',
                                     'ICEC_Z0_mean': 'Sea Ice Concentration',
                                     'ICESEV': 'Icing Severity',
                                     'REFC': 'Composite Reflectivity',
@@ -705,10 +717,19 @@ class Reference():
                                   'PNA': 'Pacific North America',
                                   'N60': '60N-90N',
                                   'S60': '60S-90S',
+                                  'North_Pacific': 'Northern Pacific Ocean',
                                   'NPO': 'Northern Pacific Ocean',
+                                  'South_Pacific': 'Southern Pacific Ocean',
                                   'SPO': 'Southern Pacific Ocean',
+                                  'Equatorial_Pacific': 'Equatorial Pacific Ocean',
+                                  'North_Atlantic': 'Northern Atlantic Ocean',
                                   'NAO': 'Northern Atlantic Ocean',
+                                  'South_Atlantic': 'Southern Atlantic Ocean',
                                   'SAO': 'Southern Atlantic Ocean',
+                                  'Equatorial_Atlantic': 'Equatorial Atlantic Ocean',
+                                  'Indian': 'Indian Ocean',
+                                  'Southern': 'Southern Ocean',
+                                  'Mediterranean': 'Mediterranean Sea',
                                   'NH': 'Northern Hemisphere 20N-90N',
                                   'SH': 'Southern Hemisphere 20S-90S',
                                   'AR2': 'AR2',
@@ -721,13 +742,17 @@ class Reference():
                                   'TRP': 'TRP',
                                   'G002': 'Global',
                                   'G003': 'Global',
+                                  'Global': 'Global',
                                   'G130': 'CONUS - NCEP Grid 130',
                                   'G211': 'CONUS - NCEP Grid 211',
+                                  'G221': 'CONUS - NCEP Grid 221',
                                   'G236': 'CONUS - NCEP Grid 236',
                                   'G223': 'CONUS - NCEP Grid 223',
                                   'CONUS': 'CONUS',
                                   'POLAR': 'Polar 60-90 N/S',
                                   'ARCTIC': 'Arctic',
+                                  'Arctic': 'Arctic Ocean',
+                                  'Antarctic': 'Antarctic Ocean',
                                   'EAST': 'Eastern US',
                                   'CONUS_East': 'Eastern US',
                                   'WEST': 'Western US',
@@ -1707,11 +1732,33 @@ class Reference():
                                         + ' faratio, sratio'),
                     'interp': 'NEAREST, BILIN',
                     'vx_mask_list' : [
-                        'CONUS', 'G130', 'G214', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
+                        'CONUS', 'G130', 'G214', 'G221', 'WEST', 'EAST', 'MDW', 'NPL', 'SPL', 'NEC', 
                         'SEC', 'NWC', 'SWC', 'NMT', 'SMT', 'SWD', 'GRB', 
                         'LMV', 'GMC', 'APL', 'NAK', 'SAK'
                     ],
                     'var_dict': {
+                         'RH2m': {'fcst_var_names': ['RH'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': (' <=15, <=20,'
+                                                          + ' <=25, <=30'),
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['RH'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': (' <=15, <=20,'
+                                                         + ' <=25, <=30'),
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                         'DPT2m': {'fcst_var_names': ['DPT'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': (' >=4.4, >=10,'
+                                                          + ' >=15.55, >=21.11'),
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['TDO'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': (' >=4.4, >=10,'
+                                                         + ' >=15.55, >=21.11'),
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
                         'VISsfc': {'fcst_var_names': ['VIS'],
                                    'fcst_var_levels': ['L0'],
                                    'fcst_var_thresholds': ('<=800, <805, <=1600, <1609,'
@@ -1834,6 +1881,75 @@ class Reference():
                                     'obs_var_names': ['PRES'],
                                     'obs_var_levels': ['Z0'],
                                     'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'}
+                    }
+                }
+            },
+            'grid2grid_global_sfc': {
+                'SL1L2': {
+                    'plot_stats_list': 'bias, rmse, fbar_obar',
+                    'interp': 'NEAREST',
+                    'vx_mask_list' : [
+                        'Global','North_Atlantic','South_Atlantic','Equatorial_Atlantic',
+                        'North_Pacific','South_Pacific','Equatorial_Pacific','Indian',
+                        'Southern','Arctic','Mediterranean','Antarctic'
+                    ],
+                    'var_dict': {
+                        'SST': {'fcst_var_names': ['sst'],
+                                  'fcst_var_levels': ['0,*,*'],
+                                  'fcst_var_thresholds': '',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['analysed_sst'],
+                                  'obs_var_levels': ['0,*,*'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'SSH': {'fcst_var_names': ['ssh'],
+                                   'fcst_var_levels': ['0,*,*'],
+                                   'fcst_var_thresholds': '',
+                                   'fcst_var_options': '',
+                                   'obs_var_names': ['adt'],
+                                   'obs_var_levels': ['0,*,*'],
+                                   'obs_var_thresholds': '',
+                                   'obs_var_options': '',
+                                   'plot_group':'sfc_upper'},
+                        'SIC': {'fcst_var_names': ['sic'],
+                                    'fcst_var_levels': ['ice_coverage'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['ice_conc'],
+                                    'obs_var_levels': ['0,*,*'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'}
+                    }
+                },
+                'CTC': {
+                    'plot_stats_list': 'sratio, pod, csi, hss',
+                    'interp': 'NEAREST',
+                    'vx_mask_list' : [
+                        'Global','North_Atlantic','South_Atlantic','Equatorial_Atlantic',
+                        'North_Pacific','South_Pacific','Equatorial_Pacific','Indian',
+                        'Southern','Arctic','Mediterranean','Antarctic'
+                    ],
+                    'var_dict': {
+                        'SST': {'fcst_var_names': ['sst'],
+                                  'fcst_var_levels': ['0,*,*'],
+                                  'fcst_var_thresholds': '>=0, >=26.5',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['analysed_sst'],
+                                  'obs_var_levels': ['0,*,*'],
+                                  'obs_var_thresholds': '>=0, >=26.5',
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'SIC': {'fcst_var_names': ['sic'],
+                                    'fcst_var_levels': ['ice_coverage'],
+                                    'fcst_var_thresholds': '>=15, >=40, >=80',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['ice_conc'],
+                                    'obs_var_levels': ['0,*,*'],
+                                    'obs_var_thresholds': '>=15, >=40, >=80',
                                     'obs_var_options': '',
                                     'plot_group':'sfc_upper'}
                     }
@@ -2082,4 +2198,7 @@ class Reference():
             return inch_vals
         def K_to_F(K_vals):
             F_vals = ((np.array(K_vals)-273.15)*9./5.)+32.
+            return F_vals
+        def C_to_F(C_vals):
+            F_vals = (np.array(C_vals)*9./5.)+32.
             return F_vals
