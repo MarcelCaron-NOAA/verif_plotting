@@ -1886,9 +1886,9 @@ class Reference():
                     }
                 }
             },
-            'grid2grid_global_sfc': {
+            'grid2grid_rtofs_sfc': {
                 'SL1L2': {
-                    'plot_stats_list': 'bias, rmse, fbar_obar',
+                    'plot_stats_list': 'bias, rmse, fbar_obar, estdev',
                     'interp': 'NEAREST',
                     'vx_mask_list' : [
                         'Global','North_Atlantic','South_Atlantic','Equatorial_Atlantic',
@@ -1904,7 +1904,16 @@ class Reference():
                                   'obs_var_levels': ['0,*,*'],
                                   'obs_var_thresholds': '',
                                   'obs_var_options': '',
-                                  'plot_group':'sfc_upper'},
+                                  'plot_group':'rtofs_sfc'},
+                        'SSS': {'fcst_var_names': ['sss'],
+                                  'fcst_var_levels': ['0,*,*'],
+                                  'fcst_var_thresholds':'',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['sss'],
+                                  'obs_var_levels': ['0,0,*,*'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group': 'rtofs_sfc'},
                         'SSH': {'fcst_var_names': ['ssh'],
                                    'fcst_var_levels': ['0,*,*'],
                                    'fcst_var_thresholds': '',
@@ -1913,16 +1922,63 @@ class Reference():
                                    'obs_var_levels': ['0,*,*'],
                                    'obs_var_thresholds': '',
                                    'obs_var_options': '',
-                                   'plot_group':'sfc_upper'},
-                        'SIC': {'fcst_var_names': ['sic'],
-                                    'fcst_var_levels': ['ice_coverage'],
+                                   'plot_group':'rtofs_sfc'},
+                        'SIC': {'fcst_var_names': ['ice_coverage'],
+                                    'fcst_var_levels': ['0,*,*'],
                                     'fcst_var_thresholds': '',
                                     'fcst_var_options': '',
                                     'obs_var_names': ['ice_conc'],
                                     'obs_var_levels': ['0,*,*'],
                                     'obs_var_thresholds': '',
                                     'obs_var_options': '',
-                                    'plot_group':'sfc_upper'}
+                                    'plot_group':'rtofs_sfc'}
+                    }
+                },
+                'SAL1L2': {
+                    'plot_stats_list': 'acc',
+                    'interp': 'NEAREST',
+                    'vx_mask_list' : [
+                        'Global','North_Atlantic','South_Atlantic','Equatorial_Atlantic',
+                        'North_Pacific','South_Pacific','Equatorial_Pacific','Indian',
+                        'Southern','Arctic','Mediterranean'
+                    ],
+                    'var_dict': {
+                        'SST': {'fcst_var_names': ['sst'],
+                                  'fcst_var_levels': ['0,*,*'],
+                                  'fcst_var_thresholds': '',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['analysed_sst'],
+                                  'obs_var_levels': ['0,*,*'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group':'rtofs_sfc'},
+                        'SSS': {'fcst_var_names': ['sss'],
+                                  'fcst_var_levels': ['0,*,*'],
+                                  'fcst_var_thresholds':'',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['sss'],
+                                  'obs_var_levels': ['0,0,*,*'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group': 'rtofs_sfc'},
+                        'SSH': {'fcst_var_names': ['ssh'],
+                                   'fcst_var_levels': ['0,*,*'],
+                                   'fcst_var_thresholds': '',
+                                   'fcst_var_options': '',
+                                   'obs_var_names': ['adt'],
+                                   'obs_var_levels': ['0,*,*'],
+                                   'obs_var_thresholds': '',
+                                   'obs_var_options': '',
+                                   'plot_group':'rtofs_sfc'},
+                        'SIC': {'fcst_var_names': ['ice_coverage'],
+                                    'fcst_var_levels': ['0,*,*'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['ice_conc'],
+                                    'obs_var_levels': ['0,*,*'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'rtofs_sfc'}
                     }
                 },
                 'CTC': {
@@ -1942,16 +1998,16 @@ class Reference():
                                   'obs_var_levels': ['0,*,*'],
                                   'obs_var_thresholds': '>=0, >=26.5',
                                   'obs_var_options': '',
-                                  'plot_group':'sfc_upper'},
-                        'SIC': {'fcst_var_names': ['sic'],
-                                    'fcst_var_levels': ['ice_coverage'],
+                                  'plot_group':'rtofs_sfc'},
+                        'SIC': {'fcst_var_names': ['ice_coverage'],
+                                    'fcst_var_levels': ['0,*,*'],
                                     'fcst_var_thresholds': '>=15, >=40, >=80',
                                     'fcst_var_options': '',
                                     'obs_var_names': ['ice_conc'],
                                     'obs_var_levels': ['0,*,*'],
                                     'obs_var_thresholds': '>=15, >=40, >=80',
                                     'obs_var_options': '',
-                                    'plot_group':'sfc_upper'}
+                                    'plot_group':'rtofs_sfc'}
                     }
                 }
             },

@@ -15,6 +15,7 @@
 import os
 import sys
 import numpy as np
+import math
 import pandas as pd
 import logging
 from functools import reduce
@@ -301,16 +302,13 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated[str(metric2_name).upper()] = (
             df_aggregated[str(metric2_name).upper()]
         ).astype(float).tolist()
-    print(df_aggregated)
     df_aggregated = df_aggregated[
         df_aggregated.index.isin(model_list, level='MODEL')
     ]
-    print(df_aggregated)
     pivot_metric1 = pd.pivot_table(
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index='ANTI_DATE_HOURS'
     )
-    print(pivot_metric1)
     pivot_metric1 = pivot_metric1.dropna() 
     if metric2_name is not None:
         pivot_metric2 = pd.pivot_table(
@@ -439,7 +437,6 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 pivot_ci_upper1.index
             ]
         )))
-        print(pivot_metric1)
         pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
         pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
         pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
@@ -477,9 +474,6 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
             )
         else:
             model_plot_name = model_list[m]
-        print(pivot_metric1)
-        print(model_list)
-        print(m)
         y_vals_metric1 = pivot_metric1[str(model_list[m])].values
         y_vals_metric1_mean = np.nanmean(y_vals_metric1)
         if metric2_name is not None:
@@ -501,17 +495,32 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 ].values
         if not y_lim_lock:
             if metric2_name is not None:
-                y_vals_metric_min = np.nanmin([y_vals_metric1, y_vals_metric2])
-                y_vals_metric_max = np.nanmax([y_vals_metric1, y_vals_metric2])
+                y_vals_both_metrics = np.concatenate((y_vals_metric1, y_vals_metric2))
+                if np.any(y_vals_both_metrics != np.inf):
+                    y_vals_metric_min = np.nanmin(y_vals_both_metrics[y_vals_both_metrics != np.inf])
+                    y_vals_metric_max = np.nanmax(y_vals_both_metrics[y_vals_both_metrics != np.inf])
+                else:
+                    y_vals_metric_min = np.nanmin(y_vals_both_metrics)
+                    y_vals_metric_max = np.nanmax(y_vals_both_metrics)
             else:
-                y_vals_metric_min = np.nanmin(y_vals_metric1)
-                y_vals_metric_max = np.nanmax(y_vals_metric1)
+                if np.any(y_vals_metric1 != np.inf):
+                    y_vals_metric_min = np.nanmin(y_vals_metric1[y_vals_metric1 != np.inf])
+                    y_vals_metric_max = np.nanmax(y_vals_metric1[y_vals_metric1 != np.inf])
+                else:
+                    y_vals_metric_min = np.nanmin(y_vals_metric1)
+                    y_vals_metric_max = np.nanmax(y_vals_metric1)
             if m == 0:
                 y_mod_min = y_vals_metric_min
                 y_mod_max = y_vals_metric_max
             else:
-                y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
-                y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
+                if math.isinf(y_mod_min):
+                    y_mod_min = y_vals_metric_min
+                else:
+                    y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
+                if math.isinf(y_mod_max):
+                    y_mod_max = y_vals_metric_max
+                else:
+                    y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
             if (y_vals_metric_min > y_min_limit 
                     and y_vals_metric_min <= y_mod_min):
                 y_min = y_vals_metric_min
@@ -1110,8 +1119,8 @@ if __name__ == "__main__":
     FLEADS = check_FCST_LEAD(os.environ['FCST_LEAD']).replace(' ','').split(',')
 
     # list of levels
-    FCST_LEVELS = re.split(r',(?![*])', check_FCST_LEVEL(os.environ['FCST_LEVEL']).replace(' ',''))
-    OBS_LEVELS = re.split(r',(?![*])', check_OBS_LEVEL(os.environ['OBS_LEVEL']).replace(' ',''))
+    FCST_LEVELS = re.split(r',(?![0*])', check_FCST_LEVEL(os.environ['FCST_LEVEL']).replace(' ',''))
+    OBS_LEVELS = re.split(r',(?![0*])', check_OBS_LEVEL(os.environ['OBS_LEVEL']).replace(' ',''))
 
     FCST_THRESH = check_FCST_THRESH(os.environ['FCST_THRESH'], LINE_TYPE)
     OBS_THRESH = check_OBS_THRESH(os.environ['OBS_THRESH'], FCST_THRESH, LINE_TYPE).replace(' ','').split(',')
