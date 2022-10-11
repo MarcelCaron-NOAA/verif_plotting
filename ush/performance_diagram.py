@@ -725,7 +725,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
 
     ax.legend(
         handles, labels, loc='upper center', fontsize=15, framealpha=1, 
-        bbox_to_anchor=(0.5, -0.08), ncol=4, frameon=True, numpoints=1, 
+        bbox_to_anchor=(0.5, -0.08), ncol=5, frameon=True, numpoints=1, 
         borderpad=.8, labelspacing=2., columnspacing=3., handlelength=3., 
         handletextpad=.4, borderaxespad=.5) 
     ax.grid(

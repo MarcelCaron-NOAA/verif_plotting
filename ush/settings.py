@@ -57,7 +57,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL_LOWER}.{valid?fmt=%Y%m%d}/{MODEL_LOWER}_*{valid?fmt=%Y%m%d}.stat"
+        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Presets():
     def __init__(self):

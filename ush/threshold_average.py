@@ -92,7 +92,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
                        + f" plot...")
         logger.info("========================================")
         return None
-
     # filter by forecast lead times
     if isinstance(flead, list):
         if len(flead) <= 8:
@@ -124,7 +123,12 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         logger.error(e1)
         logger.error(e2)
         raise ValueError(e1+"\n"+e2)
-
+    if df.empty:
+        logger.warning(f"Empty Dataframe. Continuing onto next plot...")
+        plt.close(num)
+        logger.info("========================================")
+        return None
+    
     # Remove from date_hours the valid/init hours that don't exist in the 
     # dataframe
     date_hours = np.array(date_hours)[[
@@ -152,7 +156,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         logger.error(e)
         logger.error("Quitting ...")
         raise ValueError(e+"\nQuitting ...")
-
+    
     df_thresh_symbol, df_thresh_letter = list(
         zip(*[plot_util.format_thresh(t) for t in df['FCST_THRESH']])
     )
@@ -205,7 +209,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-    print(df)
+    
     group_by = ['MODEL','FCST_THRESH_VALUE']
     if sample_equalization:
         df, bool_success = plot_util.equalize_samples(logger, df, group_by)
@@ -217,7 +221,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
-    print(df_aggregated)
     # Remove data if they exist for some but not all models at some value of 
     # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
     # error
@@ -232,7 +235,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated.index.get_level_values('FCST_THRESH_VALUE')
         .isin(df_reduced.index)
     ]
-    print(df_aggregated)
 
     if df_aggregated.empty:
         logger.warning(f"Empty Dataframe. Continuing onto next plot...")
@@ -245,7 +247,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         logger, df_aggregated, str(metric_name).lower()
     )
     df_aggregated[str(metric_name).upper()] = stat_output[0]
-    print(df_aggregated)
     metric_long_name = stat_output[2]
     if confidence_intervals:
         ci_output = df_groups.apply(
@@ -277,7 +278,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
                 'CI_UPPER'
             ].values
 
-    print(df_aggregated)
     df_aggregated[str(metric_name).upper()] = (
         df_aggregated[str(metric_name).upper()]
     ).astype(float).tolist()
@@ -286,12 +286,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated.index.isin(model_list, level='MODEL')
     ]
 
-    print(df_aggregated)
     pivot_metric = pd.pivot_table(
         df_aggregated, values=str(metric_name).upper(), columns='MODEL', 
         index='FCST_THRESH_VALUE'
     )
-    print(pivot_metric)
     pivot_metric = pivot_metric.dropna()
     if confidence_intervals:
         pivot_ci_lower = pd.pivot_table(
@@ -367,7 +365,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
 
     # Plot data
     logger.info("Begin plotting ...")
-    print(pivot_metric)
 
     if confidence_intervals:
         indices_in_common = list(set.intersection(*map(
@@ -400,7 +397,6 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     incr = incrs[incr_idx-1]
     y_min = y_min_limit
     y_max = y_max_limit
-    print(pivot_metric)
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
