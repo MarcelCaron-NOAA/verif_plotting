@@ -1542,7 +1542,7 @@ class Reference():
                                                     'P10', 'P5', 'P1'],
                                 'fcst_var_thresholds': '',
                                 'fcst_var_options': '',
-                                'obs_var_names': ['HGT'],
+                                'obs_var_names': ['HGT','ZOB'],
                                 'obs_var_levels': ['P1000', 'P925', 'P850',
                                                    'P700', 'P500', 'P400',
                                                    'P300', 'P250', 'P200',
