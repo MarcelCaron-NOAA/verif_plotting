@@ -161,7 +161,8 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
-
+    if sample_equalization:
+        df_aggregated['COUNTS']=df_groups.size()
     # Remove data if they exist for some but not all models at some value of 
     # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
     # error
@@ -237,6 +238,11 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index='PLEV'
     )
+    if sample_equalization:
+        pivot_counts = pd.pivot_table(
+            df_aggregated, values='COUNTS', columns='MODEL', 
+            index='PLEV'
+        )
     if metric2_name:
         pivot_metric2 = pd.pivot_table(
             df_aggregated, values=str(metric2_name).upper(), columns='MODEL', 
@@ -364,6 +370,8 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
         pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
         pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
+        if sample_equalization:
+            pivot_counts = pivot_counts[pivot_counts.index.isin(indices_in_common1)]
         if metric2_name is not None:
             indices_in_common2 = list(set.intersection(*map(
                 set, 
@@ -637,6 +645,24 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
         b=True, which='major', axis='both', alpha=.5, linestyle='--', 
         linewidth=.5, zorder=0
     )
+
+    if sample_equalization:
+        counts = pivot_counts.mean(axis=1, skipna=True).fillna('')
+        for count, yval in zip(counts, y_vals1.tolist()):
+            if not isinstance(count, str):
+                count = str(int(count))
+            ax.annotate(
+                f'{count}', xy=(1.,yval),
+                xycoords=('axes fraction','data'), xytext=(9,0),
+                textcoords='offset points', va='center', fontsize=11,
+                color='dimgrey', ha='left'
+            )
+        ax.annotate(
+            '#SAMPLES', xy=(1.,1.), xycoords='axes fraction',
+            xytext=(9,5), textcoords='offset points', va='bottom',
+            fontsize=11, color='dimgrey', ha='right'
+        )
+        fig.subplots_adjust(right=.95)
 
     # Title
     domain = df['VX_MASK'].tolist()[0]

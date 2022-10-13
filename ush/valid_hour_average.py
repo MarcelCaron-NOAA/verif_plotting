@@ -234,7 +234,8 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
-
+    if sample_equalization:
+        df_aggregated['COUNTS']=df_groups.size()
     # Remove data if they exist for some but not all models at some value of 
     # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
     # error
@@ -309,6 +310,11 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric1_name).upper(), columns='MODEL', 
         index='ANTI_DATE_HOURS'
     )
+    if sample_equalization:
+        pivot_counts=pd.pivot_table(
+            df_aggregated, values='COUNTS', columns='MODEL',
+            index='ANTI_DATE_HOURS'
+        )
     pivot_metric1 = pivot_metric1.dropna() 
     if metric2_name is not None:
         pivot_metric2 = pd.pivot_table(
@@ -440,6 +446,8 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         pivot_metric1 = pivot_metric1[pivot_metric1.index.isin(indices_in_common1)]
         pivot_ci_lower1 = pivot_ci_lower1[pivot_ci_lower1.index.isin(indices_in_common1)]
         pivot_ci_upper1 = pivot_ci_upper1[pivot_ci_upper1.index.isin(indices_in_common1)]
+        if sample_equalization:
+            pivot_counts = pivot_counts[pivot_counts.index.isin(indices_in_common1)]
         if metric2_name is not None:
             indices_in_common2 = list(set.intersection(*map(
                 set, 
@@ -694,6 +702,24 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         linewidth=.5, zorder=0
     )
 
+    if sample_equalization:
+        counts = pivot_counts.mean(axis=1, skipna=True).fillna('')
+        for count, xval in zip(counts, x_vals1.tolist()):
+            if not isinstance(count, str):
+                count = str(int(count))
+            ax.annotate(
+                f'{count}', xy=(xval,1.),
+                xycoords=('data','axes fraction'), xytext=(0,18),
+                textcoords='offset points', va='top', fontsize=11,
+                color='dimgrey', ha='center'
+            )
+        ax.annotate(
+            '#SAMPLES', xy=(0.,1.), xycoords='axes fraction',
+            xytext=(-50, 21), textcoords='offset points', va='top', 
+            fontsize=11, color='dimgrey', ha='center'
+        )
+        fig.subplots_adjust(top=.9)
+
     # Title
     domain = df['VX_MASK'].tolist()[0]
     var_savename = df['FCST_VAR'].tolist()[0]
@@ -772,7 +798,11 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
     title3 = (f'{str(date_type).capitalize()} {date_hours_string} '
               + f'{date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])
-    ax.set_title(title_center, loc=plotter.title_loc) 
+    if sample_equalization:
+        title_pad=40
+    else:
+        title_pad=None
+    ax.set_title(title_center, loc=plotter.title_loc, pad=title_pad) 
     logger.info("... Plotting complete.")
 
     # Saving

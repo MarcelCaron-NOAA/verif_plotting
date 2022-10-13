@@ -221,6 +221,8 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated = df_groups.sum()
     else:
         df_aggregated = df_groups.mean()
+    if sample_equalization:
+        df_aggregated['COUNTS']=df_groups.size()
     # Remove data if they exist for some but not all models at some value of 
     # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
     # error
@@ -290,6 +292,11 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric_name).upper(), columns='MODEL', 
         index='FCST_THRESH_VALUE'
     )
+    if sample_equalization:
+        pivot_counts = pd.pivot_table(
+            df_aggregated, values='COUNTS', columns='MODEL',
+            index='FCST_THRESH_VALUE'
+        )
     pivot_metric = pivot_metric.dropna()
     if confidence_intervals:
         pivot_ci_lower = pd.pivot_table(
@@ -378,6 +385,8 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         pivot_metric = pivot_metric[pivot_metric.index.isin(indices_in_common)]
         pivot_ci_lower = pivot_ci_lower[pivot_ci_lower.index.isin(indices_in_common)]
         pivot_ci_upper = pivot_ci_upper[pivot_ci_upper.index.isin(indices_in_common)]
+        if sample_equalization:
+            pivot_counts = pivot_counts[pivot_counts.index.isin(indices_in_common)]
     units = df['FCST_UNITS'].tolist()[0]
     #pivot_metric = 
     x_vals = pivot_metric.index.astype(float).tolist()
@@ -594,6 +603,24 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         linewidth=.5, zorder=0
     )
 
+    if sample_equalization:
+        counts = pivot_counts.mean(axis=1, skipna=True).fillna('')
+        for count, xval in zip(counts, x_vals.tolist()):
+            if not isinstance(count, str):
+                count = str(int(count))
+            ax.annotate(
+                f'{count}', xy=(xval,1.),
+                xycoords=('data','axes fraction'), xytext=(0,18),
+                textcoords='offset points', va='top', fontsize=11,
+                color='dimgrey', ha='center'
+            )
+        ax.annotate(
+            '#SAMPLES', xy=(0.,1.), xycoords='axes fraction',
+            xytext=(-50, 21), textcoords='offset points', va='top',
+            fontsize=11, color='dimgrey', ha='center'
+        )
+        fig.subplots_adjust(top=.9)
+
     # Title
     domain = df['VX_MASK'].tolist()[0]
     var_savename = df['FCST_VAR'].tolist()[0]
@@ -655,7 +682,11 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     title3 = (f'{str(date_type).capitalize()} {date_hours_string} '
               + f'{date_start_string} to {date_end_string}, {frange_string}')
     title_center = '\n'.join([title1, title2, title3])
-    ax.set_title(title_center, loc=plotter.title_loc) 
+    if sample_equalization:
+        title_pad=40
+    else:
+        title_pad=None
+    ax.set_title(title_center, loc=plotter.title_loc, pad=title_pad) 
     logger.info("... Plotting complete.")
 
     # Saving

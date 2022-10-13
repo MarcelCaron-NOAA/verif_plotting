@@ -230,6 +230,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
     df_groups = df.groupby(group_by)
     # Aggregate unit statistics before calculating metrics
     df_aggregated = df_groups.sum()
+    if sample_equalization:
+        df_aggregated['COUNTS']=df_groups.size()
     # Remove data if they exist for some but not all models at some value of 
     # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
     # error
@@ -305,6 +307,11 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         df_aggregated, values=str(metric2_name).upper(), columns='MODEL', 
         index='FCST_THRESH_VALUE'
     )
+    if sample_equalization:
+        pivot_counts = pd.pivot_table(
+            df_aggregated, values='COUNTS', columns='MODEL',
+            index='FCST_THRESH_VALUE'
+        )
     pivot_metric1 = pivot_metric1.dropna() 
     pivot_metric2 = pivot_metric2.dropna() 
     all_thresh_idx = np.unique(
@@ -355,6 +362,10 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             pivot_metric2.drop(
                 labels=thresh_idx, inplace=True, errors='ignore'
             )
+            if sample_equalization:
+                pivot_counts.drop(
+                    labels=thresh_idx, inplace=True, errors='ignore'
+                )
     if confidence_intervals:
         for ci_thresh_idx in all_ci_thresh_idx:
             if np.any([
@@ -383,6 +394,10 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             pivot_metric2.drop(
                 columns=model_col, inplace=True, errors='ignore'
             )
+            if sample_equalization:
+                pivot_counts.drop(
+                    column=model_col, inplace=True, errors='ignore'
+                )
             if confidence_intervals:
                 pivot_ci_lower1.drop(
                     columns=model_col, inplace=True, errors='ignore'
@@ -599,6 +614,16 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         f'{opt}{thresh_label} {units}'
         for thresh_label in thresh_labels
     ]
+    if sample_equalization:
+        counts = pivot_counts.mean(axis=1, skipna=True).fillna('')
+        counts = [
+            str(int(count)) if not isinstance(count,str) else count
+            for count in counts
+        ]
+        labels = [
+            label+f' ({counts[l]})'
+            for l, label in enumerate(labels)
+        ]
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -636,9 +661,15 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                                       + f' {y_mean:.2f})')
         else:
             metric_mean_fmt_string = f'{model_plot_name}'
+        line_start = float(
+            np.multiply(x_vals,y_vals)[0] > np.multiply(x_vals,y_vals)[-1]
+        )
+        line_end = float(
+            np.multiply(x_vals,y_vals)[0] < np.multiply(x_vals,y_vals)[-1]
+        )
         plt.plot(
-            np.concatenate(([1.],x_vals,[0.])), 
-            np.concatenate(([1.],y_vals,[0.])), 
+            np.concatenate(([line_start],x_vals,[line_end])), 
+            np.concatenate(([line_start],y_vals,[line_end])), 
             marker='None', c=mod_setting_dicts[m]['color'], 
             mew=2., mec='white', figure=fig, ms=0, 
             ls=mod_setting_dicts[m]['linestyle'], 
