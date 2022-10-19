@@ -482,6 +482,22 @@ class ModelSpecs():
                 'settings_key':'RRFS_A', 
                 'plot_name':'RRFS-A'
             },
+            'RRFS_A_AK': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A'
+            },
+            'RRFS_A_PR': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A'
+            },
+            'RRFS_A_HI': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A'
+            },
+            'RRFS_A_CONUS': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A'
+            },
             'wafs': {
                 'settings_key':'WAFS', 
                 'plot_name':'WAFS'
