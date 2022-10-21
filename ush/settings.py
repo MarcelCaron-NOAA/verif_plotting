@@ -482,6 +482,26 @@ class ModelSpecs():
                 'settings_key':'RRFS_A', 
                 'plot_name':'RRFS-A'
             },
+            'RRFS_A_AK': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A Alaska'
+            },
+            'RRFS_A_PR': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A Puerto Rico'
+            },
+            'RRFS_A_HI': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A Hawaii'
+            },
+            'RRFS_A_CONUS': {
+                'settings_key':'RRFS_A', 
+                'plot_name':'RRFS-A CONUS'
+            },
+            'RRFS_A_NACONUS': {
+                'settings_key':'RRFS_A_NA', 
+                'plot_name':'RRFS-A N. America'
+            },
             'wafs': {
                 'settings_key':'WAFS', 
                 'plot_name':'WAFS'
@@ -587,6 +607,9 @@ class ModelSpecs():
             'RRFS_A': {'color': '#00dc00',
                       'marker': 'o', 'markersize': 12,
                       'linestyle': 'solid', 'linewidth': 3.},
+            'RRFS_A_NA': {'color': '#00dc00',
+                      'marker': 'P', 'markersize': 14,
+                      'linestyle': 'dashed', 'linewidth': 3.},
             'GFS': {'color': '#000000',
                     'marker': 'o', 'markersize': 12,
                     'linestyle': 'solid', 'linewidth': 5.},
