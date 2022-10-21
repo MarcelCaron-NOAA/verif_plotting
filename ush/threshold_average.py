@@ -216,44 +216,11 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         if not bool_success:
             sample_equalization = False
     df_groups = df.groupby(group_by)
-    # Calculate desired metric
-    stat_output = plot_util.calculate_stat(
-        logger, df, str(metric_name).lower()
-    )
-    df[str(metric_name).upper()] = stat_output[0]
-    metric_long_name = stat_output[2]
-    if confidence_intervals:
-        ci_output = df_groups.apply(
-            lambda x: plot_util.calculate_bootstrap_ci(
-                logger, bs_method, x, str(metric_name).lower(), bs_nrep,
-                ci_lev, bs_min_samp
-            )
-        )
-        if any(ci_output['STATUS'] == 1):
-            logger.warning(f"Failed attempt to compute bootstrap"
-                           + f" confidence intervals.  Sample size"
-                           + f" for one or more groups is too small."
-                           + f" Minimum sample size can be changed"
-                           + f" in settings.py.")
-            logger.warning(f"Confidence intervals will not be"
-                           + f" plotted.")
-            confidence_intervals = False
-        else:
-            ci_output = ci_output.reset_index(level=2, drop=True)
-            ci_output = (
-                ci_output
-                .reindex(df.index)
-                .reindex(ci_output.index)
-            )
-            df[str(metric_name).upper()+'_BLERR'] = ci_output[
-                'CI_LOWER'
-            ].values
-            df[str(metric_name).upper()+'_BUERR'] = ci_output[
-                'CI_UPPER'
-            ].values
     # Aggregate unit statistics before calculating metrics
-    df_groups = df.groupby(group_by)
-    df_aggregated = df_groups.mean()
+    if str(line_type).upper() == 'CTC':
+        df_aggregated = df_groups.sum()
+    else:
+        df_aggregated = df_groups.mean()
     if sample_equalization:
         df_aggregated['COUNTS']=df_groups.size()
     # Remove data if they exist for some but not all models at some value of 
@@ -277,6 +244,41 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         logger.info("========================================")
         return None
 
+    # Calculate desired metric
+    stat_output = plot_util.calculate_stat(
+        logger, df_aggregated, str(metric_name).lower()
+    )
+    df_aggregated[str(metric_name).upper()] = stat_output[0]
+    metric_long_name = stat_output[2]
+    if confidence_intervals:
+        ci_output = df_groups.apply(
+            lambda x: plot_util.calculate_bootstrap_ci(
+                logger, bs_method, x, str(metric_name).lower(), bs_nrep,
+                ci_lev, bs_min_samp
+            )
+        )
+        if any(ci_output['STATUS'] == 1):
+            logger.warning(f"Failed attempt to compute bootstrap"
+                           + f" confidence intervals.  Sample size"
+                           + f" for one or more groups is too small."
+                           + f" Minimum sample size can be changed"
+                           + f" in settings.py.")
+            logger.warning(f"Confidence intervals will not be"
+                           + f" plotted.")
+            confidence_intervals = False
+        else:
+            ci_output = ci_output.reset_index(level=2, drop=True)
+            ci_output = (
+                ci_output
+                .reindex(df_aggregated.index)
+                .reindex(ci_output.index)
+            )
+            df_aggregated[str(metric_name).upper()+'_BLERR'] = ci_output[
+                'CI_LOWER'
+            ].values
+            df_aggregated[str(metric_name).upper()+'_BUERR'] = ci_output[
+                'CI_UPPER'
+            ].values
 
     df_aggregated[str(metric_name).upper()] = (
         df_aggregated[str(metric_name).upper()]

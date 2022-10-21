@@ -219,14 +219,45 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         if not bool_success:
             sample_equalization = False
     df_groups = df.groupby(group_by)
+    print(df_groups.size())
+    # Aggregate unit statistics before calculating metrics
+    if str(line_type).upper() == 'CTC':
+        df_aggregated = df_groups.sum()
+    else:
+        df_aggregated = df_groups.mean()
+    if sample_equalization:
+        df_aggregated['COUNTS']=df_groups.size()
+    if keep_shared_events_only:
+        # Remove data if they exist for some but not all models at some value of 
+        # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
+        # error
+        df_split = [
+            df_aggregated.xs(str(model)) for model in model_list
+        ]
+        df_reduced = reduce(
+            lambda x,y: pd.merge(
+                x, y, on=str(date_type).upper(), how='inner'
+            ), 
+            df_split
+        )
+    
+        df_aggregated = df_aggregated[
+            df_aggregated.index.get_level_values(str(date_type).upper())
+            .isin(df_reduced.index)
+        ]
+    if df_aggregated.empty:
+        logger.warning(f"Empty Dataframe. Continuing onto next plot...")
+        plt.close(num)
+        logger.info("========================================")
+        return None
     # Calculate desired metric
     metric_long_names = []
     for stat in [metric1_name, metric2_name]:
         if stat:
             stat_output = plot_util.calculate_stat(
-                logger, df, str(stat).lower()
+                logger, df_aggregated, str(stat).lower()
             )
-            df[str(stat).upper()] = stat_output[0]
+            df_aggregated[str(stat).upper()] = stat_output[0]
             metric_long_names.append(stat_output[2])
             '''if confidence_intervals:
                 logger.warning(
@@ -256,43 +287,15 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
                 ci_output = ci_output.reset_index(level=2, drop=True)
                 ci_output = (
                     ci_output
-                    .reindex(df.index)
+                    .reindex(df_aggregated.index)
                     .reindex(ci_output.index)
                 )
-                df[str(stat).upper()+'_BLERR'] = ci_output[
+                df_aggregated[str(stat).upper()+'_BLERR'] = ci_output[
                     'CI_LOWER'
                 ].values
-                df[str(stat).upper()+'_BUERR'] = ci_output[
+                df_aggregated[str(stat).upper()+'_BUERR'] = ci_output[
                     'CI_UPPER'
                 ].values
-    # Aggregate unit statistics before calculating metrics
-    df_groups = df.groupby(group_by)
-    df_aggregated = df_groups.mean()
-    if sample_equalization:
-        df_aggregated['COUNTS']=df_groups.size()
-    if keep_shared_events_only:
-        # Remove data if they exist for some but not all models at some value of 
-        # the indep. variable. Otherwise plot_util.calculate_stat will throw an 
-        # error
-        df_split = [
-            df_aggregated.xs(str(model)) for model in model_list
-        ]
-        df_reduced = reduce(
-            lambda x,y: pd.merge(
-                x, y, on=str(date_type).upper(), how='inner'
-            ), 
-            df_split
-        )
-    
-        df_aggregated = df_aggregated[
-            df_aggregated.index.get_level_values(str(date_type).upper())
-            .isin(df_reduced.index)
-        ]
-    if df_aggregated.empty:
-        logger.warning(f"Empty Dataframe. Continuing onto next plot...")
-        plt.close(num)
-        logger.info("========================================")
-        return None
     df_aggregated[str(metric1_name).upper()] = (
         df_aggregated[str(metric1_name).upper()]
     ).astype(float).tolist()
