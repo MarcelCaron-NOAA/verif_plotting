@@ -474,6 +474,39 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         requested_thresh_labels = [
             requested_thresh_value[i] for i in requested_thresh_argsort
         ]
+    plot_reference = [False, False]
+    if str(metric1_name).upper() in ["OBAR"]:
+        plot_reference[0] = True
+        pivot_reference1 = pivot_metric1
+        reference1 = pivot_reference1.mean(axis=1)
+        if not np.any((pivot_reference1.T/reference1).T == 1.):
+            logger.warning(
+                f"{str(metric1_name).upper()} is requested, but the value "
+                + f"varies from model to model. "
+                + f"Will plot an individual line for each model. If a "
+                + f"single reference line is preferred, set the "
+                + f"sample_equalization toggle in ush/settings.py to 'True', "
+                + f"and check in the log file if sample equalization "
+                + f"completed successfully."
+            )
+            plot_reference[0] = False
+    if metric2_name is not None and str(metric2_name).upper() in ["OBAR"]:
+        plot_reference[1] = True
+        pivot_reference2 = pivot_metric2
+        reference2 = pivot_reference2.mean(axis=1)
+        if not np.any((pivot_reference2.T/reference2).T == 1.):
+            logger.warning(
+                f"{str(metric2_name).upper()} is requested, but the value "
+                + f"varies from model to model. "
+                + f"Will plot an individual line for each model. If a "
+                + f"single reference line is preferred, set the "
+                + f"sample_equalization toggle in ush/settings.py to 'True', "
+                + f"and check in the log file if sample equalization "
+                + f"completed successfully."
+            )
+            plot_reference[1] = False
+    if np.any(plot_reference):
+        plotted_reference = [False, False]
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -538,25 +571,47 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             metric1_mean_fmt_string = f' {y_vals_metric1_mean:.2f}'
         else:
             metric1_mean_fmt_string = f' {y_vals_metric1_mean:.2E}'
-        plt.plot(
-            x_vals1.tolist(), y_vals_metric1, 
-            marker=mod_setting_dicts[m]['marker'], 
-            c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
-            figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
-            lw=mod_setting_dicts[m]['linewidth']
-        )
+        if plot_reference[0]:
+            if not plotted_reference[0]:
+                plt.plot(
+                    x_vals1.tolist(), reference1.values(), 
+                    marker=mod_setting_dicts['OBS']['marker'], 
+                    c=mod_setting_dicts['OBS']['color'], mew=2., mec='white', 
+                    figure=fig, ms=mod_setting_dicts['OBS']['markersize'], ls='solid', 
+                    lw=mod_setting_dicts['OBS']['linewidth']
+                )
+                plotted_reference[0] = True
+        else:
+            plt.plot(
+                x_vals1.tolist(), y_vals_metric1, 
+                marker=mod_setting_dicts[m]['marker'], 
+                c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
+                figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
+                lw=mod_setting_dicts[m]['linewidth']
+            )
         if metric2_name is not None:
             if np.abs(y_vals_metric2_mean) < 1E4:
                 metric2_mean_fmt_string = f' {y_vals_metric2_mean:.2f}'
             else:
                 metric2_mean_fmt_string = f' {y_vals_metric2_mean:.2E}'
-            plt.plot(
-                x_vals2.tolist(), y_vals_metric2, 
-                marker=mod_setting_dicts[m]['marker'], 
-                c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
-                figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed',
-                lw=mod_setting_dicts[m]['linewidth']
-            )
+            if plot_reference[1]:
+                if not plotted_reference[1]:
+                    plt.plot(
+                        x_vals2.tolist(), reference2.values(), 
+                        marker=mod_setting_dicts['OBS']['marker'], 
+                        c=mod_setting_dicts['OBS']['color'], mew=2., mec='white', 
+                        figure=fig, ms=mod_setting_dicts['OBS']['markersize'], ls='dashed', 
+                        lw=mod_setting_dicts['OBS']['linewidth']
+                    )
+                    plotted_reference[1] = True
+            else:
+                plt.plot(
+                    x_vals2.tolist(), y_vals_metric2, 
+                    marker=mod_setting_dicts[m]['marker'], 
+                    c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
+                    figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed',
+                    lw=mod_setting_dicts[m]['linewidth']
+                )
         if confidence_intervals:
             plt.errorbar(
                 x_vals1.tolist(), y_vals_metric1, 
