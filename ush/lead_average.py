@@ -24,6 +24,7 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.image as mpimg
 from datetime import datetime, timedelta as td
 SETTINGS_DIR = os.environ['USH_DIR']
 sys.path.insert(0, os.path.abspath(SETTINGS_DIR))
@@ -817,7 +818,10 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     # Logos
     if plot_logo_left:
         if os.path.exists(path_logo_left):
-            
+            left_logo = mpimg.imread(path_logo_left)
+            fig.figimage(
+                left_logo, xo=0., yo=-10, alpha=.7, origin='upper', zorder=1
+            )       
         else:
             logger.warning(
                 f"Left logo path ({path_logo_left}) doesn't exist. "
@@ -825,7 +829,10 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             )
     if plot_logo_right:
         if os.path.exists(path_logo_right):
-            # Plot right logo
+            right_logo = mpimg.imread(path_logo_right)
+            fig.figimage(
+                right_logo, xo=1., yo=-10, alpha=.7, origin='upper', zorder=1
+            )       
         else:
             logger.warning(
                 f"Right logo path ({path_logo_right}) doesn't exist. "
