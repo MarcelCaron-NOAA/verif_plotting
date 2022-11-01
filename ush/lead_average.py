@@ -40,6 +40,7 @@ plotter = Plotter(fig_size=(28.,14.))
 plotter.set_up_plots()
 toggle = Toggle()
 templates = Templates()
+paths = Paths()
 presets = Presets()
 model_colors = ModelSpecs()
 reference = Reference()
@@ -65,7 +66,10 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                       eval_period: str = 'TEST', save_header: str = '', 
                       display_averages: bool = True, 
                       plot_group: str = 'sfc_upper',
-                      sample_equalization: bool = True):
+                      sample_equalization: bool = True
+                      plot_logo_left: bool = False, 
+                      plot_logo_right: bool = False, path_logo_left: str = '.',
+                      path_logo_right: str = '.'):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -810,6 +814,24 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     ax.set_title(title_center, loc=plotter.title_loc, pad=title_pad) 
     logger.info("... Plotting complete.")
 
+    # Logos
+    if plot_logo_left:
+        if os.path.exists(path_logo_left):
+            
+        else:
+            logger.warning(
+                f"Left logo path ({path_logo_left}) doesn't exist. "
+                + f"Left logo will not be plotted."
+            )
+    if plot_logo_right:
+        if os.path.exists(path_logo_right):
+            # Plot right logo
+        else:
+            logger.warning(
+                f"Right logo path ({path_logo_right}) doesn't exist. "
+                + f"Right logo will not be plotted."
+            )
+
     # Saving
     models_savename = '_'.join([str(model) for model in model_list])
     if len(date_hours) <= 8: 
@@ -1102,7 +1124,9 @@ def main():
                     confidence_intervals=CONFIDENCE_INTERVALS, bs_nrep=bs_nrep, 
                     bs_method=bs_method, ci_lev=ci_lev, 
                     bs_min_samp=bs_min_samp, 
-                    sample_equalization=sample_equalization
+                    sample_equalization=sample_equalization,
+                    plot_logo_left, plot_logo_right, path_logo_left, 
+                    path_logo_right
                 )
                 num+=1
 
@@ -1189,6 +1213,12 @@ if __name__ == "__main__":
 
     # Whether or not to clear the intermediate directory that stores pruned data
     clear_prune_dir = toggle.plot_settings['clear_prune_directory']
+
+    # Information about logos
+    plot_logo_left = toggle.plot_settings['plot_logo_left']
+    plot_logo_right = toggle.plot_settings['plot_logo_right']
+    path_logo_left = paths.logo_left_path
+    path_logo_right = paths.logo_right_path
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 
