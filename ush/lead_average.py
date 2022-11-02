@@ -3,7 +3,7 @@
 # Name:          lead_average.py
 # Contact(s):    Marcel Caron
 # Developed:     Nov. 18, 2021 by Marcel Caron 
-# Last Modified: Apr. 06, 2022 by Marcel Caron             
+# Last Modified: Nov. 02, 2022 by Marcel Caron             
 # Title:         Line plot of verification metric as a function of 
 #                lead time
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -420,21 +420,6 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     ]
     # Plot data
     logger.info("Begin plotting ...")
-    f = lambda m,c,ls,lw,ms,mec: plt.plot(
-        [], [], marker=m, mec=mec, mew=2., c=c, ls=ls, lw=lw, ms=ms
-    )[0]
-    if metric2_name is not None:
-        handles = [
-            f('', 'black', line_setting, 5., 0, 'white')
-            for line_setting in ['solid','dashed']
-        ]
-        labels = [
-            str(metric_name).upper()
-            for metric_name in [metric1_name, metric2_name]
-        ]
-    else:
-        handles = []
-        labels = []
     if confidence_intervals:
         indices_in_common1 = list(set.intersection(*map(
             set, 
@@ -476,6 +461,82 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         requested_thresh_labels = [
             requested_thresh_value[i] for i in requested_thresh_argsort
         ]
+    plot_reference = [False, False]
+    ref_metrics = ['OBAR']
+    if str(metric1_name).upper() in ref_metrics:
+        plot_reference[0] = True
+        pivot_reference1 = pivot_metric1
+        reference1 = pivot_reference1.mean(axis=1)
+        if confidence_intervals:
+            reference_ci_lower1 = pivot_ci_lower1.mean(axis=1)
+            reference_ci_upper1 = pivot_ci_upper1.mean(axis=1)
+        if not np.any((pivot_reference1.T/reference1).T == 1.):
+            logger.warning(
+                f"{str(metric1_name).upper()} is requested, but the value "
+                + f"varies from model to model. "
+                + f"Will plot an individual line for each model. If a "
+                + f"single reference line is preferred, set the "
+                + f"sample_equalization toggle in ush/settings.py to 'True', "
+                + f"and check in the log file if sample equalization "
+                + f"completed successfully."
+            )
+            plot_reference[0] = False
+    if metric2_name is not None and str(metric2_name).upper() in ref_metrics:
+        plot_reference[1] = True
+        pivot_reference2 = pivot_metric2
+        reference2 = pivot_reference2.mean(axis=1)
+        if confidence_intervals:
+            reference_ci_lower2 = pivot_ci_lower2.mean(axis=1)
+            reference_ci_upper2 = pivot_ci_upper2.mean(axis=1)
+        if not np.any((pivot_reference2.T/reference2).T == 1.):
+            logger.warning(
+                f"{str(metric2_name).upper()} is requested, but the value "
+                + f"varies from model to model. "
+                + f"Will plot an individual line for each model. If a "
+                + f"single reference line is preferred, set the "
+                + f"sample_equalization toggle in ush/settings.py to 'True', "
+                + f"and check in the log file if sample equalization "
+                + f"completed successfully."
+            )
+            plot_reference[1] = False
+    if np.any(plot_reference):
+        plotted_reference = [False, False]
+        if confidence_intervals:
+            plotted_reference_CIs = [False, False]
+    f = lambda m,c,ls,lw,ms,mec: plt.plot(
+        [], [], marker=m, mec=mec, mew=2., c=c, ls=ls, lw=lw, ms=ms
+    )[0]
+    if metric2_name is not None:
+        if np.any(plot_reference):
+            ref_color_dict = model_colors.get_color_dict('obs')
+            handles = []
+            labels = []
+            line_settings = ['solid','dashed']
+            metric_names = [metric1_name, metric2_name]
+            for p, rbool in enumerate(plot_reference):
+                if rbool:
+                    handles += [
+                        f('', ref_color_dict['color'], line_settings[p], 5., 0, 'white')
+                    ]
+                else:
+                    handles += [
+                        f('', 'black', line_settings[p], 5., 0, 'white')
+                    ]
+                labels += [
+                    str(metric_names[p]).upper()
+                ]
+        else:
+            handles = [
+                f('', 'black', line_setting, 5., 0, 'white')
+                for line_setting in ['solid','dashed']
+            ]
+            labels = [
+                str(metric_name).upper()
+                for metric_name in [metric1_name, metric2_name]
+            ]
+    else:
+        handles = []
+        labels = []
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -540,43 +601,93 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
             metric1_mean_fmt_string = f' {y_vals_metric1_mean:.2f}'
         else:
             metric1_mean_fmt_string = f' {y_vals_metric1_mean:.2E}'
-        plt.plot(
-            x_vals1.tolist(), y_vals_metric1, 
-            marker=mod_setting_dicts[m]['marker'], 
-            c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
-            figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
-            lw=mod_setting_dicts[m]['linewidth']
-        )
+        if plot_reference[0]:
+            if not plotted_reference[0]:
+                ref_color_dict = model_colors.get_color_dict('obs')
+                plt.plot(
+                    x_vals1.tolist(), reference1, 
+                    marker=ref_color_dict['marker'], 
+                    c=ref_color_dict['color'], mew=2., mec='white', 
+                    figure=fig, ms=ref_color_dict['markersize'], ls='solid', 
+                    lw=ref_color_dict['linewidth']
+                )
+                plotted_reference[0] = True
+        else:
+            plt.plot(
+                x_vals1.tolist(), y_vals_metric1, 
+                marker=mod_setting_dicts[m]['marker'], 
+                c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
+                figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
+                lw=mod_setting_dicts[m]['linewidth']
+            )
         if metric2_name is not None:
             if np.abs(y_vals_metric2_mean) < 1E4:
                 metric2_mean_fmt_string = f' {y_vals_metric2_mean:.2f}'
             else:
                 metric2_mean_fmt_string = f' {y_vals_metric2_mean:.2E}'
-            plt.plot(
-                x_vals2.tolist(), y_vals_metric2, 
-                marker=mod_setting_dicts[m]['marker'], 
-                c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
-                figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed',
-                lw=mod_setting_dicts[m]['linewidth']
-            )
-        if confidence_intervals:
-            plt.errorbar(
-                x_vals1.tolist(), y_vals_metric1, 
-                yerr=[np.abs(y_vals_ci_lower1), y_vals_ci_upper1], 
-                fmt='none', ecolor=mod_setting_dicts[m]['color'], 
-                elinewidth=mod_setting_dicts[m]['linewidth'],
-                capsize=10., capthick=mod_setting_dicts[m]['linewidth'],
-                alpha=.70, zorder=0
-            )
-            if metric2_name is not None:
-                plt.errorbar(
+            if plot_reference[1]:
+                if not plotted_reference[1]:
+                    ref_color_dict = model_colors.get_color_dict('obs')
+                    plt.plot(
+                        x_vals2.tolist(), reference2, 
+                        marker=ref_color_dict['marker'], 
+                        c=ref_color_dict['color'], mew=2., mec='white', 
+                        figure=fig, ms=ref_color_dict['markersize'], ls='dashed', 
+                        lw=ref_color_dict['linewidth']
+                    )
+                    plotted_reference[1] = True
+            else:
+                plt.plot(
                     x_vals2.tolist(), y_vals_metric2, 
-                    yerr=[np.abs(y_vals_ci_lower2), y_vals_ci_upper2], 
+                    marker=mod_setting_dicts[m]['marker'], 
+                    c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
+                    figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed',
+                    lw=mod_setting_dicts[m]['linewidth']
+                )
+        if confidence_intervals:
+            if plot_reference[0]:
+                if not plotted_reference_CIs[0]:
+                    ref_color_dict = model_colors.get_color_dict('obs')
+                    plt.errorbar(
+                        x_vals1.tolist(), reference1, 
+                        yerr=[np.abs(reference_ci_lower1), reference_ci_upper1], 
+                        fmt='none', ecolor=ref_color_dict['color'], 
+                        elinewidth=ref_color_dict['linewidth'],
+                        capsize=10., capthick=ref_color_dict['linewidth'],
+                        alpha=.70, zorder=0
+                    )
+                    plotted_reference_CIs[0] = True
+            else:
+                plt.errorbar(
+                    x_vals1.tolist(), y_vals_metric1, 
+                    yerr=[np.abs(y_vals_ci_lower1), y_vals_ci_upper1], 
                     fmt='none', ecolor=mod_setting_dicts[m]['color'], 
                     elinewidth=mod_setting_dicts[m]['linewidth'],
                     capsize=10., capthick=mod_setting_dicts[m]['linewidth'],
                     alpha=.70, zorder=0
                 )
+            if metric2_name is not None:
+                if plot_reference[1]:
+                    if not plotted_reference_CIs[1]:
+                        ref_color_dict = model_colors.get_color_dict('obs')
+                        plt.errorbar(
+                            x_vals2.tolist(), reference2, 
+                            yerr=[np.abs(reference_ci_lower2), reference_ci_upper2], 
+                            fmt='none', ecolor=ref_color_dict['color'], 
+                            elinewidth=ref_color_dict['linewidth'],
+                            capsize=10., capthick=ref_color_dict['linewidth'],
+                            alpha=.70, zorder=0
+                        )
+                        plotted_reference_CIs[1] = True
+                else:
+                    plt.errorbar(
+                        x_vals2.tolist(), y_vals_metric2, 
+                        yerr=[np.abs(y_vals_ci_lower2), y_vals_ci_upper2], 
+                        fmt='none', ecolor=mod_setting_dicts[m]['color'], 
+                        elinewidth=mod_setting_dicts[m]['linewidth'],
+                        capsize=10., capthick=mod_setting_dicts[m]['linewidth'],
+                        alpha=.70, zorder=0
+                    )
         handles+=[
             f(
                 mod_setting_dicts[m]['marker'], mod_setting_dicts[m]['color'],
@@ -1145,9 +1256,7 @@ def main():
                     plot_logo_left=plot_logo_left, 
                     plot_logo_right=plot_logo_right, 
                     path_logo_left=path_logo_left, 
-                    path_logo_right=path_logo_right,
-                    zoom_logo_left=zoom_logo_left,
-                    zoom_logo_right=zoom_logo_right
+                    path_logo_right=path_logo_right
                 )
                 num+=1
 
