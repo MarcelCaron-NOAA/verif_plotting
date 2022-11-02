@@ -59,7 +59,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{MODEL_LOWER}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):
