@@ -766,7 +766,7 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
             ax.annotate(
                 f'{count}', xy=(1.,yval),
                 xycoords=('axes fraction','data'), xytext=(9,0),
-                textcoords='offset points', va='center', fontsize=12,
+                textcoords='offset points', va='center', fontsize=14,
                 color='dimgrey', ha='left'
             )
         ax.annotate(

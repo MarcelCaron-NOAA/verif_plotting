@@ -625,7 +625,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
         f'{opt}{thresh_label} {units}'
         for thresh_label in thresh_labels
     ]
-    '''
+    
     if sample_equalization:
         counts = pivot_counts.mean(axis=1, skipna=True).fillna('')
         counts = [
@@ -636,7 +636,7 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             label+f' ({counts[l]})' 
             for l, label in enumerate(labels)
         ]
-    '''
+    
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
