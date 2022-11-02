@@ -23,8 +23,10 @@ class Toggle():
             'sample_equalization': True, # equalize samples along each value of the independent variable where data exist
             'keep_shared_events_only': False, # functional for time_series only.
             'clear_prune_directory': True, # remove the intermediate directory created to store pruned data files temporarily
-            'plot_logo_left': False,
-            'plot_logo_right': False,
+            'plot_logo_left': True,
+            'plot_logo_right': True,
+            'zoom_logo_left': 1.0, 
+            'zoom_logo_right': 1.0,
         }
 
 class Templates():
@@ -59,7 +61,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{MODEL_LOWER}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):
@@ -69,8 +71,8 @@ class Paths():
         Referenced if plot_logo_left and plot_logo_right, in the Toggle class,
         are set to True
         '''
-        self.logo_left_path = "/scratch2/NCEPDEV/ovp/Marcel.Caron/testing/noaa.png"
-        self.logo_right_path = "/scratch2/NCEPDEV/ovp/Marcel.Caron/testing/nws.png"
+        self.logo_left_path = "/lfs/h2/emc/vpppg/noscrub/emc.vpppg/verification/EVS_fix/logos/noaa.png"
+        self.logo_right_path = "/lfs/h2/emc/vpppg/noscrub/emc.vpppg/verification/EVS_fix/logos/nws.png"
 
 class Presets():
     def __init__(self):
@@ -2099,7 +2101,7 @@ class Reference():
                 },
                 'CTC': {
                     'plot_stats_list': ('bias, ets, fss, csi, fbias, fbar,'
-                                        + ' obar, pod, faratio, sratio'),
+                                        + ' obar, pod, faratio, farate, sratio'),
                     'interp': 'NEAREST',
                     'vx_mask_list' : [
                         'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 

@@ -23,11 +23,13 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.image as mpimg
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from datetime import datetime, timedelta as td
 
 SETTINGS_DIR = os.environ['USH_DIR']
 sys.path.insert(0, os.path.abspath(SETTINGS_DIR))
-from settings import Toggle, Templates, Presets, ModelSpecs, Reference
+from settings import Toggle, Templates, Paths, Presets, ModelSpecs, Reference
 from plotter import Plotter
 from prune_stat_files import prune_data
 import plot_util
@@ -40,6 +42,7 @@ plotter = Plotter(fig_size=(28.,14.))
 plotter.set_up_plots()
 toggle = Toggle()
 templates = Templates()
+paths = Paths()
 presets = Presets()
 model_colors = ModelSpecs()
 reference = Reference()
@@ -71,7 +74,11 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
                      display_averages: bool = True, 
                      keep_shared_events_only: bool = False,
                      plot_group: str = 'sfc_upper',
-                     sample_equalization: bool = True):
+                     sample_equalization: bool = True,
+                     plot_logo_left: bool = False,
+                     plot_logo_right: bool = False, path_logo_left: str = '.',
+                     path_logo_right: str = '.', zoom_logo_left: float = 1.,
+                     zoom_logo_right: float = 1.):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -219,7 +226,6 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
         if not bool_success:
             sample_equalization = False
     df_groups = df.groupby(group_by)
-    print(df_groups.size())
     # Aggregate unit statistics before calculating metrics
     if str(line_type).upper() == 'CTC':
         df_aggregated = df_groups.sum()
@@ -815,6 +821,38 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
     ax.set_title(title_center, loc=plotter.title_loc, pad=title_pad) 
     logger.info("... Plotting complete.")
 
+    # Logos
+    if plot_logo_left:
+        if os.path.exists(path_logo_left):
+            left_logo_arr = mpimg.imread(path_logo_left)
+            left_image_box = OffsetImage(left_logo_arr, zoom=zoom_logo_left)
+            ab_left = AnnotationBbox(
+                left_image_box, xy=(0.,1.), xycoords='axes fraction',
+                xybox=(0, 20), boxcoords='offset points', frameon = False,
+                box_alignment=(0,0)
+            )
+            ax.add_artist(ab_left)
+        else:
+            logger.warning(
+                f"Left logo path ({path_logo_left}) doesn't exist. "
+                + f"Left logo will not be plotted."
+            )
+    if plot_logo_right:
+        if os.path.exists(path_logo_right):
+            right_logo_arr = mpimg.imread(path_logo_right)
+            right_image_box = OffsetImage(right_logo_arr, zoom=zoom_logo_right)
+            ab_right = AnnotationBbox(
+                right_image_box, xy=(1.,1.), xycoords='axes fraction',
+                xybox=(0, 20), boxcoords='offset points', frameon = False,
+                box_alignment=(1,0)
+            )
+            ax.add_artist(ab_right)
+        else:
+            logger.warning(
+                f"Right logo path ({path_logo_right}) doesn't exist. "
+                + f"Right logo will not be plotted."
+            )
+
     # Saving
     models_savename = '_'.join([str(model) for model in model_list])
     if len(date_hours) <= 8: 
@@ -1109,7 +1147,13 @@ def main():
                     confidence_intervals=CONFIDENCE_INTERVALS,
                     bs_nrep=bs_nrep, bs_method=bs_method, ci_lev=ci_lev,
                     bs_min_samp=bs_min_samp,
-                    sample_equalization=sample_equalization
+                    sample_equalization=sample_equalization,
+                    plot_logo_left=plot_logo_left,
+                    plot_logo_right=plot_logo_right,
+                    path_logo_left=path_logo_left,
+                    path_logo_right=path_logo_right,
+                    zoom_logo_left=zoom_logo_left,
+                    zoom_logo_right=zoom_logo_right
                 )
                 num+=1
 
@@ -1196,6 +1240,14 @@ if __name__ == "__main__":
 
     # Whether or not to clear the intermediate directory that stores pruned data
     clear_prune_dir = toggle.plot_settings['clear_prune_directory']
+
+    # Information about logos
+    plot_logo_left = toggle.plot_settings['plot_logo_left']
+    plot_logo_right = toggle.plot_settings['plot_logo_right']
+    zoom_logo_left = toggle.plot_settings['zoom_logo_left']
+    zoom_logo_right = toggle.plot_settings['zoom_logo_right']
+    path_logo_left = paths.logo_left_path
+    path_logo_right = paths.logo_right_path
 
     OUTPUT_BASE_TEMPLATE = templates.output_base_template
 
