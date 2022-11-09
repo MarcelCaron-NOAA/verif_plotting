@@ -838,7 +838,7 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
             ax.annotate(
                 f'{count}', xy=(xval,1.), 
                 xycoords=('data','axes fraction'), xytext=(0,18), 
-                textcoords='offset points', va='top', fontsize=14, 
+                textcoords='offset points', va='top', fontsize=16, 
                 color='dimgrey', ha='center'
             )
         ax.annotate(
