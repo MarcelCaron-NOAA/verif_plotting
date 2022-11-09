@@ -1268,7 +1268,7 @@ def main():
                     plot_logo_left=plot_logo_left, 
                     plot_logo_right=plot_logo_right, 
                     path_logo_left=path_logo_left, 
-                    path_logo_right=path_logo_right
+                    path_logo_right=path_logo_right,
                     zoom_logo_left=zoom_logo_left,
                     zoom_logo_right=zoom_logo_right
                 )
