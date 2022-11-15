@@ -16,6 +16,7 @@
 import os
 import sys
 import numpy as np
+import math
 import pandas as pd
 import logging
 from functools import reduce
@@ -431,14 +432,24 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
                 str(model_list[m])
             ].values
         if not y_lim_lock:
-            y_vals_metric_min = np.nanmin(y_vals_metric)
-            y_vals_metric_max = np.nanmax(y_vals_metric)
+            if np.any(y_vals_metric != np.inf):
+                y_vals_metric_min = np.nanmin(y_vals_metric[y_vals_metric != np.inf])
+                y_vals_metric_max = np.nanmax(y_vals_metric[y_vals_metric != np.inf])
+            else:
+                y_vals_metric_min = np.nanmin(y_vals_metric)
+                y_vals_metric_max = np.nanmax(y_vals_metric)
             if m == 0:
                 y_mod_min = y_vals_metric_min
                 y_mod_max = y_vals_metric_max
             else:
-                y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
-                y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
+                if math.isinf(y_mod_min):
+                    y_mod_min = y_vals_metric_min
+                else:
+                    y_mod_min = np.nanmin([y_mod_min, y_vals_metric_min])
+                if math.isinf(y_mod_max):
+                    y_mod_max = y_vals_metric_max
+                else:
+                    y_mod_max = np.nanmax([y_mod_max, y_vals_metric_max])
             if (y_vals_metric_min > y_min_limit 
                     and y_vals_metric_min <= y_mod_min):
                 y_min = y_vals_metric_min
