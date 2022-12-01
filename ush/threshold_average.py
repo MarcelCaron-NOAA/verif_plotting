@@ -406,7 +406,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     x_vals_argsort = np.argsort(x_vals)
     x_vals = np.sort(x_vals)
     x_vals_incr = np.diff(x_vals)
-    min_incr = np.min(x_vals_incr)
+    if len(x_vals) > 1:
+        min_incr = np.min(x_vals_incr)
+    else:
+        min_incr = 0
     incrs = [.05,.1,.5,1.,5.,10.,50.,100.,500.,1E3,5E3,1E4,5E4,1E5,5E5]
     incr_idx = np.digitize(min_incr, incrs)
     if incr_idx < 1:
@@ -576,8 +579,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     yticks = np.arange(ylim_min, ylim_max+round_to_nearest, round_to_nearest)
     var_long_name_key = df['FCST_VAR'].tolist()[0]
     if str(var_long_name_key).upper() == 'HGT':
-        if str(df['OBS_VAR'].tolist()[0]).upper() == 'CEILING':
+        if str(df['OBS_VAR'].tolist()[0]).upper() in ['CEILING']:
             var_long_name_key = 'HGTCLDCEIL'
+        elif str(df['OBS_VAR'].tolist()[0]).upper() in ['HPBL']:
+            var_long_name_key = 'HPBL'
     var_long_name = variable_translator[var_long_name_key]
     metrics_using_var_units = [
         'BCRMSE','RMSE','BIAS','ME','FBAR','OBAR','MAE','FBAR_OBAR',
@@ -658,15 +663,40 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     date_start_string = date_range[0].strftime('%d %b %Y')
     date_end_string = date_range[1].strftime('%d %b %Y')
     metric_string = metric_long_name
-    if str(verif_type).lower() in ['pres', 'upper_air'] or 'P' in str(level):
-        level_num = level.replace('P', '')
-        level_string = f'{level_num} hPa '
-        level_savename = f'{level_num}MB_'
-    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms']:
+    if str(level).upper() in ['CEILING', 'TOTAL', 'PBL']:
+        if str(level).upper() == 'CEILING':
+            level_string = ''
+            level_savename = ''
+        elif str(level).upper() == 'TOTAL':
+            level_string = 'Total '
+            level_savename = ''
+        elif str(level).upper() == 'PBL':
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['pres', 'upper_air', 'raob'] or 'P' in str(level):
+        if 'P' in str(level):
+            if str(level).upper() == 'P90-0':
+                level_string = f'Mixed-Layer '
+                level_savename = f'ML'
+            else:
+                level_num = level.replace('P', '')
+                level_string = f'{level_num} hPa '
+                level_savename = f'{level_num}MB_'
+        elif str(level).upper() == 'L0':
+            level_string = f'Surface-Based '
+            level_savename = f'SB'
+        else:
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms','metar']:
         if 'Z' in str(level):
             if str(level).upper() == 'Z0':
-                level_string = 'Surface '
-                level_savename = 'SFC_'
+                if str(var_long_name_key).upper() in ['MLSP', 'MSLET', 'MSLMA', 'PRMSL']:
+                    level_string = ''
+                    level_savename = ''
+                else:
+                    level_string = 'Surface '
+                    level_savename = 'SFC_'
             else:
                 level_num = level.replace('Z', '')
                 if var_savename in ['TSOIL', 'SOILW']:
@@ -678,6 +708,7 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
         elif 'L' in str(level) or 'A' in str(level):
             level_string = ''
             level_savename = ''
+
         else:
             level_string = f'{level} '
             level_savename = f'{level}_'
@@ -995,7 +1026,7 @@ def main():
             if (FCST_LEVELS[l] not in var_specs['fcst_var_levels'] 
                     or OBS_LEVELS[l] not in var_specs['obs_var_levels']):
                 e = (f"The requested variable/level combination is not valid:"
-                     + f" {requested_var}/{level}")
+                     + f" {requested_var}/{fcst_level}")
                 logger.warning(e)
                 logger.warning("Continuing ...")
                 continue

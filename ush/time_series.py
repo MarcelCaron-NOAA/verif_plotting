@@ -1,9 +1,9 @@
 ###############################################################################
 #
-# Name:          timeseries.py
+# Name:          time_series.py
 # Contact(s):    Marcel Caron
 # Developed:     Oct. 14, 2021 by Marcel Caron 
-# Last Modified: Nov. 02, 2022 by Marcel Caron             
+# Last Modified: Nov. 28, 2022 by Marcel Caron             
 # Title:         Line plot of verification metric as a function of 
 #                valid or init time
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -777,8 +777,10 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
     yticks = np.arange(ylim_min, ylim_max+round_to_nearest, round_to_nearest)
     var_long_name_key = df['FCST_VAR'].tolist()[0]
     if str(var_long_name_key).upper() == 'HGT':
-        if str(df['OBS_VAR'].tolist()[0]).upper() == 'CEILING':
+        if str(df['OBS_VAR'].tolist()[0]).upper() in ['CEILING']:
             var_long_name_key = 'HGTCLDCEIL'
+        elif str(df['OBS_VAR'].tolist()[0]).upper() in ['HPBL']:
+            var_long_name_key = 'HPBL'
     var_long_name = variable_translator[var_long_name_key]
     units = df['FCST_UNITS'].tolist()[0]
     if units in reference.unit_conversions:
@@ -878,15 +880,40 @@ def plot_time_series(df: pd.DataFrame, logger: logging.Logger,
     )
     date_start_string = date_range[0].strftime('%d %b %Y')
     date_end_string = date_range[1].strftime('%d %b %Y')
-    if str(verif_type).lower() in ['pres', 'upper_air'] or 'P' in str(level):
-        level_num = level.replace('P', '')
-        level_string = f'{level_num} hPa '
-        level_savename = f'{level_num}MB_'
-    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc']:
+    if str(level).upper() in ['CEILING', 'TOTAL', 'PBL']:
+        if str(level).upper() == 'CEILING':
+            level_string = ''
+            level_savename = ''
+        elif str(level).upper() == 'TOTAL':
+            level_string = 'Total '
+            level_savename = ''
+        elif str(level).upper() == 'PBL':
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['pres', 'upper_air', 'raob'] or 'P' in str(level):
+        if 'P' in str(level):
+            if str(level).upper() == 'P90-0':
+                level_string = f'Mixed-Layer '
+                level_savename = f'ML'
+            else:
+                level_num = level.replace('P', '')
+                level_string = f'{level_num} hPa '
+                level_savename = f'{level_num}MB_'
+        elif str(level).upper() == 'L0':
+            level_string = f'Surface-Based '
+            level_savename = f'SB'
+        else:
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc', 'metar']:
         if 'Z' in str(level):
             if str(level).upper() == 'Z0':
-                level_string = 'Surface '
-                level_savename = 'SFC_'
+                if str(var_long_name_key).upper() in ['MLSP', 'MSLET', 'MSLMA', 'PRMSL']:
+                    level_string = ''
+                    level_savename = ''
+                else:
+                    level_string = 'Surface '
+                    level_savename = 'SFC_'
             else:
                 level_num = level.replace('Z', '')
                 if var_savename in ['TSOIL', 'SOILW']:

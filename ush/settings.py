@@ -22,9 +22,9 @@ class Toggle():
             'display_averages': False, # display mean statistic for each model, averaged across the dimension of the independent variable
             'sample_equalization': True, # equalize samples along each value of the independent variable where data exist
             'keep_shared_events_only': False, # functional for time_series only.
-            'clear_prune_directory': True, # remove the intermediate directory created to store pruned data files temporarily
-            'plot_logo_left': True,
-            'plot_logo_right': True,
+            'clear_prune_directory': False, # remove the intermediate directory created to store pruned data files temporarily
+            'plot_logo_left': False,
+            'plot_logo_right': False,
             'zoom_logo_left': 1.0, 
             'zoom_logo_right': 1.0,
         }
@@ -61,7 +61,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL_LOWER}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/evs.stats.{MODEL}.atmos.grid2obs.v{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):
@@ -678,7 +678,11 @@ class Reference():
             'C': {
                 'convert_to': 'F',
                 'formula': self.formulas.C_to_F
-            }
+            },
+            'm/s': {
+                'convert_to': 'kt',
+                'formula': self.formulas.mps_to_kt
+            },
         }
 
         '''
@@ -704,12 +708,21 @@ class Reference():
                                     'DPT': 'Dewpoint Temperature',
                                     'UGRD': 'Zonal Wind Speed',
                                     'VGRD': 'Meridional Wind Speed',
-                                    'UGRD_VGRD': 'Vector Wind Speed',
+                                    'UGRD_VGRD': 'Vector Wind',
+                                    'WIND': 'Wind Speed',
                                     'GUST': 'Wind Gust',
+                                    'GUSTsfc': 'Wind Gust',
                                     'CAPE': ('Convective Available Potential'
+                                             + ' Energy'),
+                                    'SBCAPE': ('Surface-Based Convective Available Potential'
+                                             + ' Energy'),
+                                    'MLCAPE': ('Mixed-Layer Convective Available Potential'
                                              + ' Energy'),
                                     'PRES': 'Pressure',
                                     'PRMSL': 'Pressure Reduced to MSL',
+                                    'MSLMA': 'Mean Sea Level Pressure',
+                                    'MSLET': 'Mean Sea Level Pressure',
+                                    'MSLP': 'Mean Sea Level Pressure',
                                     'O3MR': 'Ozone Mixing Ratio',
                                     'TOZNE': 'Total Ozone',
                                     'OZCON1': 'OZCON1',
@@ -798,22 +811,42 @@ class Reference():
                                   'CONUS_Central': 'Central US',
                                   'CONUS_South': 'Southern US',
                                   'NWC': 'Northwest Coast',
+                                  'PacificNW': 'Pacific Northwest',
                                   'SWC': 'Southwest Coast',
+                                  'PacificSW': 'Pacific Southwest',
                                   'NMT': 'Northern Mountain Region',
+                                  'NRockies': 'Northern Rocky Mountains', 
                                   'GRB': 'Great Basin',
+                                  'GreatBasin': 'Great Basin',
                                   'SMT': 'Southern Mountain Region',
+                                  'SRockies': 'Southern Rocky Mountains',
                                   'SWD': 'Southwest Desert',
+                                  'Mezquital': 'Mezquital',
                                   'NPL': 'Northern Plains',
+                                  'NPlains': 'Northern Plains',
+                                  'CPlains': 'Central Plains',
                                   'SPL': 'Southern Plains',
+                                  'SPlains': 'Southern Plains',
+                                  'Prairie': 'Prairie',
+                                  'GreatLakes': 'Great Lakes',
                                   'MDW': 'Midwest',
                                   'LMV': 'Lower Mississippi Valley',
                                   'APL': 'Appalachians',
+                                  'Appalachia': 'Appalachia',
+                                  'NorthAtlantic': 'North Atlantic',
+                                  'MidAtlantic': 'Mid-Atlantic',
                                   'NEC': 'Northeast Coast',
                                   'SEC': 'Southeast Coast',
+                                  'Southeast': 'Southeast CONUS',
                                   'GMC': 'Gulf of Mexico Coast',
+                                  'DeepSouth': 'Deep South',
                                   'Alaska': 'Alaska',
                                   'NAK': 'Northern Alaska',
                                   'SAK': 'Southern Alaska',
+                                  'Hawaii': 'Hawaii',
+                                  'PuertoRico': 'Puerto Rico',
+                                  'Guam': 'Guam',
+                                  'FireWx': 'Fire Weather Nest',
                                   'SEA_ICE': 'Global - Sea Ice',
                                   'SEA_ICE_FREE': 'Global - Sea Ice Free',
                                   'SEA_ICE_POLAR': 'Polar - Sea Ice',
@@ -1622,6 +1655,510 @@ class Reference():
                     }
                 }
             },
+            'grid2obs_raob': {
+                'SL1L2': {
+                    'plot_stats_list': ('bcrmse, bias, fbar_obar, fbar,'
+                                        + ' obar'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'HGT': {'fcst_var_names': ['HGT'],
+                                'fcst_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'fcst_var_thresholds': '',
+                                'fcst_var_options': '',
+                                'obs_var_names': ['HGT'],
+                                'obs_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'obs_var_thresholds': '',
+                                'obs_var_options': '',
+                                'plot_group':'sfc_upper'},
+                        'TMP': {'fcst_var_names': ['TMP'],
+                                'fcst_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'fcst_var_thresholds': '',
+                                'fcst_var_options': '',
+                                'obs_var_names': ['TMP'],
+                                'obs_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'obs_var_thresholds': '',
+                                'obs_var_options': '',
+                                'plot_group':'sfc_upper'},
+                        'UGRD': {'fcst_var_names': ['UGRD'],
+                                'fcst_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'fcst_var_thresholds': '',
+                                'fcst_var_options': '',
+                                'obs_var_names': ['UGRD'],
+                                'obs_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'obs_var_thresholds': '',
+                                'obs_var_options': '',
+                                'plot_group':'sfc_upper'},
+                        'VGRD': {'fcst_var_names': ['VGRD'],
+                                'fcst_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'fcst_var_thresholds': '',
+                                'fcst_var_options': '',
+                                'obs_var_names': ['VGRD'],
+                                'obs_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                    'P900', 'P875', 'P850', 'P825',
+                                                    'P800', 'P775', 'P750', 'P725',
+                                                    'P700', 'P675', 'P650', 'P625',
+                                                    'P600', 'P575', 'P550', 'P525',
+                                                    'P500', 'P475', 'P450', 'P425',
+                                                    'P400', 'P375', 'P350', 'P325',
+                                                    'P300', 'P275', 'P250', 'P225', 
+                                                    'P200', 'P175', 'P150', 'P125',
+                                                    'P100', 'P75', 'P50', 'P30', 
+                                                    'P20', 'P10'],
+                                'obs_var_thresholds': '',
+                                'obs_var_options': '',
+                                'plot_group':'sfc_upper'},
+                        'SPFH': {'fcst_var_names': ['SPFH'],
+                                 'fcst_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                     'P900', 'P875', 'P850', 'P825',
+                                                     'P800', 'P775', 'P750', 'P725',
+                                                     'P700', 'P675', 'P650', 'P625',
+                                                     'P600', 'P575', 'P550', 'P525',
+                                                     'P500', 'P475', 'P450', 'P425',
+                                                     'P400', 'P375', 'P350', 'P325',
+                                                     'P300', 'P275', 'P250', 'P225', 
+                                                     'P200', 'P175', 'P150', 'P125',
+                                                     'P100', 'P75', 'P50', 'P30', 
+                                                     'P20', 'P10'],
+                                 'fcst_var_thresholds': '',
+                                 'fcst_var_options': '',
+                                 'obs_var_names': ['SPFH'],
+                                 'obs_var_levels': ['P1000', 'P975', 'P950', 'P925', 
+                                                     'P900', 'P875', 'P850', 'P825',
+                                                     'P800', 'P775', 'P750', 'P725',
+                                                     'P700', 'P675', 'P650', 'P625',
+                                                     'P600', 'P575', 'P550', 'P525',
+                                                     'P500', 'P475', 'P450', 'P425',
+                                                     'P400', 'P375', 'P350', 'P325',
+                                                     'P300', 'P275', 'P250', 'P225', 
+                                                     'P200', 'P175', 'P150', 'P125',
+                                                     'P100', 'P75', 'P50', 'P30', 
+                                                     'P20', 'P10'],
+                                 'obs_var_thresholds': '',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                        'SBCAPE': {'fcst_var_names': ['CAPE'],
+                                    'fcst_var_levels': ['L0'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['CAPE'],
+                                    'obs_var_levels': ['L100000-0'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'cape'},
+                        'MLCAPE': {'fcst_var_names': ['CAPE'],
+                                    'fcst_var_levels': ['P90-0'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['MLCAPE'],
+                                    'obs_var_levels': ['L90000-0'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'cape'},
+                        'HPBL': {'fcst_var_names': ['HGT','HPBL'],
+                                 'fcst_var_levels': ['L0'],
+                                 'fcst_var_thresholds': '',
+                                 'fcst_var_options': '',
+                                 'obs_var_names': ['HPBL'],
+                                 'obs_var_levels': ['L0'],
+                                 'obs_var_thresholds': '',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                    }
+                },
+                'VL1L2': {
+                    'plot_stats_list': ('bias, rmse, bcrmse, fbar_obar, fbar,'
+                                        + ' obar'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'UGRD_VGRD': {'fcst_var_names': ['UGRD_VGRD'],
+                                      'fcst_var_levels': [
+                                          'P1000', 'P975', 'P950', 'P925', 
+                                          'P900', 'P875', 'P850', 'P825',
+                                          'P800', 'P775', 'P750', 'P725',
+                                          'P700', 'P675', 'P650', 'P625',
+                                          'P600', 'P575', 'P550', 'P525',
+                                          'P500', 'P475', 'P450', 'P425',
+                                          'P400', 'P375', 'P350', 'P325',
+                                          'P300', 'P275', 'P250', 'P225', 
+                                          'P200', 'P175', 'P150', 'P125',
+                                          'P100', 'P75', 'P50', 'P30', 
+                                          'P20', 'P10'
+                                      ],
+                                      'fcst_var_thresholds': '',
+                                      'fcst_var_options': '',
+                                      'obs_var_names': ['UGRD_VGRD'],
+                                      'obs_var_levels': [
+                                          'P1000', 'P975', 'P950', 'P925', 
+                                          'P900', 'P875', 'P850', 'P825',
+                                          'P800', 'P775', 'P750', 'P725',
+                                          'P700', 'P675', 'P650', 'P625',
+                                          'P600', 'P575', 'P550', 'P525',
+                                          'P500', 'P475', 'P450', 'P425',
+                                          'P400', 'P375', 'P350', 'P325',
+                                          'P300', 'P275', 'P250', 'P225', 
+                                          'P200', 'P175', 'P150', 'P125',
+                                          'P100', 'P75', 'P50', 'P30', 
+                                          'P20', 'P10'
+                                      ],
+                                      'obs_var_thresholds': '',
+                                      'obs_var_options': '',
+                                      'plot_group':'sfc_upper'}
+                    }
+                },
+                'CTC': {
+                    'plot_stats_list': ('csi, fbias, pod,'
+                                        + ' faratio, sratio'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'SBCAPE': {'fcst_var_names': ['CAPE'],
+                                    'fcst_var_levels': ['L0'],
+                                    'fcst_var_thresholds': ('>=250, >=500, >=1000,'
+                                                            + ' >=1500, >=2000,'
+                                                            + ' >=3000,'
+                                                            + ' >=4000'),
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['CAPE'],
+                                    'obs_var_levels': ['L100000-0'],
+                                    'obs_var_thresholds': ('>=250, >=500, >=1000,'
+                                                          + ' >=1500, >=2000,'
+                                                          + ' >=3000,'
+                                                          + ' >=4000'),
+                                    'obs_var_options': '',
+                                    'plot_group':'cape'},
+                        'MLCAPE': {'fcst_var_names': ['CAPE'],
+                                    'fcst_var_levels': ['P90-0'],
+                                    'fcst_var_thresholds': ('>=250, >=500, >=1000,'
+                                                            + ' >=1500, >=2000,'
+                                                            + ' >=3000,'
+                                                            + ' >=4000'),
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['MLCAPE'],
+                                    'obs_var_levels': ['L90000-0'],
+                                    'obs_var_thresholds': ('>=250, >=500, >=1000,'
+                                                          + ' >=1500, >=2000,'
+                                                          + ' >=3000,'
+                                                          + ' >=4000'),
+                                    'obs_var_options': '',
+                                    'plot_group':'cape'},
+                        'HPBL': {'fcst_var_names': ['HGT','HPBL'],
+                                 'fcst_var_levels': ['L0'],
+                                 'fcst_var_thresholds': '<=500, >=2000',
+                                 'fcst_var_options': '',
+                                 'obs_var_names': ['HPBL'],
+                                 'obs_var_levels': ['L0'],
+                                 'obs_var_thresholds': '<=500, >=2000',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                    }
+                }
+            },
+            'grid2obs_metar': {
+                'SL1L2': {
+                    'plot_stats_list': ('bcrmse, bias'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'TMP2m': {'fcst_var_names': ['TMP'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': '',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['TMP'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'DPT2m': {'fcst_var_names': ['DPT'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': '',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['DPT'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': '>=277.594,>=283.15,>=288.706,>=294.261',
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'RH2m': {'fcst_var_names': ['RH'],
+                                 'fcst_var_levels': ['Z2'],
+                                 'fcst_var_thresholds': '',
+                                 'fcst_var_options': '',
+                                 'obs_var_names': ['RH'],
+                                 'obs_var_levels': ['Z2'],
+                                 'obs_var_thresholds': '<=15,<=20,<=25,<=30',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                        'MSLP': {'fcst_var_names': ['MSLET','MSLMA'],
+                                  'fcst_var_levels': ['Z0'],
+                                  'fcst_var_thresholds': '',
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['PRMSL'],
+                                  'obs_var_levels': ['Z0'],
+                                  'obs_var_thresholds': '',
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'UGRD10m': {'fcst_var_names': ['UGRD'],
+                                    'fcst_var_levels': ['Z10'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['UGRD'],
+                                    'obs_var_levels': ['Z10'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'},
+                        'VGRD10m': {'fcst_var_names': ['VGRD'],
+                                    'fcst_var_levels': ['Z10'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['VGRD'],
+                                    'obs_var_levels': ['Z10'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'},
+                        'WIND10m': {'fcst_var_names': ['WIND'],
+                                    'fcst_var_levels': ['Z10'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['WIND'],
+                                    'obs_var_levels': ['Z10'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'},
+                        'GUSTsfc': {'fcst_var_names': ['GUST'],
+                                    'fcst_var_levels': ['Z0'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['GUST'],
+                                    'obs_var_levels': ['Z0'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'sfc_upper'},
+                    }
+                },
+                'VL1L2': {
+                    'plot_stats_list': ('bcrmse, bias'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'UGRD_VGRD10m': {'fcst_var_names': ['UGRD_VGRD'],
+                                         'fcst_var_levels': ['Z10'],
+                                         'fcst_var_thresholds': '',
+                                         'fcst_var_options': '',
+                                         'obs_var_names': ['UGRD_VGRD'],
+                                         'obs_var_levels': ['Z10'],
+                                         'obs_var_thresholds': '',
+                                         'obs_var_options': '',
+                                         'plot_group':'sfc_upper'},
+                    }
+                },
+                'CTC': {
+                    'plot_stats_list': ('csi, ets, fbias, pod,'
+                                        + ' faratio, sratio'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'DPT2m': {'fcst_var_names': ['DPT'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': (' >=277.594, >=283.15,'
+                                                          + ' >=288.706, >=294.261'),
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['DPT'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': (' >=277.594, >=283.15,'
+                                                         + ' >=288.706, >=294.261'),
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'RH2m': {'fcst_var_names': ['RH'],
+                                  'fcst_var_levels': ['Z2'],
+                                  'fcst_var_thresholds': (' <=15, >=15, <=20, >=20, '
+                                                          + ' <=25, >=25, <=30, >=30'),
+                                  'fcst_var_options': '',
+                                  'obs_var_names': ['RH'],
+                                  'obs_var_levels': ['Z2'],
+                                  'obs_var_thresholds': (' <=15, >=15, <=20, >=20, '
+                                                         + ' <=25, >=25, <=30, >=30'),
+                                  'obs_var_options': '',
+                                  'plot_group':'sfc_upper'},
+                        'VIS': {'fcst_var_names': ['VIS'],
+                                   'fcst_var_levels': ['Z0'],
+                                   'fcst_var_thresholds': ('<=805, <=1609,'
+                                                           + ' <=4828, <=8045,'
+                                                           + ' >=8045,'
+                                                           + ' <=16090'),
+                                   'fcst_var_options': '',
+                                   'obs_var_names': ['VIS'],
+                                   'obs_var_levels': ['Z0'],
+                                   'obs_var_thresholds': ('<=805, <=1609,'
+                                                          + ' <=4828, <=8045,'
+                                                          + ' >=8045,'
+                                                          + ' <=16090'),
+                                   'obs_var_options': '',
+                                   'plot_group':'ceil_vis'},
+                        'CEILING': {'fcst_var_names': ['HGT'],
+                                       'fcst_var_levels': ['L0','CEILING'],
+                                       'fcst_var_thresholds': ('<=152,'
+                                                               + ' <=305,'
+                                                               + ' >=914, <=914,'
+                                                               + ' <=1524, '
+                                                               + ' <=3048'),
+                                       'fcst_var_options': ('GRIB_lvl_typ ='
+                                                            + ' 215;'),
+                                       'obs_var_names': ['CEILING','HGT'],
+                                       'obs_var_levels': ['L0'],
+                                       'obs_var_thresholds': ('<=152,'
+                                                              + ' <=305,'
+                                                              + ' >=914, <=914,'
+                                                              + ' <=1524, '
+                                                              + ' <=3048'),
+                                       'obs_var_options': '',
+                                       'plot_group':'ceil_vis'},
+                        'TCDC': {'fcst_var_names': ['TCDC'],
+                                 'fcst_var_levels': ['L0','TOTAL'],
+                                 'fcst_var_thresholds': '<10, >10, >50, >90',
+                                 'fcst_var_options': 'GRIB_lvl_typ = 200;',
+                                 'obs_var_names': ['TCDC'],
+                                 'obs_var_levels': ['L0'],
+                                 'obs_var_thresholds': '<10, >10, >50, >90',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                    }
+                },
+                'CNT': {
+                    'plot_stats_list': ('fss'),
+                    'interp': 'NEAREST, BILIN',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 'CONUS_South',
+                        'Appalachia', 'CPlains', 'DeepSouth', 'GreatBasin', 'GreatLakes', 
+                        'Mezquital', 'MidAtlantic', 'NorthAtlantic', 'NPlains', 'NRockies',
+                        'PacificNW', 'Prairie', 'Southeast', 'SPlains', 'SRockies',
+                        'Alaska', 'Hawaii', 'PuertoRico', 'Guam', 'FireWx', 'DAY1_1200_TSTM',
+                        'DAY1_0100_TSTM'
+                    ],
+                    'var_dict': {
+                        'TCDC': {'fcst_var_names': ['TCDC'],
+                                 'fcst_var_levels': ['L0'],
+                                 'fcst_var_thresholds': '',
+                                 'fcst_var_options': '',
+                                 'obs_var_names': ['TCDC'],
+                                 'obs_var_levels': ['L0'],
+                                 'obs_var_thresholds': '',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
+                    }
+                },
+            },
             'grid2obs_conus_sfc': {
                 'SL1L2': {
                     'plot_stats_list': ('bias, rmse, bcrmse, fbar_obar, fbar,'
@@ -2291,8 +2828,11 @@ class Reference():
             inch_vals = np.divide(mm_vals, 25.4)
             return inch_vals
         def K_to_F(K_vals):
-            F_vals = ((np.array(K_vals)-273.15)*9./5.)+32.
+            F_vals = (((np.array(K_vals)-273.15)*9./5.)+32.).round()
             return F_vals
         def C_to_F(C_vals):
             F_vals = (np.array(C_vals)*9./5.)+32.
             return F_vals
+        def mps_to_kt(mps_vals):
+            kt_vals = np.array(mps_vals)*1.94384449412
+            return kt_vals

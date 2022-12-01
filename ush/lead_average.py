@@ -3,7 +3,7 @@
 # Name:          lead_average.py
 # Contact(s):    Marcel Caron
 # Developed:     Nov. 18, 2021 by Marcel Caron 
-# Last Modified: Nov. 02, 2022 by Marcel Caron             
+# Last Modified: Dec. 01, 2022 by Marcel Caron             
 # Title:         Line plot of verification metric as a function of 
 #                lead time
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -53,7 +53,8 @@ reference = Reference()
 
 def plot_lead_average(df: pd.DataFrame, logger: logging.Logger, 
                       date_range: tuple, model_list: list, num: int = 0, 
-                      level: str = '500', flead='all', thresh: list = ['<20'], 
+                      level: str = '500', flead='all', 
+                      fcst_thresh: list = ['<20'], obs_thresh: list = [''],
                       metric1_name: str = 'BCRMSE', metric2_name: str = 'ME', 
                       y_min_limit: float = -10., y_max_limit: float = 10., 
                       y_lim_lock: bool = False, x_min_limit: float = -9999.,
@@ -124,55 +125,110 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         str(x) in df[str(date_type).upper()].dt.hour.astype(str).tolist() 
         for x in date_hours
     ]]
-    if thresh and '' not in thresh:
-        requested_thresh_symbol, requested_thresh_letter = list(
-            zip(*[plot_util.format_thresh(t) for t in thresh])
+    if obs_thresh and '' not in obs_thresh:
+        requested_obs_thresh_symbol, requested_obs_thresh_letter = list(
+            zip(*[plot_util.format_thresh(t) for t in obs_thresh])
         )
         symbol_found = False
         for opt in ['>=', '>', '==', '!=', '<=', '<']:
-            if any(opt in t for t in requested_thresh_symbol):
-                if all(opt in t for t in requested_thresh_symbol):
+            if any(opt in t for t in requested_obs_thresh_symbol):
+                if all(opt in t for t in requested_obs_thresh_symbol):
                     symbol_found = True
-                    opt_letter = requested_thresh_letter[0][:2]
+                    opt_letter = requested_obs_thresh_letter[0][:2]
                     break
                 else:
                     e = ("Threshold operands do not match among all requested"
-                         + f" thresholds.")
+                         + f" obs thresholds.")
                     logger.error(e)
                     logger.error("Quitting ...")
                     raise ValueError(e+"\nQuitting ...")
         if not symbol_found:
-            e = "None of the requested thresholds contain a valid symbol."
+            e = "None of the requested obs thresholds contain a valid symbol."
             logger.error(e)
             logger.error("Quitting ...")
             raise ValueError(e+"\nQuitting ...")
-        df_thresh_symbol, df_thresh_letter = list(
-            zip(*[plot_util.format_thresh(t) for t in df['FCST_THRESH']])
+        df_obs_thresh_symbol, df_obs_thresh_letter = list(
+            zip(*[
+                plot_util.format_thresh(t) 
+                for t in df['OBS_THRESH'].replace(np.nan, '', regex=True)
+            ])
         )
-        df['FCST_THRESH_SYMBOL'] = df_thresh_symbol
-        df['FCST_THRESH_VALUE'] = [str(item)[2:] for item in df_thresh_letter]
-        requested_thresh_value = [
-            str(item)[2:] for item in requested_thresh_letter
+        df['OBS_THRESH_SYMBOL'] = df_obs_thresh_symbol
+        df['OBS_THRESH_VALUE'] = [str(item)[2:] for item in df_obs_thresh_letter]
+        requested_obs_thresh_value = [
+            str(item)[2:] for item in requested_obs_thresh_letter
         ]
-        df = df[df['FCST_THRESH_SYMBOL'].isin(requested_thresh_symbol)]
+        df = df[df['OBS_THRESH_SYMBOL'].isin(requested_obs_thresh_symbol)]
         thresholds_removed = (
-            np.array(requested_thresh_symbol)[
-                ~np.isin(requested_thresh_symbol, df['FCST_THRESH_SYMBOL'])
+            np.array(requested_obs_thresh_symbol)[
+                ~np.isin(requested_obs_thresh_symbol, df['OBS_THRESH_SYMBOL'])
             ]
         )
-        requested_thresh_symbol = (
-            np.array(requested_thresh_symbol)[
-                np.isin(requested_thresh_symbol, df['FCST_THRESH_SYMBOL'])
+        requested_obs_thresh_symbol = (
+            np.array(requested_obs_thresh_symbol)[
+                np.isin(requested_obs_thresh_symbol, df['OBS_THRESH_SYMBOL'])
             ]
         )
         if thresholds_removed.size > 0:
             thresholds_removed_string = ', '.join(thresholds_removed)
             if len(thresholds_removed) > 1:
-                warning_string = (f"{thresholds_removed_string} thresholds"
+                warning_string = (f"{thresholds_removed_string} obs thresholds"
                                   + f" were not found and will not be"
                                   + f" plotted.")
             else:
-                warning_string = (f"{thresholds_removed_string} threshold was"
+                warning_string = (f"{thresholds_removed_string} obs threshold was"
+                                  + f" not found and will not be plotted.")
+            logger.warning(warning_string)
+            logger.warning("Continuing ...")
+    if fcst_thresh and '' not in fcst_thresh:
+        requested_fcst_thresh_symbol, requested_fcst_thresh_letter = list(
+            zip(*[plot_util.format_thresh(t) for t in fcst_thresh])
+        )
+        symbol_found = False
+        for opt in ['>=', '>', '==', '!=', '<=', '<']:
+            if any(opt in t for t in requested_fcst_thresh_symbol):
+                if all(opt in t for t in requested_fcst_thresh_symbol):
+                    symbol_found = True
+                    opt_letter = requested_fcst_thresh_letter[0][:2]
+                    break
+                else:
+                    e = ("Threshold operands do not match among all requested"
+                         + f" fcst thresholds.")
+                    logger.error(e)
+                    logger.error("Quitting ...")
+                    raise ValueError(e+"\nQuitting ...")
+        if not symbol_found:
+            e = "None of the requested fcst thresholds contain a valid symbol."
+            logger.error(e)
+            logger.error("Quitting ...")
+            raise ValueError(e+"\nQuitting ...")
+        df_fcst_thresh_symbol, df_fcst_thresh_letter = list(
+            zip(*[plot_util.format_thresh(t) for t in df['FCST_THRESH']])
+        )
+        df['FCST_THRESH_SYMBOL'] = df_fcst_thresh_symbol
+        df['FCST_THRESH_VALUE'] = [str(item)[2:] for item in df_fcst_thresh_letter]
+        requested_fcst_thresh_value = [
+            str(item)[2:] for item in requested_fcst_thresh_letter
+        ]
+        df = df[df['FCST_THRESH_SYMBOL'].isin(requested_fcst_thresh_symbol)]
+        thresholds_removed = (
+            np.array(requested_fcst_thresh_symbol)[
+                ~np.isin(requested_fcst_thresh_symbol, df['FCST_THRESH_SYMBOL'])
+            ]
+        )
+        requested_fcst_thresh_symbol = (
+            np.array(requested_fcst_thresh_symbol)[
+                np.isin(requested_fcst_thresh_symbol, df['FCST_THRESH_SYMBOL'])
+            ]
+        )
+        if thresholds_removed.size > 0:
+            thresholds_removed_string = ', '.join(thresholds_removed)
+            if len(thresholds_removed) > 1:
+                warning_string = (f"{thresholds_removed_string} fcst thresholds"
+                                  + f" were not found and will not be"
+                                  + f" plotted.")
+            else:
+                warning_string = (f"{thresholds_removed_string} fcst threshold was"
                                   + f" not found and will not be plotted.")
             logger.warning(warning_string)
             logger.warning("Continuing ...")
@@ -252,7 +308,7 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         plt.close(num)
         logger.info("========================================")
         return None
-
+    
     # Calculate desired metric
     metric_long_names = []
     for stat in [metric1_name, metric2_name]:
@@ -451,15 +507,25 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         x_vals2 = pivot_metric2.index
     y_min = y_min_limit
     y_max = y_max_limit
-    if thresh and '' not in thresh:
-        thresh_labels = np.unique(df['FCST_THRESH_VALUE'])
-        thresh_argsort = np.argsort(thresh_labels.astype(float))
-        requested_thresh_argsort = np.argsort(
-            [float(item) for item in requested_thresh_value]
+    if obs_thresh and '' not in obs_thresh:
+        obs_thresh_labels = np.unique(df['OBS_THRESH_VALUE'])
+        obs_thresh_argsort = np.argsort(obs_thresh_labels.astype(float))
+        requested_obs_thresh_argsort = np.argsort(
+            [float(item) for item in requested_obs_thresh_value]
         )
-        thresh_labels = [thresh_labels[i] for i in thresh_argsort]
-        requested_thresh_labels = [
-            requested_thresh_value[i] for i in requested_thresh_argsort
+        obs_thresh_labels = [obs_thresh_labels[i] for i in obs_thresh_argsort]
+        requested_obs_thresh_labels = [
+            requested_obs_thresh_value[i] for i in requested_obs_thresh_argsort
+        ]
+    if fcst_thresh and '' not in fcst_thresh:
+        fcst_thresh_labels = np.unique(df['FCST_THRESH_VALUE'])
+        fcst_thresh_argsort = np.argsort(fcst_thresh_labels.astype(float))
+        requested_fcst_thresh_argsort = np.argsort(
+            [float(item) for item in requested_fcst_thresh_value]
+        )
+        fcst_thresh_labels = [fcst_thresh_labels[i] for i in fcst_thresh_argsort]
+        requested_fcst_thresh_labels = [
+            requested_fcst_thresh_value[i] for i in requested_fcst_thresh_argsort
         ]
     plot_reference = [False, False]
     ref_metrics = ['OBAR']
@@ -761,15 +827,25 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     yticks = np.arange(ylim_min, ylim_max+round_to_nearest, round_to_nearest)
     var_long_name_key = df['FCST_VAR'].tolist()[0]
     if str(var_long_name_key).upper() == 'HGT':
-        if str(df['OBS_VAR'].tolist()[0]).upper() == 'CEILING':
+        if str(df['OBS_VAR'].tolist()[0]).upper() in ['CEILING']:
             var_long_name_key = 'HGTCLDCEIL'
+        elif str(df['OBS_VAR'].tolist()[0]).upper() in ['HPBL']:
+            var_long_name_key = 'HPBL'
     var_long_name = variable_translator[var_long_name_key]
     units = df['FCST_UNITS'].tolist()[0]
     if units in reference.unit_conversions:
-        if thresh and '' not in thresh:
-            thresh_labels = [float(tlab) for tlab in thresh_labels]
-            thresh_labels = reference.unit_conversions[units]['formula'](thresh_labels)
-            thresh_labels = [str(tlab) for tlab in thresh_labels]
+        if fcst_thresh and '' not in fcst_thresh:
+            fcst_thresh_labels = [float(tlab) for tlab in fcst_thresh_labels]
+            fcst_thresh_labels = (
+                reference.unit_conversions[units]['formula'](fcst_thresh_labels)
+            )
+            fcst_thresh_labels = [str(tlab) for tlab in fcst_thresh_labels]
+        if obs_thresh and '' not in obs_thresh:
+            obs_thresh_labels = [float(tlab) for tlab in obs_thresh_labels]
+            obs_thresh_labels = (
+                reference.unit_conversions[units]['formula'](obs_thresh_labels)
+            )
+            obs_thresh_labels = [str(tlab) for tlab in obs_thresh_labels]
         units = reference.unit_conversions[units]['convert_to']
     if units == '-':
         units = ''
@@ -861,15 +937,40 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     '''
     date_start_string = date_range[0].strftime('%d %b %Y')
     date_end_string = date_range[1].strftime('%d %b %Y')
-    if str(verif_type).lower() in ['pres', 'upper_air'] or 'P' in str(level):
-        level_num = level.replace('P', '')
-        level_string = f'{level_num} hPa '
-        level_savename = f'{level_num}MB_'
-    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms']:
+    if str(level).upper() in ['CEILING', 'TOTAL', 'PBL']:
+        if str(level).upper() == 'CEILING':
+            level_string = ''
+            level_savename = ''
+        elif str(level).upper() == 'TOTAL':
+            level_string = 'Total '
+            level_savename = ''
+        elif str(level).upper() == 'PBL':
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['pres', 'upper_air', 'raob'] or 'P' in str(level):
+        if 'P' in str(level):
+            if str(level).upper() == 'P90-0':
+                level_string = f'Mixed-Layer '
+                level_savename = f'ML'
+            else:
+                level_num = level.replace('P', '')
+                level_string = f'{level_num} hPa '
+                level_savename = f'{level_num}MB_'
+        elif str(level).upper() == 'L0':
+            level_string = f'Surface-Based '
+            level_savename = f'SB'
+        else:
+            level_string = ''
+            level_savename = ''
+    elif str(verif_type).lower() in ['sfc', 'conus_sfc', 'polar_sfc', 'mrms', 'metar']:
         if 'Z' in str(level):
             if str(level).upper() == 'Z0':
-                level_string = 'Surface '
-                level_savename = 'SFC_'
+                if str(var_long_name_key).upper() in ['MLSP', 'MSLET', 'MSLMA', 'PRMSL']:
+                    level_string = ''
+                    level_savename = ''
+                else:
+                    level_string = 'Surface '
+                    level_savename = 'SFC_'
             else:
                 level_num = level.replace('Z', '')
                 if var_savename in ['TSOIL', 'SOILW']:
@@ -899,19 +1000,39 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
         title1 = f'{metric1_string} and {metric2_string}'
     else:
         title1 = f'{metric1_string}'
-    if thresh and '' not in thresh:
-        thresholds_phrase = ', '.join([
-            f'{opt}{thresh_label}' for thresh_label in thresh_labels
+    fcst_thresh_on = (fcst_thresh and '' not in fcst_thresh)
+    obs_thresh_on = (obs_thresh and '' not in obs_thresh)
+    if fcst_thresh_on:
+        fcst_thresholds_phrase = ', '.join([
+            f'{opt}{fcst_thresh_label}' 
+            for fcst_thresh_label in fcst_thresh_labels
         ])
-        thresholds_save_phrase = ''.join([
-            f'{opt_letter}{thresh_label}' 
-            for thresh_label in requested_thresh_labels
+        fcst_thresholds_save_phrase = ''.join([
+            f'{opt_letter}{fcst_thresh_label}' 
+            for fcst_thresh_label in requested_fcst_thresh_labels
         ])
+    if obs_thresh_on:
+        obs_thresholds_phrase = ', '.join([
+            f'obs{opt}{obs_thresh_label}' 
+            for obs_thresh_label in obs_thresh_labels
+        ])
+        obs_thresholds_save_phrase = ''.join([
+            f'obs{opt_letter}{obs_thresh_label}'
+            for obs_thresh_label in requested_obs_thresh_labels
+        ])
+    if fcst_thresh_on:
         if units:
-            title2 = (f'{level_string}{var_long_name} ({thresholds_phrase} '
+            title2 = (f'{level_string}{var_long_name} ({fcst_thresholds_phrase} '
                       + f'{units}), {domain_string}')
         else:
-            title2 = (f'{level_string}{var_long_name} ({thresholds_phrase} '
+            title2 = (f'{level_string}{var_long_name} ({fcst_thresholds_phrase} '
+                      + f'unitless), {domain_string}')
+    elif obs_thresh_on:
+        if units:
+            title2 = (f'{level_string}{var_long_name} ({obs_thresholds_phrase} '
+                      + f'{units}), {domain_string}')
+        else:
+            title2 = (f'{level_string}{var_long_name} ({obs_thresholds_phrase} '
                       + f'unitless), {domain_string}')
     else:
         if units:
@@ -984,8 +1105,10 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
                  + f'{str(var_savename).lower()}_{str(metric1_name).lower()}')
     if metric2_name is not None:
         save_name+=f'_{str(metric2_name).lower()}'
-    if thresh and '' not in thresh:
-        save_name+=f'_{str(thresholds_save_phrase).lower()}'
+    if fcst_thresh_on:
+        save_name+=f'_{str(fcst_thresholds_save_phrase).lower()}'
+    elif obs_thresh_on:
+        save_name+=f'_{str(obs_thresholds_save_phrase).lower()}'
     if save_header:
         save_name = f'{save_header}_'+save_name
     save_subdir = os.path.join(
@@ -1195,15 +1318,25 @@ def main():
         letter_keep = []
         for fcst_thresh, obs_thresh in list(
                 zip(*[fcst_thresh_symbol, obs_thresh_symbol])):
-            if (fcst_thresh in var_specs['fcst_var_thresholds']
-                    and obs_thresh in var_specs['obs_var_thresholds']):
+            fcst_okay = (
+                fcst_thresh in var_specs['fcst_var_thresholds'] 
+            )
+            obs_okay = (
+                obs_thresh in var_specs['obs_var_thresholds'] 
+            )
+            if (fcst_okay and obs_okay):
                 symbol_keep.append(True)
             else:
                 symbol_keep.append(False)
         for fcst_thresh, obs_thresh in list(
                 zip(*[fcst_thresh_letter, obs_thresh_letter])):
-            if (fcst_thresh in var_specs['fcst_var_thresholds']
-                    and obs_thresh in var_specs['obs_var_thresholds']):
+            fcst_okay = (
+                fcst_thresh in var_specs['fcst_var_thresholds']
+            )
+            obs_okay = (
+                obs_thresh in var_specs['obs_var_thresholds']
+            )
+            if (fcst_okay and obs_okay):
                 letter_keep.append(True)
             else:
                 letter_keep.append(False)
@@ -1251,7 +1384,8 @@ def main():
                 df_metric = df
                 plot_lead_average(
                     df_metric, logger, date_range, MODELS, num=num, 
-                    flead=FLEADS, level=fcst_level, thresh=fcst_thresh, 
+                    flead=FLEADS, level=fcst_level, fcst_thresh=fcst_thresh, 
+                    obs_thresh=obs_thresh,
                     metric1_name=metrics[0], metric2_name=metrics[1], 
                     date_type=DATE_TYPE, y_min_limit=Y_MIN_LIMIT, 
                     y_max_limit=Y_MAX_LIMIT, y_lim_lock=Y_LIM_LOCK, 
