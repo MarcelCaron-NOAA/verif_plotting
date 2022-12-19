@@ -61,7 +61,8 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/evs.stats.{MODEL}.atmos.grid2obs.v{valid?fmt=%Y%m%d}*"
+        #self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/evs.stats.{MODEL}.atmos.grid2obs.v{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):
@@ -2591,6 +2592,54 @@ class Reference():
                     'plot_stats_list': ('bias, rmse, bcrmse, fbar_obar, fbar,'
                                         + ' obar'),
                     'interp': 'NEAREST',
+                    'vx_mask_list' : [
+                        'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 
+                        'CONUS_South', 'Alaska', 'G130', 'G214', 'WEST', 'EAST', 
+                        'MDW', 'NPL', 'SPL', 'NEC', 'SEC', 'NWC', 'SWC', 'NMT', 
+                        'SMT', 'SWD', 'GRB', 'LMV', 'GMC', 'APL', 'NAK', 'SAK'
+                    ],
+                    'var_dict': {
+                        'APCP_01': {'fcst_var_names': ['APCP', 'APCP_01'],
+                                    'fcst_var_levels': ['A01','A1'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['APCP', 'APCP_01', 'APCP_01_Z0'],
+                                    'obs_var_levels': ['A01','A1'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_03': {'fcst_var_names': ['APCP', 'APCP_03'],
+                                    'fcst_var_levels': ['A03','A3'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['APCP', 'APCP_03', 'APCP_01_Z0'],
+                                    'obs_var_levels': ['A03','A3'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_06': {'fcst_var_names': ['APCP', 'APCP_06'],
+                                    'fcst_var_levels': ['A06','A6'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['APCP', 'APCP_06', 'APCP_01_Z0'],
+                                    'obs_var_levels': ['A06','A6'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'},
+                        'APCP_24': {'fcst_var_names': ['APCP', 'APCP_24'],
+                                    'fcst_var_levels': ['A24'],
+                                    'fcst_var_thresholds': '',
+                                    'fcst_var_options': '',
+                                    'obs_var_names': ['APCP', 'APCP_24', 'APCP_01_Z0'],
+                                    'obs_var_levels': ['A24'],
+                                    'obs_var_thresholds': '',
+                                    'obs_var_options': '',
+                                    'plot_group':'precip'}
+                    }
+                },
+                'NBRCNT': {
+                    'plot_stats_list': ('fss, afss, ufss'),
+                    'interp': 'NEAREST, NBRHD_SQUARE',
                     'vx_mask_list' : [
                         'CONUS', 'CONUS_East', 'CONUS_West', 'CONUS_Central', 
                         'CONUS_South', 'Alaska', 'G130', 'G214', 'WEST', 'EAST', 
