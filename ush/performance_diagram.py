@@ -986,8 +986,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                  + f'{str(var_savename).lower()}')
     if interp_pts and '' not in interp_pts:
         save_name+=f'_{str(interp_pts_save_string).lower()}'
-    save_name+='_{str_frange_save_string).lower()}_'
-    save_name+='_{str(thresholds_save_phrase).lower()}'
+    save_name+=f'_{str_frange_save_string).lower()}_'
+    save_name+=f'_{str(thresholds_save_phrase).lower()}'
     if save_header:
         save_name = f'{save_header}_'+save_name
     save_subdir = os.path.join(
