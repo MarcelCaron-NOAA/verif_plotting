@@ -62,7 +62,7 @@ class Templates():
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
         #self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/evs.stats.{MODEL}.atmos.grid2obs.v{valid?fmt=%Y%m%d}*"
-        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "evs.stats.{MODEL_LOWER}_{RUN_CASE}_v{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):
@@ -2032,6 +2032,15 @@ class Reference():
                                     'obs_var_thresholds': '',
                                     'obs_var_options': '',
                                     'plot_group':'sfc_upper'},
+                        'TCDC': {'fcst_var_names': ['TCDC'],
+                                 'fcst_var_levels': ['L0','TOTAL'],
+                                 'fcst_var_thresholds': '',
+                                 'fcst_var_options': 'GRIB_lvl_typ = 200;',
+                                 'obs_var_names': ['TCDC'],
+                                 'obs_var_levels': ['L0'],
+                                 'obs_var_thresholds': '',
+                                 'obs_var_options': '',
+                                 'plot_group':'sfc_upper'},
                     }
                 },
                 'VL1L2': {

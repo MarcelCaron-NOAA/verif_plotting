@@ -652,6 +652,10 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
     else:
         handles = []
         labels = []
+    if np.all([val==1 for val in pivot_metric1.count(axis=1)]):
+        connect_points = True
+    else:
+        connect_points = False
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -719,8 +723,14 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         if plot_reference[0]:
             if not plotted_reference[0]:
                 ref_color_dict = model_colors.get_color_dict('obs')
+                if connect_points:
+                    x_vals1_plot = x_vals1[~np.isnan(reference1)]
+                    y_vals1_plot = reference1[~np.isnan(reference1)]
+                else:
+                    x_vals1_plot = x_vals1
+                    y_vals1_plot = reference1
                 plt.plot(
-                    x_vals1.tolist(), reference1,
+                    x_vals1_plot.tolist(), y_vals1_plot,
                     marker=ref_color_dict['marker'],
                     c=ref_color_dict['color'], mew=2., mec='white',
                     figure=fig, ms=ref_color_dict['markersize'], ls='solid',
@@ -728,8 +738,14 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 )
                 plotted_reference[0] = True
         else:
+            if connect_points:
+                x_vals1_plot = x_vals1[~np.isnan(y_vals_metric1)]
+                y_vals1_plot = y_vals_metric1[~np.isnan(y_vals_metric1)]
+            else:
+                x_vals1_plot = x_vals1
+                y_vals1_plot = y_vals_metric1
             plt.plot(
-                x_vals1.tolist(), y_vals_metric1, 
+                x_vals1_plot.tolist(), y_vals1_plot, 
                 marker=mod_setting_dicts[m]['marker'], 
                 c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
                 figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='solid', 
@@ -742,9 +758,15 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                 metric2_mean_fmt_string = f'{y_vals_metric2_mean:.2E}'
             if plot_reference[1]:
                 if not plotted_reference[1]:
+                    if connect_points:
+                        x_vals2_plot = x_vals2[~np.isnan(reference2)]
+                        y_vals2_plot = reference2[~np.isnan(reference2)]
+                    else:
+                        x_vals2_plot = x_vals2
+                        y_vals2_plot = reference2
                     ref_color_dict = model_colors.get_color_dict('obs')
                     plt.plot(
-                        x_vals2.tolist(), reference2,
+                        x_vals2_plot.tolist(), y_vals2_plot,
                         marker=ref_color_dict['marker'],
                         c=ref_color_dict['color'], mew=2., mec='white',
                         figure=fig, ms=ref_color_dict['markersize'], ls='dashed',
@@ -752,8 +774,14 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
                     )
                     plotted_reference[1] = True
             else:
+                if connect_points:
+                    x_vals2_plot = x_vals2[~np.isnan(y_vals_metric2)]
+                    y_vals2_plot = y_vals_metric2[~np.isnan(y_vals_metric2)]
+                else:
+                    x_vals2_plot = x_vals2
+                    y_vals2_plot = y_vals_metric2
                 plt.plot(
-                    x_vals2.tolist(), y_vals_metric2, 
+                    x_vals2_plot.tolist(), y_vals2_plot, 
                     marker=mod_setting_dicts[m]['marker'], 
                     c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
                     figure=fig, ms=mod_setting_dicts[m]['markersize'], ls='dashed', 
