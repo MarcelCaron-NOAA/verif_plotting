@@ -460,6 +460,10 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
     incr = incrs[incr_idx-1]
     y_min = y_min_limit
     y_max = y_max_limit
+    if np.all([val==1 for val in pivot_metric.count(axis=1)]):
+        connect_points = True
+    else:
+        connect_points = False
     for m in range(len(mod_setting_dicts)):
         if model_list[m] in model_colors.model_alias:
             model_plot_name = (
@@ -511,8 +515,14 @@ def plot_threshold_average(df: pd.DataFrame, logger: logging.Logger,
                                           + f' ({y_vals_metric_mean:.2E})')
         else:
             metric_mean_fmt_string = f'{model_plot_name}'
+        if connect_points:
+            x_vals_plot = x_vals[~np.isnan(y_vals_metric)]
+            y_vals_plot = y_vals_metric[~np.isnan(y_vals_metric)]
+        else:
+            x_vals_plot = x_vals
+            y_vals_plot = y_vals_metric
         plt.plot(
-            x_vals, y_vals_metric, 
+            x_vals_plot, y_vals_plot, 
             marker='o', c=mod_setting_dicts[m]['color'], mew=2., mec='white', 
             figure=fig, ms=12, ls=mod_setting_dicts[m]['linestyle'], 
             lw=mod_setting_dicts[m]['linewidth'],
