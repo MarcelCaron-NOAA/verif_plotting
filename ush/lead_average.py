@@ -439,7 +439,10 @@ def plot_lead_average(df: pd.DataFrame, logger: logging.Logger,
     # Reindex pivot table with full list of lead hours, introducing NaNs 
     x_vals_pre = pivot_metric1.index.tolist()
     lead_time_incr = np.diff(x_vals_pre)
-    min_incr = np.min(lead_time_incr)
+    if lead_time_incr.size == 0:
+        min_incr = 1
+    else:
+        min_incr = np.min(lead_time_incr)
     incrs = [1,6,12,24]
     incr_idx = np.digitize(min_incr, incrs)
     if incr_idx < 1:

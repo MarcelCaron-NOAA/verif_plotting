@@ -423,7 +423,10 @@ def plot_stat_by_level(df: pd.DataFrame, logger: logging.Logger,
     if metric2_name is not None:
         y_vals2 = pivot_metric2.index
     plev_incr = np.abs(np.diff(y_vals1))
-    min_incr = np.min(plev_incr) 
+    if plev_incr.size == 0:
+        min_incr = 100
+    else:
+        min_incr = np.min(plev_incr) 
     x_min = x_min_limit
     x_max = x_max_limit
     plot_reference = [False, False]
