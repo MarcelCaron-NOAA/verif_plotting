@@ -84,7 +84,7 @@ def plot_valid_hour_average(df: pd.DataFrame, logger: logging.Logger,
         logger.warning(f"Empty Dataframe. Continuing onto next plot...")
         logger.info("========================================")
         return None
-    if str(line_type).upper() == 'CTC' and np.array(thresh).size == 0:
+    if str(line_type).upper() == 'CTC' and np.array(fcst_thresh).size == 0:
         logger.warning(f"Empty list of thresholds. Continuing onto next"
                        + f" plot...")
         logger.info("========================================")

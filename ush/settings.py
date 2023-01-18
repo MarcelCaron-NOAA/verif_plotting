@@ -27,6 +27,7 @@ class Toggle():
             'plot_logo_right': False,
             'zoom_logo_left': 1.0, 
             'zoom_logo_right': 1.0,
+            'delete_intermed_data': True # whether or not to delete DataFrame rows if, for any model, rows include NaN (currently only used in lead_average.py)
         }
 
 class Templates():
