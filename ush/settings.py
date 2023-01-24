@@ -23,10 +23,14 @@ class Toggle():
             'sample_equalization': True, # equalize samples along each value of the independent variable where data exist
             'keep_shared_events_only': False, # functional for time_series only.
             'clear_prune_directory': False, # remove the intermediate directory created to store pruned data files temporarily
-            'plot_logo_left': False,
-            'plot_logo_right': False,
+            'plot_logo_left': True,
+            'plot_logo_right': True,
             'zoom_logo_left': 1.0, 
             'zoom_logo_right': 1.0,
+            'xoffset_logo_left': 0., # horizontal offset from default position of left logo, in points (float)
+            'yoffset_logo_left': 0., # vertical offset from default position of left logo, in points (float)
+            'xoffset_logo_right': 0., # horizontal offset from default position of right logo, in points (float)
+            'yoffset_logo_right': 0., # vertical offset from default position of right logo, in points (float)
             'delete_intermed_data': True # whether or not to delete DataFrame rows if, for any model, rows include NaN (currently only used in lead_average.py)
         }
 
@@ -62,8 +66,7 @@ class Templates():
         Example: 
         "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
         '''
-        #self.output_base_template = "{MODEL}.{valid?fmt=%Y%m%d}/evs.stats.{MODEL}.atmos.grid2obs.v{valid?fmt=%Y%m%d}*"
-        self.output_base_template = "evs.stats.{MODEL_LOWER}_{RUN_CASE}_v{valid?fmt=%Y%m%d}*"
+        self.output_base_template = "{RUN_CASE_LOWER}/{MODEL}/{valid?fmt=%Y%m}/{MODEL}_{valid?fmt=%Y%m%d}*"
 
 class Paths():
     def __init__(self):

@@ -3,7 +3,7 @@
 # Name:          performance_diagram.py
 # Contact(s):    Marcel Caron
 # Developed:     Nov. 22, 2021 by Marcel Caron 
-# Last Modified: Jun. 3, 2022 by Marcel Caron             
+# Last Modified: Jan. 24, 2023 by Marcel Caron             
 # Title:         Line plot of verification metric as a function of 
 #                forecast threshold
 # Abstract:      Plots METplus output (e.g., BCRMSE) as a line plot, 
@@ -74,7 +74,9 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
                       plot_logo_left: bool = False,
                       plot_logo_right: bool = False, path_logo_left: str = '.',
                       path_logo_right: str = '.', zoom_logo_left: float = 1.,
-                      zoom_logo_right: float = 1.):
+                      zoom_logo_right: float = 1., xoffset_logo_left: float = 1.,
+                      yoffset_logo_left: float = 1., xoffset_logo_right: float = 1.,
+                      yoffset_logo_right: float = 1.):
 
     logger.info("========================================")
     logger.info(f"Creating Plot {num} ...")
@@ -937,7 +939,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             left_image_box = OffsetImage(left_logo_arr, zoom=zoom_logo_left*.8)
             ab_left = AnnotationBbox(
                 left_image_box, xy=(0.,1.), xycoords='axes fraction',
-                xybox=(0, 3), boxcoords='offset points', frameon = False,
+                xybox=(0+xoffset_logo_left, 3+yoffset_logo_left), 
+                boxcoords='offset points', frameon = False,
                 box_alignment=(0,0)
             )
             ax.add_artist(ab_left)
@@ -952,7 +955,8 @@ def plot_performance_diagram(df: pd.DataFrame, logger: logging.Logger,
             right_image_box = OffsetImage(right_logo_arr, zoom=zoom_logo_right*.8)
             ab_right = AnnotationBbox(
                 right_image_box, xy=(1.,1.), xycoords='axes fraction',
-                xybox=(0, 3), boxcoords='offset points', frameon = False,
+                xybox=(0+xoffset_logo_right, 3+yoffset_logo_right), 
+                boxcoords='offset points', frameon = False,
                 box_alignment=(1,0)
             )
             ax.add_artist(ab_right)
@@ -1274,7 +1278,11 @@ def main():
                     path_logo_left=path_logo_left,
                     path_logo_right=path_logo_right,
                     zoom_logo_left=zoom_logo_left,
-                    zoom_logo_right=zoom_logo_right
+                    zoom_logo_right=zoom_logo_right,
+                    xoffset_logo_left=xoffset_logo_left,
+                    yoffset_logo_left=yoffset_logo_left,
+                    xoffset_logo_right=xoffset_logo_right,
+                    yoffset_logo_right=yoffset_logo_right,
                 )
                 num+=1
 
@@ -1367,6 +1375,10 @@ if __name__ == "__main__":
     plot_logo_right = toggle.plot_settings['plot_logo_right']
     zoom_logo_left = toggle.plot_settings['zoom_logo_left']
     zoom_logo_right = toggle.plot_settings['zoom_logo_right']
+    xoffset_logo_left = toggle.plot_settings['xoffset_logo_left']
+    yoffset_logo_left = toggle.plot_settings['yoffset_logo_left']
+    xoffset_logo_right = toggle.plot_settings['xoffset_logo_right']
+    yoffset_logo_right = toggle.plot_settings['yoffset_logo_right']
     path_logo_left = paths.logo_left_path
     path_logo_right = paths.logo_right_path
 
